@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Currency {
+  RUB
+  USD
+  EUR
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  trips             Trip[]
+  favoriteCountries FavoriteCountry[]
+
+  @@index([email])
+}
+
+model FavoriteCountry {
+  id          String   @id @default(uuid())
+  userId      String
+  countrySlug String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, countrySlug])
+  @@index([userId])
+  @@index([countrySlug])
+}
+
+model Trip {
+  id             String           @id @default(uuid())
+  userId         String
+  title          String
+  country        String
+  city           String
+  startDate      DateTime         @db.Date
+  endDate        DateTime         @db.Date
+  travelersCount Int              @default(1)
+  budget         Decimal          @default(0) @db.Decimal(12, 2)
+  currency       Currency         @default(RUB)
+  description    String           @default("")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events         ItineraryEvent[]
+
+  @@index([userId])
+  @@index([userId, startDate])
+}
+
+model ItineraryEvent {
+  id            String   @id @default(uuid())
+  tripId        String
+  date          DateTime @db.Date
+  title         String
+  description   String   @default("")
+  startTime     String?
+  endTime       String?
+  location      String?
+  estimatedCost Decimal? @db.Decimal(12, 2)
+  note          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  trip          Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([tripId, date, startTime])
+}
