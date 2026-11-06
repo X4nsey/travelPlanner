@@ -1,0 +1,18 @@
+{
+  "name": "travel-planner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TravelPlanner — Full-stack веб-приложение для планирования путешествий (Vue 3 + Express + Prisma + PostgreSQL)",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "db:setup": "npm --prefix backend run db:setup",
+    "prisma:generate": "npm --prefix backend run prisma:generate",
+    "prisma:migrate": "npm --prefix backend run prisma:migrate",
+    "test:e2e": "npm --prefix backend run test:e2e"
+  }
+}
