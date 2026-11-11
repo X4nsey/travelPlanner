@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import {
   Globe2,
@@ -8,22 +8,31 @@ import {
   Sparkles,
   ArrowLeft,
   CheckCircle2,
+  Heart,
+  PlaneTakeoff,
 } from 'lucide-vue-next';
 import { useCountryStore } from '@/stores/country.store';
+import { useTripStore } from '@/stores/trip.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useToastStore } from '@/stores/toast.store';
 import type { CountryData } from '@/types';
 import type { GlobePolygonFeature } from '@/services/geo.service';
 import AdaptiveLayout from '@/layouts/AdaptiveLayout.vue';
-import WorldGlobe from '@/components/countries/WorldGlobe.vue';
 import GlobeCountryPanel from '@/components/countries/GlobeCountryPanel.vue';
 import CountryCard from '@/components/countries/CountryCard.vue';
 import AuthPromptModal from '@/components/countries/AuthPromptModal.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 
+// Lazy-load the heavy 3D Globe + Three.js component only when ExploreWorldView is rendered
+const WorldGlobe = defineAsyncComponent({
+  loader: () => import('@/components/countries/WorldGlobe.vue'),
+  delay: 50,
+});
+
 const route = useRoute();
 const router = useRouter();
 const countryStore = useCountryStore();
+const tripStore = useTripStore();
 const authStore = useAuthStore();
 const toastStore = useToastStore();
 
@@ -34,6 +43,33 @@ const authRedirectTarget = ref('/explore');
 const isPickerMode = computed(
   () => route.query.mode === 'pick' || Boolean(countryStore.pendingReturnPath)
 );
+
+const plannedCountryNames = computed<string[]>(() => {
+  const set = new Set<string>();
+  for (const trip of tripStore.trips) {
+    if (trip.country?.trim()) {
+      set.add(trip.country.trim());
+    }
+  }
+  return Array.from(set);
+});
+
+const plannedCountrySetLower = computed(() => {
+  const s = new Set<string>();
+  for (const name of plannedCountryNames.value) {
+    s.add(name.toLowerCase());
+  }
+  return s;
+});
+
+function hasPlannedTrip(country: CountryData): boolean {
+  const s = plannedCountrySetLower.value;
+  return (
+    s.has(country.nameRu.toLowerCase()) ||
+    s.has(country.nameEn.toLowerCase()) ||
+    s.has(country.slug.toLowerCase())
+  );
+}
 
 const quickMatchingCountries = computed(() => {
   const q = quickSearch.value.trim().toLowerCase();
@@ -59,6 +95,9 @@ onMounted(async () => {
     await countryStore.ensureCountriesLoaded();
     if (authStore.isAuthenticated) {
       countryStore.fetchFavorites().catch(() => {});
+      if (tripStore.trips.length === 0) {
+        tripStore.fetchTrips().catch(() => {});
+      }
     }
 
     const queryCountry = route.query.country as string | undefined;
@@ -73,8 +112,8 @@ onMounted(async () => {
   }
 });
 
-function handlePolygonSelect(feat: GlobePolygonFeature) {
-  const resolved = countryStore.resolvePolygonCountry(feat);
+async function handlePolygonSelect(feat: GlobePolygonFeature) {
+  const resolved = await countryStore.resolvePolygonCountry(feat);
   countryStore.selectedGlobeCountry = resolved;
 }
 
@@ -230,12 +269,32 @@ function openAuthPrompt() {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 border transition-all',
               countryStore.selectedGlobeCountry?.slug === item.slug
-                ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
-                : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-800',
+                ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
+                : hasPlannedTrip(item)
+                  ? 'bg-emerald-50 text-emerald-900 border-emerald-300/90 hover:bg-emerald-100/80'
+                  : countryStore.isFavorite(item.slug)
+                    ? 'bg-purple-50 text-purple-900 border-purple-200/90 hover:bg-purple-100/80'
+                    : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-900',
             ]"
           >
             <span>{{ item.flagEmoji }}</span>
             <span>{{ item.nameRu }}</span>
+            <PlaneTakeoff
+              v-if="hasPlannedTrip(item)"
+              :class="[
+                'w-3 h-3 shrink-0',
+                countryStore.selectedGlobeCountry?.slug === item.slug ? 'text-white' : 'text-emerald-600',
+              ]"
+              title="Запланирована поездка"
+            />
+            <Heart
+              v-if="countryStore.isFavorite(item.slug)"
+              :class="[
+                'w-3 h-3 shrink-0 fill-current',
+                countryStore.selectedGlobeCountry?.slug === item.slug ? 'text-white' : 'text-purple-600',
+              ]"
+              title="В избранном"
+            />
           </button>
         </div>
       </div>
@@ -243,11 +302,28 @@ function openAuthPrompt() {
       <!-- Main Interactive Section: 3D Globe (Left/Center) + Selected Country Panel (Right) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         <div class="lg:col-span-7 xl:col-span-8 flex flex-col">
-          <WorldGlobe
-            :countries="countryStore.countries"
-            :selectedCountry="countryStore.selectedGlobeCountry"
-            @select-country="handlePolygonSelect"
-          />
+          <Suspense>
+            <template #default>
+              <WorldGlobe
+                :countries="countryStore.countries"
+                :selectedCountry="countryStore.selectedGlobeCountry"
+                :favoriteSlugs="countryStore.favoriteSlugs"
+                :plannedCountryNames="plannedCountryNames"
+                @select-country="handlePolygonSelect"
+              />
+            </template>
+            <template #fallback>
+              <div
+                class="w-full h-[460px] sm:h-[540px] lg:h-[600px] rounded-3xl bg-gradient-to-b from-slate-950 via-slate-900 to-sky-950 border border-slate-800/80 shadow-xl flex flex-col items-center justify-center p-6 text-center text-white"
+              >
+                <div class="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center mb-3 animate-pulse">
+                  <Globe2 class="w-6 h-6 text-sky-400" />
+                </div>
+                <p class="text-sm font-semibold text-slate-200">Загрузка интерактивного 3D-глобуса...</p>
+                <p class="text-xs text-slate-400 mt-1">Подготавливаем карту стран мира</p>
+              </div>
+            </template>
+          </Suspense>
         </div>
 
         <div class="lg:col-span-5 xl:col-span-4 flex flex-col">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, defineAsyncComponent } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
   Compass,
@@ -17,7 +17,11 @@ import { useAuthStore } from '@/stores/auth.store';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import SmartImage from '@/components/ui/SmartImage.vue';
-import InspirationTripModal, { type InspirationTrip } from '@/components/trips/InspirationTripModal.vue';
+import type { InspirationTrip } from '@/components/trips/InspirationTripModal.vue';
+
+const InspirationTripModal = defineAsyncComponent(
+  () => import('@/components/trips/InspirationTripModal.vue')
+);
 
 const authStore = useAuthStore();
 const selectedInspirationTrip = ref<InspirationTrip | null>(null);
@@ -227,8 +231,8 @@ const demoDestinations: InspirationTrip[] = [
     durationDays: 6,
     season: 'Автомаршрут по Чуйскому тракту',
     bestPeriod: 'Июнь — Сентябрь',
-    photoUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
-    photoAuthor: 'Bailey Zindel',
+    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Katun_River%2C_Altai%2C_Russia_%2814940666671%29.jpg/1280px-Katun_River%2C_Altai%2C_Russia_%2814940666671%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
+    photoAuthor: 'A Vahanvaty (Wikimedia Commons)',
     budget: 80000,
     currency: 'RUB',
     currencySymbol: '₽',
@@ -535,6 +539,7 @@ function openTripDetails(trip: InspirationTrip) {
               <div class="relative overflow-hidden aspect-[16/10]">
                 <SmartImage
                   :src="dest.photoUrl"
+                  size="md"
                   :alt="dest.title"
                   :authorName="dest.photoAuthor"
                   :fallbackTitle="dest.title"

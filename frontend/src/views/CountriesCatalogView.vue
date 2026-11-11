@@ -94,12 +94,19 @@ function handleOpenCountry(country: CountryData) {
           </p>
         </div>
 
-        <RouterLink to="/explore" class="shrink-0">
-          <BaseButton variant="secondary" size="md">
-            <Globe2 class="w-4 h-4 text-teal-600" />
-            <span>Открыть 3D-глобус</span>
-          </BaseButton>
-        </RouterLink>
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+          <RouterLink to="/diagnostics/photos">
+            <BaseButton variant="secondary" size="md">
+              <span>Диагностика фото</span>
+            </BaseButton>
+          </RouterLink>
+          <RouterLink to="/explore">
+            <BaseButton variant="secondary" size="md">
+              <Globe2 class="w-4 h-4 text-teal-600" />
+              <span>Открыть 3D-глобус</span>
+            </BaseButton>
+          </RouterLink>
+        </div>
       </div>
 
       <!-- Search, Continent Filter & Alphabetical Sort Bar -->

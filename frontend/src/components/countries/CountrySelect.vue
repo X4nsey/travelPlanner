@@ -147,6 +147,7 @@ function clearSelection(event: MouseEvent) {
         <div v-if="selectedCountryObj" class="flex items-center gap-3 min-w-0 flex-1">
           <SmartImage
             :src="selectedCountryObj.coverPhoto?.thumbUrl"
+            size="xs"
             :alt="selectedCountryObj.nameRu"
             :fallbackTitle="selectedCountryObj.nameRu"
             :fallbackFlag="selectedCountryObj.flagEmoji"
@@ -158,6 +159,8 @@ function clearSelection(event: MouseEvent) {
               v-if="selectedCountryObj.flagUrl"
               :src="selectedCountryObj.flagUrl"
               :alt="selectedCountryObj.nameRu"
+              loading="lazy"
+              decoding="async"
               class="w-5 h-3.5 object-cover rounded-sm border border-slate-200 shrink-0"
             />
             <span v-else class="text-base">{{ selectedCountryObj.flagEmoji }}</span>
@@ -243,6 +246,7 @@ function clearSelection(event: MouseEvent) {
             <div class="flex items-center gap-3 min-w-0">
               <SmartImage
                 :src="item.coverPhoto?.thumbUrl"
+                size="xs"
                 :alt="item.nameRu"
                 :fallbackTitle="item.nameRu"
                 :fallbackFlag="item.flagEmoji"

@@ -4,6 +4,7 @@ import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { buildEventValidationSchema } from '@/schemas/validation';
 import type { EventFormPayload, ItineraryEvent, Currency } from '@/types';
+import { getLocationPlaceholder } from '@/utils/locationPlaceholders';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
@@ -15,12 +16,16 @@ interface Props {
   tripStartDate: string;
   tripEndDate: string;
   currency: Currency;
+  country?: string;
+  city?: string;
   defaultDate?: string;
   editingEvent?: ItineraryEvent | null;
   loading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  country: '',
+  city: '',
   defaultDate: '',
   editingEvent: null,
   loading: false,
@@ -104,6 +109,10 @@ const modalTitle = computed(() =>
   props.editingEvent ? 'Редактировать мероприятие' : 'Добавить мероприятие'
 );
 
+const locationPlaceholder = computed(() => {
+  return getLocationPlaceholder(props.country, props.city);
+});
+
 const onSubmit = handleSubmit((values) => {
   serverError.value = null;
   const parsedCost =
@@ -184,7 +193,7 @@ defineExpose({
           v-model="location"
           name="location"
           label="Место проведения"
-          placeholder="Например: Красная площадь, 1 / Терминал B"
+          :placeholder="locationPlaceholder"
           :error="errors.location"
           :disabled="loading"
         />

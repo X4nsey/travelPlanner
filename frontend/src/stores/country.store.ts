@@ -3,10 +3,7 @@ import { ref, computed } from 'vue';
 import type { CountryData, TripFormPayload } from '@/types';
 import { countryService } from '@/services/country.service';
 import { favoriteService } from '@/services/favorite.service';
-import {
-  buildFallbackCountryFromFeature,
-  type GlobePolygonFeature,
-} from '@/services/geo.service';
+import type { GlobePolygonFeature } from '@/services/geo.service';
 import { useAuthStore } from './auth.store';
 import { useToastStore } from './toast.store';
 
@@ -68,6 +65,9 @@ export const useCountryStore = defineStore('countries', () => {
     const idx = countries.value.findIndex((c) => c.slug === detail.slug);
     if (idx !== -1) {
       countries.value[idx] = detail;
+    }
+    if (selectedGlobeCountry.value?.slug === detail.slug) {
+      selectedGlobeCountry.value = detail;
     }
     return detail;
   }
@@ -157,13 +157,15 @@ export const useCountryStore = defineStore('countries', () => {
     );
   }
 
-  function resolvePolygonCountry(feat: GlobePolygonFeature): CountryData {
+  async function resolvePolygonCountry(feat: GlobePolygonFeature): Promise<CountryData> {
     const match =
       findCountryByQuery(feat.properties.slug) ||
       findCountryByQuery(feat.properties.isoNumeric) ||
-      findCountryByQuery(feat.properties.name);
+      findCountryByQuery(feat.properties.name) ||
+      findCountryByQuery(feat.properties.nameRu);
 
     if (match) return match;
+    const { buildFallbackCountryFromFeature } = await import('@/services/geo.service');
     return buildFallbackCountryFromFeature(feat);
   }
 

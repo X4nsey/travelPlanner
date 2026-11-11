@@ -132,12 +132,14 @@ function handleViewCountry() {
           <div class="relative shrink-0">
             <SmartImage
               :src="trip.photoUrl"
+              size="lg"
               :alt="trip.title"
               :authorName="trip.photoAuthor"
               :fallbackTitle="trip.title"
               :fallbackFlag="trip.flag"
               aspectClass="h-56 sm:h-72 w-full"
               showAttribution
+              eager
             />
 
             <!-- Gradient Overlay for readability -->

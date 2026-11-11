@@ -381,12 +381,107 @@ async function runTests() {
     assert.deepEqual(listFavsAfterRemove.body.data.slugs, ['japan']);
     console.log('✅ 12. Избранные страны в PostgreSQL (добавление, получение, удаление и изоляция пользователей) работают');
 
+    // 14. Trip Expenses & Budget Tracker (Financial Assistant) API
+    const tripWithBudget = await request(baseUrl, 'POST', '/api/trips', {
+      cookies: user1Cookies,
+      body: {
+        title: 'Тестовая поездка в Рим с бюджетом',
+        country: 'Италия',
+        city: 'Рим',
+        startDate: '2026-09-01',
+        endDate: '2026-09-10',
+        travelersCount: 2,
+        budget: 50000,
+        currency: 'RUB',
+        description: 'Поездка для тестирования расходов',
+      },
+    });
+    assert.equal(tripWithBudget.status, 201);
+    const budgetTripId = tripWithBudget.body.data.trip.id;
+
+    // Create expenses
+    const exp1 = await request(baseUrl, 'POST', `/api/trips/${budgetTripId}/expenses`, {
+      cookies: user1Cookies,
+      body: {
+        category: 'TRANSPORT',
+        amount: 12000,
+        currency: 'RUB',
+        expenseDate: '2026-09-01',
+        description: 'Авиабилеты',
+      },
+    });
+    assert.equal(exp1.status, 201);
+    assert.equal(exp1.body.data.expense.amount, 12000);
+
+    const exp2 = await request(baseUrl, 'POST', `/api/trips/${budgetTripId}/expenses`, {
+      cookies: user1Cookies,
+      body: {
+        category: 'LODGING',
+        amount: 18000,
+        currency: 'RUB',
+        expenseDate: '2026-09-02',
+        description: 'Отель в центре',
+      },
+    });
+    assert.equal(exp2.status, 201);
+
+    const exp3 = await request(baseUrl, 'POST', `/api/trips/${budgetTripId}/expenses`, {
+      cookies: user1Cookies,
+      body: {
+        category: 'FOOD',
+        amount: 8000,
+        currency: 'RUB',
+        expenseDate: '2026-09-03',
+        description: 'Рестораны и траттории',
+      },
+    });
+    assert.equal(exp3.status, 201);
+    const foodExpId = exp3.body.data.expense.id;
+
+    // List expenses and verify summary calculations
+    const listExpensesRes = await request(baseUrl, 'GET', `/api/trips/${budgetTripId}/expenses`, {
+      cookies: user1Cookies,
+    });
+    assert.equal(listExpensesRes.status, 200);
+    assert.equal(listExpensesRes.body.data.expenses.length, 3);
+    assert.equal(listExpensesRes.body.data.summary.totalSpent, 38000);
+    assert.equal(listExpensesRes.body.data.summary.remainingBudget, 12000);
+    assert.equal(listExpensesRes.body.data.summary.plannedBudget, 50000);
+    assert.equal(listExpensesRes.body.data.summary.spentPercentage, 76);
+    assert.equal(listExpensesRes.body.data.summary.status, 'under_budget');
+
+    // Update expense
+    const updateExpRes = await request(baseUrl, 'PATCH', `/api/expenses/${foodExpId}`, {
+      cookies: user1Cookies,
+      body: {
+        amount: 10000,
+        description: 'Рестораны и кофе',
+      },
+    });
+    assert.equal(updateExpRes.status, 200);
+    assert.equal(updateExpRes.body.data.expense.amount, 10000);
+
+    // Delete expense
+    const deleteExpRes = await request(baseUrl, 'DELETE', `/api/expenses/${foodExpId}`, {
+      cookies: user1Cookies,
+    });
+    assert.equal(deleteExpRes.status, 200);
+
+    // Verify Fiji localized catalog & metadata
+    const fijiRes = await request(baseUrl, 'GET', '/api/countries/fiji');
+    assert.equal(fijiRes.status, 200);
+    assert.equal(fijiRes.body.data.country.nameRu, 'Фиджи');
+    assert.equal(fijiRes.body.data.country.capital, 'Сува');
+    assert.ok(fijiRes.body.data.country.currency.includes('FJD'));
+
+    console.log('✅ 13. Финансовый помощник (расходы, категории, расчет бюджета, диаграмма) и локализация Фиджи работают');
+
     // Clean up test users
     await prisma.user.deleteMany({
       where: { email: { in: [user1Email, user2Email] } },
     });
 
-    console.log('\n🎉 Все 12 групп интеграционных тестов успешно пройдены!');
+    console.log('\n🎉 Все 13 групп интеграционных тестов успешно пройдены!');
   } finally {
     server.close();
     await shutdownDatabase();

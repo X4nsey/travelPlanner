@@ -1,13 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import HomeView from '@/views/HomeView.vue';
-import LoginView from '@/views/LoginView.vue';
-import RegisterView from '@/views/RegisterView.vue';
-import DashboardOverviewView from '@/views/DashboardOverviewView.vue';
-import TripsListView from '@/views/TripsListView.vue';
-import TripFormView from '@/views/TripFormView.vue';
-import TripDetailView from '@/views/TripDetailView.vue';
-import ProfileView from '@/views/ProfileView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,13 +18,13 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: LoginView,
+      component: () => import('@/views/LoginView.vue'),
       meta: { guestOnly: true, title: 'Вход — TravelPlanner' },
     },
     {
       path: '/register',
       name: 'register',
-      component: RegisterView,
+      component: () => import('@/views/RegisterView.vue'),
       meta: { guestOnly: true, title: 'Регистрация — TravelPlanner' },
     },
     {
@@ -53,6 +46,12 @@ const router = createRouter({
       meta: { title: 'О стране — TravelPlanner' },
     },
     {
+      path: '/diagnostics/photos',
+      name: 'photo-diagnostics',
+      component: () => import('@/views/PhotoDiagnosticsView.vue'),
+      meta: { title: 'Диагностика фотографий — TravelPlanner' },
+    },
+    {
       path: '/favorites',
       name: 'favorite-countries',
       component: () => import('@/views/FavoriteCountriesView.vue'),
@@ -61,37 +60,37 @@ const router = createRouter({
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: DashboardOverviewView,
+      component: () => import('@/views/DashboardOverviewView.vue'),
       meta: { requiresAuth: true, title: 'Личный кабинет — TravelPlanner' },
     },
     {
       path: '/trips',
       name: 'trips-list',
-      component: TripsListView,
+      component: () => import('@/views/TripsListView.vue'),
       meta: { requiresAuth: true, title: 'Мои поездки — TravelPlanner' },
     },
     {
       path: '/trips/new',
       name: 'trip-create',
-      component: TripFormView,
+      component: () => import('@/views/TripFormView.vue'),
       meta: { requiresAuth: true, title: 'Создать поездку — TravelPlanner' },
     },
     {
       path: '/trips/:id',
       name: 'trip-detail',
-      component: TripDetailView,
+      component: () => import('@/views/TripDetailView.vue'),
       meta: { requiresAuth: true, title: 'Детали поездки — TravelPlanner' },
     },
     {
       path: '/trips/:id/edit',
       name: 'trip-edit',
-      component: TripFormView,
+      component: () => import('@/views/TripFormView.vue'),
       meta: { requiresAuth: true, title: 'Редактировать поездку — TravelPlanner' },
     },
     {
       path: '/profile',
       name: 'profile',
-      component: ProfileView,
+      component: () => import('@/views/ProfileView.vue'),
       meta: { requiresAuth: true, title: 'Профиль — TravelPlanner' },
     },
     {

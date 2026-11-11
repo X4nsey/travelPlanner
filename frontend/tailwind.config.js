@@ -1,8 +1,10 @@
+import { fileURLToPath } from 'node:url';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
+    fileURLToPath(new URL('./index.html', import.meta.url)),
+    fileURLToPath(new URL('./src/**/*.{vue,js,ts,jsx,tsx}', import.meta.url)),
   ],
   theme: {
     extend: {
@@ -33,13 +35,13 @@ export default {
           700: '#0369a1',
           800: '#075985',
           900: '#0c4a6e',
-        }
+        },
       },
       boxShadow: {
-        'soft': '0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04)',
-        'card': '0 10px 30px -5px rgba(15, 23, 42, 0.07), 0 4px 12px -2px rgba(15, 23, 42, 0.04)',
-      }
+        soft: '0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04)',
+        card: '0 10px 30px -5px rgba(15, 23, 42, 0.07), 0 4px 12px -2px rgba(15, 23, 42, 0.04)',
+      },
     },
   },
   plugins: [],
-}
+};

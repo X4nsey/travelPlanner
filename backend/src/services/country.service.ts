@@ -10,6 +10,35 @@ export interface CountryListQuery {
 }
 
 export class CountryService {
+  static async listCountriesAsync(query: CountryListQuery = {}): Promise<CountryData[]> {
+    const search = query.search?.trim().toLowerCase() || '';
+    const continent = query.continent?.trim() || '';
+    const sortOrder = query.sort === 'desc' ? 'desc' : 'asc';
+
+    const verifiedCatalog = await PhotoService.applyVerifiedPhotosAndOverrides(
+      FULL_COUNTRIES_CATALOG
+    );
+
+    const filtered = verifiedCatalog.filter((c) => {
+      if (continent && continent !== 'all' && c.continent !== continent) {
+        return false;
+      }
+      if (!search) return true;
+      return (
+        c.nameRu.toLowerCase().includes(search) ||
+        c.nameEn.toLowerCase().includes(search) ||
+        c.capital.toLowerCase().includes(search) ||
+        c.popularCities.some((city) => city.name.toLowerCase().includes(search)) ||
+        c.landmarks.some((lm) => lm.name.toLowerCase().includes(search))
+      );
+    });
+
+    return filtered.sort((a, b) => {
+      const cmp = a.nameRu.localeCompare(b.nameRu, 'ru');
+      return sortOrder === 'desc' ? -cmp : cmp;
+    });
+  }
+
   static listCountries(query: CountryListQuery = {}): CountryData[] {
     const search = query.search?.trim().toLowerCase() || '';
     const continent = query.continent?.trim() || '';
@@ -49,25 +78,27 @@ export class CountryService {
   }
 
   static async getCountryDetail(identifier: string): Promise<CountryData> {
-    const country = this.findCountryByIdentifier(identifier);
-    if (!country) {
+    const baseCountry = this.findCountryByIdentifier(identifier);
+    if (!baseCountry) {
       throw new AppError('Страна не найдена в каталоге', 404, 'COUNTRY_NOT_FOUND');
     }
 
-    const photos = await PhotoService.getPhotosForCountry(country);
-    return {
-      ...country,
-      coverPhoto: photos.coverPhoto,
-      gallery: photos.gallery,
-    };
+    const verifiedCatalog = await PhotoService.applyVerifiedPhotosAndOverrides(
+      FULL_COUNTRIES_CATALOG
+    );
+    const verifiedCountry = verifiedCatalog.find((c) => c.slug === baseCountry.slug);
+    return verifiedCountry || baseCountry;
   }
 
   static async getCountryPhotos(identifier: string) {
-    const country = this.findCountryByIdentifier(identifier);
-    if (!country) {
-      throw new AppError('Страна не найдена в каталоге', 404, 'COUNTRY_NOT_FOUND');
-    }
-
-    return PhotoService.getPhotosForCountry(country);
+    const country = await this.getCountryDetail(identifier);
+    return {
+      coverPhoto: country.coverPhoto,
+      gallery: country.gallery,
+      popularCities: country.popularCities,
+      landmarks: country.landmarks,
+      provider: 'wikimedia_verified',
+      fetchedAt: Date.now(),
+    };
   }
 }

@@ -171,3 +171,27 @@ export const passwordChangeValidationSchema = z
     message: 'Подтверждение пароля не совпадает с новым паролем',
     path: ['confirmPassword'],
   });
+
+export const expenseValidationSchema = z.object({
+  category: z.enum(
+    ['TRANSPORT', 'FOOD', 'LODGING', 'ENTERTAINMENT', 'SHOPPING', 'OTHER'],
+    {
+      errorMap: () => ({ message: 'Выберите категорию расхода' }),
+    }
+  ),
+  amount: z.coerce
+    .number({ invalid_type_error: 'Введите сумму расхода' })
+    .positive('Сумма расхода должна быть больше 0')
+    .max(999999999, 'Сумма расхода слишком велика'),
+  currency: z.enum(['RUB', 'USD', 'EUR'], {
+    errorMap: () => ({ message: 'Выберите валюту расхода' }),
+  }),
+  expenseDate: z
+    .string({ required_error: 'Выберите дату расхода' })
+    .regex(dateRegex, 'Выберите корректную дату расхода'),
+  description: z
+    .string()
+    .max(500, 'Описание не должно превышать 500 символов')
+    .optional()
+    .default(''),
+});

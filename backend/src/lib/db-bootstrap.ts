@@ -53,9 +53,26 @@ export async function ensureDatabaseReady(): Promise<void> {
       const dataDir = path.resolve(__dirname, '../../.pgdata');
       const isInitialized = fs.existsSync(path.join(dataDir, 'PG_VERSION'));
 
-      // Clean stale postmaster.pid if previous process exited abruptly
+      // Clean stale postmaster.pid and terminate any lingering orphaned postgres process
       const pidFile = path.join(dataDir, 'postmaster.pid');
       if (fs.existsSync(pidFile)) {
+        try {
+          const content = fs.readFileSync(pidFile, 'utf8');
+          const lines = content.split('\n');
+          const oldPid = parseInt(lines[0], 10);
+          if (oldPid && !isNaN(oldPid)) {
+            try {
+              process.kill(oldPid, 0);
+              process.kill(oldPid);
+              // Wait brief moment for process to release port
+              await new Promise((r) => setTimeout(r, 400));
+            } catch {
+              // process is not running
+            }
+          }
+        } catch {
+          // ignore
+        }
         try {
           fs.unlinkSync(pidFile);
         } catch {
@@ -89,8 +106,22 @@ export async function ensureDatabaseReady(): Promise<void> {
     }
   }
 
-  // Ensure schema tables exist
-  await prisma.$connect();
+  // Ensure schema tables exist with retry in case postgres is still completing startup
+  let connected = false;
+  let lastConnectErr: any = null;
+  for (let attempt = 1; attempt <= 10; attempt++) {
+    try {
+      await prisma.$connect();
+      connected = true;
+      break;
+    } catch (err) {
+      lastConnectErr = err;
+      await new Promise((r) => setTimeout(r, 600));
+    }
+  }
+  if (!connected) {
+    throw lastConnectErr;
+  }
   const regResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."User"')::text as reg`;
   const tableExists = Boolean(regResult?.[0]?.reg);
 
@@ -106,7 +137,13 @@ export async function ensureDatabaseReady(): Promise<void> {
         try {
           await prisma.$executeRawUnsafe(statement);
         } catch (stmtErr: any) {
-          if (!String(stmtErr?.message || '').includes('already exists')) {
+          const msg = String(stmtErr?.message || '').toLowerCase();
+          if (
+            !msg.includes('already exists') &&
+            !msg.includes('duplicate') &&
+            !msg.includes('42710') &&
+            !msg.includes('42p07')
+          ) {
             throw stmtErr;
           }
         }
@@ -127,6 +164,35 @@ export async function ensureDatabaseReady(): Promise<void> {
     console.log('[Database] Применяем миграцию таблицы избранных стран (FavoriteCountry)...');
     await applyMigrationFile('../../prisma/migrations/20261105000000_add_favorite_countries/migration.sql');
     console.log('[Database] Миграция FavoriteCountry успешно применена.');
+  }
+
+  const expenseRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."TripExpense"')::text as reg`;
+  const expenseTableExists = Boolean(expenseRegResult?.[0]?.reg);
+
+  if (!expenseTableExists) {
+    console.log('[Database] Применяем миграцию расходов поездок (TripExpense)...');
+    await applyMigrationFile('../../prisma/migrations/20261108000000_add_trip_expenses/migration.sql');
+    console.log('[Database] Миграция TripExpense успешно применена.');
+  }
+
+  const photoRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."PhotoRecord"')::text as reg`;
+  const photoTableExists = Boolean(photoRegResult?.[0]?.reg);
+
+  if (!photoTableExists) {
+    console.log('[Database] Применяем миграцию реестра фотографий (PhotoRecord)...');
+    await applyMigrationFile('../../prisma/migrations/20261109000000_add_photo_records/migration.sql');
+    console.log('[Database] Миграция PhotoRecord успешно применена.');
+  } else {
+    try {
+      await prisma.$executeRawUnsafe(
+        'ALTER TABLE "PhotoRecord" ADD COLUMN IF NOT EXISTS "manualOverride" BOOLEAN NOT NULL DEFAULT false;'
+      );
+      await prisma.$executeRawUnsafe(
+        'CREATE INDEX IF NOT EXISTS "PhotoRecord_manualOverride_idx" ON "PhotoRecord"("manualOverride");'
+      );
+    } catch (colErr) {
+      console.warn('[Database] Ошибка проверки столбца manualOverride в PhotoRecord:', colErr);
+    }
   }
 }
 

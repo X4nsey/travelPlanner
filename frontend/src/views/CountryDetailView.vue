@@ -219,6 +219,8 @@ function openAuthPromptForFavorite() {
       <section class="relative rounded-3xl overflow-hidden shadow-card border border-slate-200/80 bg-slate-900">
         <SmartImage
           :src="country.coverPhoto?.url"
+          :thumbSrc="country.coverPhoto?.thumbUrl"
+          size="hero"
           :alt="country.nameRu"
           :fallbackTitle="country.nameRu"
           :fallbackFlag="country.flagEmoji"
@@ -396,35 +398,41 @@ function openAuthPromptForFavorite() {
             v-for="(photo, idx) in galleryPhotos"
             :key="idx"
             @click="openLightbox(idx)"
-            class="group relative rounded-2xl overflow-hidden border border-slate-200/80 shadow-soft cursor-pointer"
+            class="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-soft hover:shadow-card transition-all cursor-pointer flex flex-col"
           >
             <SmartImage
-              :src="photo.thumbUrl || photo.url"
+              :src="photo.url"
+              :thumbSrc="photo.thumbUrl"
+              size="md"
               :alt="photo.alt"
-              :fallbackTitle="country.nameRu"
+              :fallbackTitle="photo.alt"
               :fallbackFlag="country.flagEmoji"
               aspectClass="aspect-[4/3]"
               imgClass="object-cover group-hover:scale-105"
             >
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+              <div
+                v-if="photo.url"
+                class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity pointer-events-none"
+              />
 
-              <div class="absolute top-3 left-3 right-3 flex items-center justify-between">
+              <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                 <span
                   v-if="photo.category"
-                  class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[11px] font-bold text-slate-800"
+                  class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[11px] font-bold text-slate-800 shadow-sm"
                 >
                   {{ photo.category }}
                 </span>
                 <span
+                  v-if="photo.url"
                   class="w-8 h-8 rounded-xl bg-slate-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <ZoomIn class="w-4 h-4" />
                 </span>
               </div>
 
-              <div class="absolute bottom-3 left-3.5 right-3.5 text-white">
+              <div v-if="photo.url" class="absolute bottom-3 left-3.5 right-3.5 text-white pointer-events-none">
                 <p class="text-xs font-semibold line-clamp-1">{{ photo.alt }}</p>
-                <p class="text-[10px] text-white/75 mt-0.5">
+                <p class="text-[10px] text-white/75 mt-0.5 truncate">
                   Фото: {{ photo.authorName }} ({{ photo.sourceName }})
                 </p>
               </div>
@@ -451,19 +459,25 @@ function openAuthPromptForFavorite() {
             <div>
               <SmartImage
                 :src="city.photoUrl"
-                :alt="city.name"
+                :thumbSrc="city.thumbUrl || city.photoUrl"
+                size="md"
+                :alt="`${city.name} — ${country.nameRu}`"
                 :fallbackTitle="city.name"
                 :fallbackFlag="country.flagEmoji"
-                aspectClass="aspect-[16/9]"
-              >
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
-                <div class="absolute bottom-3 left-4 right-4 flex items-center gap-2 text-white">
-                  <MapPin class="w-4 h-4 text-teal-300 shrink-0" />
-                  <h3 class="text-lg font-extrabold truncate">{{ city.name }}</h3>
-                </div>
-              </SmartImage>
+                aspectClass="aspect-[16/10]"
+                :authorName="city.authorName"
+                :authorUrl="city.authorUrl"
+                :sourceName="city.sourceName"
+                :sourceUrl="city.sourceUrl"
+                :license="city.license"
+                showAttribution
+              />
 
               <div class="p-5">
+                <div class="flex items-center gap-2 mb-2">
+                  <MapPin class="w-4 h-4 text-teal-600 shrink-0" />
+                  <h3 class="text-lg font-extrabold text-slate-900 truncate">{{ city.name }}</h3>
+                </div>
                 <p class="text-sm text-slate-600 leading-relaxed">
                   {{ city.description }}
                 </p>
@@ -484,42 +498,77 @@ function openAuthPromptForFavorite() {
         </div>
       </section>
 
-      <!-- 5. LANDMARKS -->
+      <!-- 5. LANDMARKS (ЧТО ПОСЕТИТЬ) -->
       <section v-if="country.landmarks && country.landmarks.length > 0" class="space-y-4">
         <div>
           <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 mb-1">
             <Sparkles class="w-3.5 h-3.5" />
-            <span>Знаковые места</span>
+            <span>Что посетить</span>
           </div>
-          <h2 class="text-2xl font-bold text-slate-900">Известные достопримечательности</h2>
+          <h2 class="text-2xl font-bold text-slate-900">Что посетить — известные достопримечательности</h2>
+          <p class="text-sm text-slate-500">
+            Проверенные знаковые места и памятники природы и архитектуры в стране «{{ country.nameRu }}»
+          </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <article
             v-for="lm in country.landmarks"
             :key="lm.name"
-            class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-soft flex flex-col justify-between hover:border-teal-200 transition-colors"
+            class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden flex flex-col justify-between hover:border-teal-200 hover:shadow-card transition-all"
           >
             <div>
-              <div class="flex items-center justify-between gap-2 mb-3">
-                <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 text-xs font-semibold">
-                  {{ lm.category }}
-                </span>
-                <span class="inline-flex items-center gap-1 text-xs text-slate-500">
-                  <MapPin class="w-3 h-3 text-teal-600" />
-                  {{ lm.city }}
-                </span>
+              <SmartImage
+                :src="lm.photoUrl"
+                :thumbSrc="lm.thumbUrl || lm.photoUrl"
+                size="md"
+                :alt="`${lm.name} (${lm.city}, ${country.nameRu})`"
+                :fallbackTitle="lm.name"
+                :fallbackFlag="country.flagEmoji"
+                aspectClass="aspect-[16/10]"
+                :authorName="lm.authorName"
+                :authorUrl="lm.authorUrl"
+                :sourceName="lm.sourceName"
+                :sourceUrl="lm.sourceUrl"
+                :license="lm.license"
+                showAttribution
+              />
+
+              <div class="p-5">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 text-xs font-semibold">
+                    {{ lm.category }}
+                  </span>
+                  <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
+                    <MapPin class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                    <span class="truncate max-w-[150px]">{{ lm.city }}</span>
+                  </span>
+                </div>
+
+                <h3 class="text-base font-extrabold text-slate-900 mb-2">
+                  {{ lm.name }}
+                </h3>
+
+                <p class="text-sm text-slate-600 leading-relaxed">
+                  {{ lm.description }}
+                </p>
               </div>
-
-              <h3 class="text-base font-bold text-slate-900 mb-2">
-                {{ lm.name }}
-              </h3>
-
-              <p class="text-sm text-slate-600 leading-relaxed">
-                {{ lm.description }}
-              </p>
             </div>
-          </div>
+
+            <div class="px-5 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span class="truncate">
+                {{ country.nameRu }} • {{ lm.city }}
+              </span>
+              <button
+                type="button"
+                @click="handleCreateTrip(lm.city)"
+                class="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-800 transition-colors shrink-0"
+              >
+                <PlaneTakeoff class="w-3.5 h-3.5" />
+                <span>В маршрут</span>
+              </button>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -602,6 +651,7 @@ function openAuthPromptForFavorite() {
             <img
               :src="activeLightboxPhoto.url"
               :alt="activeLightboxPhoto.alt"
+              decoding="async"
               class="max-h-[75vh] w-auto max-w-full rounded-2xl shadow-2xl object-contain border border-white/15"
             />
 

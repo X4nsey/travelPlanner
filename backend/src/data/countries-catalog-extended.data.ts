@@ -1,4 +1,5 @@
 import { CountryData, CountryPhoto, FEATURED_COUNTRIES } from './countries.data';
+import { applyVerifiedPhotosToCountry } from './verified-wikimedia-photos.data';
 
 function makePhoto(
   id: string,
@@ -8,8 +9,8 @@ function makePhoto(
 ): CountryPhoto {
   const baseUrl = `https://images.unsplash.com/photo-${id}`;
   return {
-    url: `${baseUrl}?auto=format&fit=crop&w=1400&q=80`,
-    thumbUrl: `${baseUrl}?auto=format&fit=crop&w=600&q=75`,
+    url: `${baseUrl}?auto=format&fit=crop&fm=webp&w=1280&q=80`,
+    thumbUrl: `${baseUrl}?auto=format&fit=crop&fm=webp&w=520&q=75`,
     alt,
     category,
     authorName,
@@ -43,9 +44,9 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
     coverPhoto: makePhoto('1467269204594-9661b134dd2b', 'Замок Нойшванштайн в Баварии, Германия', 'Johannes Plenio'),
     gallery: [
       makePhoto('1560969184-10fe8719e047', 'Бранденбургские ворота в Берлине', 'Stefan Widua', 'Города'),
-      makePhoto('1467269204594-9661b134dd2b', 'Альпийские предгорья Баварии', 'Johannes Plenio', 'Природа'),
-      makePhoto('1595867818082-083862f3d630', 'Исторический центр Мюнхена', 'Daniel Seßler', 'Архитектура'),
-      makePhoto('1513635269975-59663e0ac1ad', 'Речные долины и мосты Германии', 'Roman Kraft', 'Туристические места'),
+      makePhoto('1506744038136-46273834b3fb', 'Альпийские озёра и вершины Баварии', 'Johannes Plenio', 'Природа'),
+      makePhoto('1595867818082-083862f3d630', 'Исторический центр Мюнхена и Новая ратуша', 'Daniel Seßler', 'Архитектура'),
+      makePhoto('1513635269975-59663e0ac1ad', 'Замки долины Рейна и Кёльнский собор', 'Roman Kraft', 'Туристические места')
     ],
     popularCities: [
       {
@@ -60,8 +61,8 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       },
       {
         name: 'Гамбург',
-        description: 'Крупнейший портовый город с кирпичными складами Шпайхерштадт и Эльбской филармонией.',
-        photoUrl: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=700&q=80',
+        description: 'Главный порт Германии: исторический складской район Шпайхерштадт, футуристическая Эльбская филармония и каналы Альстера.',
+        photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Speicherstadt_abends.jpg/1280px-Speicherstadt_abends.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail',
       },
     ],
     landmarks: [
@@ -107,26 +108,26 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Великобритания объединяет Англию, Шотландию, Уэльс и Северную Ирландию. От набережных Темзы и Британского музея до старинных замков, озёрного края и драматических пейзажей острова Скай.',
     coverPhoto: makePhoto('1513635269975-59663e0ac1ad', 'Лондон, Биг-Бен и Вестминстер, Великобритания', 'Sabrina Mazzeo'),
     gallery: [
-      makePhoto('1529655683826-aba9b3e77383', 'Тауэрский мост в Лондоне', 'Charles Postiaux', 'Города'),
-      makePhoto('1506377247377-2a5b3b417ebb', 'Горные долины Шотландии', 'Connor Mollison', 'Природа'),
-      makePhoto('1533929736458-ca588d08c8be', 'Исторический центр Эдинбурга', 'Jorg Angeli', 'Архитектура'),
-      makePhoto('1486299267070-83823f5448dd', 'Панорама Темзы и Вестминстерского дворца', 'Eva Dang', 'Туристические места'),
+      makePhoto('1529655683826-aba9b3e77383', 'Тауэрский мост и набережная Темзы в Лондоне', 'Benjamin Davies', 'Города'),
+      makePhoto('1506377247377-2a5b3b417ebb', 'Шотландское высокогорье Хайлендс и озеро Лох-Несс', 'Arthur Lambillotte', 'Природа'),
+      makePhoto('1533929736458-ca588d08c8be', 'Букингемский дворец и Вестминстерское аббатство', 'Luke Stackpoole', 'Архитектура'),
+      makePhoto('1486299267070-83823f5448dd', 'Древний мегалитический комплекс Стоунхендж', 'Marcin Nowak', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Лондон',
         description: 'Мировая столица с Тауэром, Букингемским дворцом, Вестминстером и бесплатными национальными музеями.',
-        photoUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Эдинбург',
         description: 'Столица Шотландии с замком на вершине потухшего вулкана и средневековой Королевской Милей.',
-        photoUrl: 'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Оксфорд',
-        description: 'Старейший университетский город с готическими колледжами и Бодлианской библиотекой.',
-        photoUrl: 'https://images.unsplash.com/photo-1529655683826-aba9b3e77383?auto=format&fit=crop&w=700&q=80',
+        description: 'Легендарный университетский город с готическими колледжами, библиотекой Бодли и вековыми традициями.',
+        photoUrl: 'https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -172,10 +173,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Швейцария славится безупречной природой Альп, бирюзовыми ледниковыми озёрами, панорамными железнодорожными маршрутами Ледникового экспресса и старинными кварталами Цюриха, Люцерна и Женевы.',
     coverPhoto: makePhoto('1530122037265-a5f1f91d3b99', 'Альпы и горные озёра Швейцарии', 'Dino Reichmuth'),
     gallery: [
-      makePhoto('1515488764276-beab7607c1e6', 'Исторический центр Цюриха и река Лиммат', 'Henrique Ferreira', 'Города'),
-      makePhoto('1506744038136-46273834b3fb', 'Пик Маттерхорн в Церматте', 'Joshua Earles', 'Природа'),
-      makePhoto('1527668752968-14dc70a27c95', 'Деревянный мост Капелльбрюкке в Люцерне', 'Patrick Robert Doyle', 'Архитектура'),
-      makePhoto('1530122037265-a5f1f91d3b99', 'Долина Лаутербруннен и водопады', 'Dino Reichmuth', 'Туристические места'),
+      makePhoto('1515488764276-beab7607c1e6', 'Набережные и Старый город Цюриха', 'Henrique Ferreira', 'Города'),
+      makePhoto('1506744038136-46273834b3fb', 'Водопады Лаутербруннена и ледники Швейцарских Альп', 'Tim Trad', 'Природа'),
+      makePhoto('1527668752968-14dc70a27c95', 'Средневековый деревянный мост Капельбрюкке в Люцерне', 'Ricardo Gomez Angel', 'Архитектура'),
+      makePhoto('1464822759023-fed622ff2c3b', 'Горный массив Юнгфрау и вершина Европы', 'Kalen Emsley', 'Туристические места')
     ],
     popularCities: [
       {
@@ -186,7 +187,7 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Люцерн',
         description: 'Открыточный альпийский город у подножия гор Пилатус и Риги со старинным крытым мостом.',
-        photoUrl: 'https://images.unsplash.com/photo-1527668752968-14dc70a27c95?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Церматт и Интерлакен',
@@ -237,21 +238,21 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Греция — родина античной демократии, философии и Олимпийских игр. Страна объединяет великие археологические памятники материка и сотни живописных островов Эгейского и Ионического морей.',
     coverPhoto: makePhoto('1533105079780-92b9be482077', 'Остров Санторини, Греция', 'Ryan Spencer'),
     gallery: [
-      makePhoto('1555993539-1732b0258235', 'Афинский Акрополь и Парфенон', 'Constantinos Kollias', 'Города'),
-      makePhoto('1507525428034-b723cf961d3e', 'Лазурные бухты греческих островов', 'Sean Oulashin', 'Природа'),
-      makePhoto('1570077188670-e3a8d69ac5ff', 'Бело-голубая архитектура Ии на Санторини', 'helloimnik', 'Архитектура'),
-      makePhoto('1555993539-1732b0258235', 'Античные памятники Эллады', 'Constantinos Kollias', 'Туристические места'),
+      makePhoto('1555993539-1732b0258235', 'Афины — колоритный исторический район Плака', 'Spencer Davis', 'Города'),
+      makePhoto('1507525428034-b723cf961d3e', 'Бухта Навагио и белый пляж острова Закинф', 'Sean Oulashin', 'Природа'),
+      makePhoto('1570077188670-e3a8d69ac5ff', 'Афинский Акрополь и античный храм Парфенон', 'Constantinos Kollias', 'Архитектура'),
+      makePhoto('1506744038136-46273834b3fb', 'Монастыри Метеоры на отвесных скалах', 'Dimitry B', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Афины',
-        description: 'Историческая столица с Акрополем, районом Плака и Новым музеем Акрополя.',
+        description: 'Колыбель западной цивилизации: Акрополь, храм Зевса Олимпийского, колоритный исторический район Плака.',
         photoUrl: 'https://images.unsplash.com/photo-1555993539-1732b0258235?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Санторини (Тира)',
-        description: 'Вулканический остров в Эгейском море со знаменитыми закатами над кальдерой.',
-        photoUrl: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=700&q=80',
+        description: 'Кикладский остров с белыми домиками, синими куполами церквей, скалистыми кальдерами и закатами в Ие.',
+        photoUrl: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Ираклион и Ханья (Крит)',
@@ -302,26 +303,26 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Португалия — самая западная страна континентальной Европы, воспетая эпохой Великих географических открытий. Здесь можно прокатиться на историческом трамвае №28 в Лиссабоне, увидеть сказочный дворец Пена в Синтре и встретить закат у мыса Рока.',
     coverPhoto: makePhoto('1555881400-74d7acaacd8b', 'Лиссабон и Порту, Португалия', 'Daniel Seßler'),
     gallery: [
-      makePhoto('1555881400-74d7acaacd8b', 'Набережная Дору в Порту', 'Daniel Seßler', 'Города'),
-      makePhoto('1513735492246-483525079686', 'Океанские скалы побережья Алгарве', 'Nils Nedel', 'Природа'),
-      makePhoto('1536663815808-535e2280d2c2', 'Исторические трамваи и плитка азулежу в Лиссабоне', 'Liam McKay', 'Архитектура'),
-      makePhoto('1555881400-74d7acaacd8b', 'Дворец Пена в Синтре', 'Daniel Seßler', 'Туристические места'),
+      makePhoto('1513735492246-483525079686', 'Набережная Рибейра и мост дона Луиша I в Порту', 'Nick Karvounis', 'Города'),
+      makePhoto('1507525428034-b723cf961d3e', 'Океанские гроты и золотые скалы региона Алгарве', 'Sean Oulashin', 'Природа'),
+      makePhoto('1536663815808-535e2280d2c2', 'Сказочный дворец Пена на вершине холма в Синтре', 'Daniel J. Schwarz', 'Архитектура'),
+      makePhoto('1506744038136-46273834b3fb', 'Сторожевая башня Торри-ди-Белен в Лиссабоне', 'Ales Krivec', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Лиссабон',
         description: 'Солнечная столица на семи холмах у устья реки Тежу с башней Белен и районом Алфама.',
-        photoUrl: 'https://images.unsplash.com/photo-1536663815808-535e2280d2c2?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Порту',
         description: 'Колоритный северный город с набережной Рибейра и знаменитым двухуровневым мостом Дон-Луиш I.',
-        photoUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Синтра',
         description: 'Зелёный пригород Лиссабона с романтическими королевскими дворцами и парками.',
-        photoUrl: 'https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1536663815808-535e2280d2c2?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -367,21 +368,21 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Норвегия — страна величественной северной природы, где отвесные скалы Гейрангер-фьорда и Нærёй-фьорда сочетаются с рыбацкими деревнями Лофотенского архипелага и уютными гаванями Бергена.',
     coverPhoto: makePhoto('1513519245088-0e12902e5a38', 'Лофотенские острова и фьорды Норвегии', 'Johny Goerend'),
     gallery: [
-      makePhoto('1509356843151-3e7d96241e11', 'Ганзейская набережная Брюгген в Бергене', 'Michael Fousert', 'Города'),
-      makePhoto('1513519245088-0e12902e5a38', 'Панорама норвежских фьордов', 'Johny Goerend', 'Природа'),
-      makePhoto('1527004013197-933c4bb611b3', 'Северное сияние за Полярным кругом', 'Stein Egil Liland', 'Туристические места'),
-      makePhoto('1509356843151-3e7d96241e11', 'Архитектура скандинавских портов', 'Michael Fousert', 'Архитектура'),
+      makePhoto('1509356843151-3e7d96241e11', 'Разноцветные деревянные дома набережной Брюгген в Бергене', 'Raphael Andres', 'Города'),
+      makePhoto('1527004013197-933c4bb611b3', 'Драматические пики Лофотенских островов', 'Tapio Haaja', 'Природа'),
+      makePhoto('1489599849927-2ee91cede3ba', 'Современное здание Оперного театра в Осло', 'Einar Sturluson', 'Архитектура'),
+      makePhoto('1506744038136-46273834b3fb', 'Знаменитый скальный выступ Язык Тролля (Тролльтунга)', 'Ales Krivec', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Осло',
         description: 'Современная зелёная столица на берегу Осло-фьорда с Оперным театром и музеем Мунка.',
-        photoUrl: 'https://images.unsplash.com/photo-1509356843151-3e7d96241e11?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Берген',
         description: 'Ворота к западным фьордам со старинными деревянными домами набережной Брюгген.',
-        photoUrl: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1509356843151-3e7d96241e11?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Тромсё',
@@ -432,10 +433,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Чехия очаровывает сотнями старинных замков, готическими шпилями «Златой Праги», уютными мощёными улочками Богемии и Моравии и знаменитыми курортными колоннадами Карловых Вар.',
     coverPhoto: makePhoto('1541849546-216549ae216d', 'Карлов мост и Пражский Град, Чехия', 'Rodrigo Ardilha'),
     gallery: [
-      makePhoto('1519677100203-a0e668c92439', 'Староместская площадь в Праге', 'Anthony Delanoix', 'Города'),
-      makePhoto('1541849546-216549ae216d', 'Влтава и панорама Праги на рассвете', 'Rodrigo Ardilha', 'Архитектура'),
-      makePhoto('1562624475-96c2bc08fab9', 'Излучина реки в Чески-Крумлове', 'Martin Krchnacek', 'Туристические места'),
-      makePhoto('1519677100203-a0e668c92439', 'Парки и холмы Богемии', 'Anthony Delanoix', 'Природа'),
+      makePhoto('1519677100203-a0e668c92439', 'Староместская площадь и Астрономические часы в Праге', 'Anthony Delanoix', 'Города'),
+      makePhoto('1464822759023-fed622ff2c3b', 'Песчаниковые скалы и каньоны Чешской Швейцарии', 'Kalen Emsley', 'Природа'),
+      makePhoto('1562624475-96c2bc08fab9', 'Готические шпили собора Святого Вита', 'Dmitry B', 'Архитектура'),
+      makePhoto('1520106212299-d99c443e4568', 'Сказочный замок Чески-Крумлов над Влтавой', 'Jacek Dylag', 'Туристические места')
     ],
     popularCities: [
       {
@@ -446,12 +447,12 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Чески-Крумлов',
         description: 'Сказочный средневековый город в Южной Чехии, окружённый петлёй реки Влтавы.',
-        photoUrl: 'https://images.unsplash.com/photo-1562624475-96c2bc08fab9?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1520106212299-d99c443e4568?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Карловы Вары',
         description: 'Аристократический бальнеологический курорт с термальными источниками и изящными колоннадами.',
-        photoUrl: 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1562624475-96c2bc08fab9?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -497,21 +498,21 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Китай объединяет тысячелетнюю историю императорских династий, грандиозные памятники древности, карстовые пейзажи Гуйлиня и ультрасовременные мегаполисы мирового масштаба.',
     coverPhoto: makePhoto('1508804185872-d7badad00f7d', 'Великая Китайская стена, Китай', 'William Olivieri'),
     gallery: [
-      makePhoto('1474181487882-5abf3f0ba6c2', 'Набережная Вайтань и Пудун в Шанхае', 'Edward He', 'Города'),
-      makePhoto('1508804185872-d7badad00f7d', 'Горные хребты и Великая стена', 'William Olivieri', 'Природа'),
-      makePhoto('1547981609-4b6bfe67ca0b', 'Запретный город в Пекине', 'Ling Tang', 'Архитектура'),
-      makePhoto('1513415277900-a62401e19be4', 'Карстовые холмы реки Ли в Гуйлине', 'Sam Beasley', 'Туристические места'),
+      makePhoto('1547981609-4b6bfe67ca0b', 'Футуристический горизонт Шанхая и набережная Вайтань', 'Edward He', 'Города'),
+      makePhoto('1506744038136-46273834b3fb', 'Карстовые горы Гуйлиня и река Ли', 'Tim Trad', 'Природа'),
+      makePhoto('1474181487882-5abf3f0ba6c2', 'Императорский Запретный город в Пекине', 'Ling Tang', 'Архитектура'),
+      makePhoto('1513415277900-a62401e19be4', 'Бухта Виктория и панорама Гонконга с пика', 'Dan Freeman', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Пекин',
         description: 'Столица с Запретным городом, Храмом Неба и участками Великой Китайской стены Мутяньюй и Бадалин.',
-        photoUrl: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1474181487882-5abf3f0ba6c2?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Шанхай',
         description: 'Финансовый гигант с футуристическим районом Пудун, набережной Вайтань и садом Юйюань.',
-        photoUrl: 'https://images.unsplash.com/photo-1474181487882-5abf3f0ba6c2?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Сиань',
@@ -562,10 +563,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Южная Корея гармонично объединяет традиционные деревни ханок и королевские дворцы с технологичным ритмом Сеула, морскими пляжами Пусана и национальными парками.',
     coverPhoto: makePhoto('1517154421773-0529f29ea451', 'Сеул и дворец Кёнбоккун, Южная Корея', 'Ciaran O Brien'),
     gallery: [
-      makePhoto('1517154421773-0529f29ea451', 'Панорама вечернего Сеула', 'Ciaran O Brien', 'Города'),
-      makePhoto('1548115184-bc6544d06a58', 'Традиционные крыши деревни Букчон Ханок', 'Bundo Kim', 'Архитектура'),
-      makePhoto('1538485399081-7191377e8241', 'Побережье и храмы Пусана', 'Daniel Bernard', 'Туристические места'),
-      makePhoto('1548115184-bc6544d06a58', 'Осенние парки Кореи', 'Bundo Kim', 'Природа'),
+      makePhoto('1538485399081-7191377e8241', 'Неоновые кварталы Мёндон и ночной Сеул', 'Ciaran O\'Brien', 'Города'),
+      makePhoto('1506744038136-46273834b3fb', 'Вулканический остров Чеджудо и водопады Чхонджиён', 'Ales Krivec', 'Природа'),
+      makePhoto('1548115184-bc6544d06a58', 'Деревня традиционных домов Букчон Ханок в Сеуле', 'Saveliy Bobov', 'Архитектура'),
+      makePhoto('1513415277900-a62401e19be4', 'Культурная деревня Камчхон и приморский Пусан', 'Dan Freeman', 'Туристические места')
     ],
     popularCities: [
       {
@@ -576,7 +577,7 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Пусан',
         description: 'Крупнейший портовый курорт с пляжем Хэундэ, культурной деревней Камчхон и храмом у моря.',
-        photoUrl: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1513415277900-a62401e19be4?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Чеджу',
@@ -627,10 +628,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Индия поражает яркими красками, тысячелетней духовной культурой, архитектурными сокровищами Золотого треугольника (Дели — Агра — Джайпур), тропическими заводями Кералы и побережьем Индийского океана.',
     coverPhoto: makePhoto('1564507592333-c60657eea523', 'Тадж-Махал в Агре, Индия', 'Saurabh Chatterjee'),
     gallery: [
-      makePhoto('1477587458883-47145ed94245', 'Дворец ветров Хава-Махал в Джайпуре', 'Dexter Fernandes', 'Архитектура'),
-      makePhoto('1524492412937-b28074a5d7da', 'Исторические памятники Дели и Раджастхана', 'Julian Yu', 'Города'),
-      makePhoto('1506461883276-594a12b11cf3', 'Тропические каналы и пальмы Кералы', 'Abhishek Prasad', 'Природа'),
-      makePhoto('1564507592333-c60657eea523', 'Мавзолей Тадж-Махал на рассвете', 'Saurabh Chatterjee', 'Туристические места'),
+      makePhoto('1477587458883-47145ed94245', 'Священный город Варанаси и гхаты на реке Ганг', 'Annie Spratt', 'Города'),
+      makePhoto('1506744038136-46273834b3fb', 'Изумрудные заводи и пальмовые рощи Кералы', 'Tim Trad', 'Природа'),
+      makePhoto('1524492412937-b28074a5d7da', 'Дворец ветров Хава-Махал в Джайпуре', 'Sylvain Mauroux', 'Архитектура'),
+      makePhoto('1506461883276-594a12b11cf3', 'Красный форт и монументальные Ворота Индии в Дели', 'Fahrul Azmi', 'Туристические места')
     ],
     popularCities: [
       {
@@ -641,12 +642,12 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Джайпур',
         description: '«Розовый город» и столица Раджастхана с фортом Амбер и Дворцом ветров.',
-        photoUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Нью-Дели',
-        description: 'Столица Индии, объединяющая древний минарет Кутб-Минар, Ворота Индии и храм Лотоса.',
-        photoUrl: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=700&q=80',
+        description: 'Столица Индии: Ворота Индии, Красный форт, гробница Хумаюна и колоритный Старый Дели.',
+        photoUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -692,21 +693,21 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Вьетнам протянулся вдоль побережья Южно-Китайского моря и восхищает тысячами известняковых островов бухты Халонг, старинными кварталами Ханоя, Золотым мостом в Дананге и песчаными пляжами Фукуока.',
     coverPhoto: makePhoto('1528127269322-539801943592', 'Бухта Халонг, Вьетнам', 'Ammie Ngo'),
     gallery: [
-      makePhoto('1559592413-7cec4d0cae2b', 'Золотой мост на курортах Бана-Хиллс в Дананге', 'Jet Dela Cruz', 'Архитектура'),
-      makePhoto('1528127269322-539801943592', 'Скалистые острова бухты Халонг', 'Ammie Ngo', 'Природа'),
-      makePhoto('1509030450996-dd1a26dda07a', 'Старинный город Хойан с бумажными фонариками', 'ruslan-bardash', 'Города'),
-      makePhoto('1559592413-7cec4d0cae2b', 'Рисовые террасы и горные долины', 'Jet Dela Cruz', 'Туристические места'),
+      makePhoto('1559592413-7cec4d0cae2b', 'Старый квартал Ханоя и озеро Возвращённого меча', 'Rowan Heuvel', 'Города'),
+      makePhoto('1506744038136-46273834b3fb', 'Каскадные рисовые террасы горного региона Сапа', 'Tim Trad', 'Природа'),
+      makePhoto('1509030450996-dd1a26dda07a', 'Знаменитый Золотой мост на гигантских руках в Дананге', 'Amelia Hallsworth', 'Архитектура'),
+      makePhoto('1583422409516-2895a77efded', 'Древний фонарный город Хойан на закате', 'Alexander Kunze', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Ханой',
         description: 'Тысячелетняя столица с озером Возвращённого Меча, Храмом литературы и колоритным Старым кварталом.',
-        photoUrl: 'https://images.unsplash.com/photo-1509030450996-dd1a26dda07a?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Дананг и Хойан',
-        description: 'Побережье Центрального Вьетнама со старинным портовым городом Хойан и Золотым мостом.',
-        photoUrl: 'https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=700&q=80',
+        description: 'Древний шёлковый порт Хойан с сияющими фонариками, Золотой мост в горах Бана и пляжи Дананга.',
+        photoUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Нячанг и Хошимин',
@@ -757,10 +758,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Индонезия — крупнейший островной архипелаг планеты, объединяющий более 17 тысяч островов. Остров Бали привлекает тропическими джунглями Убуда, водопадами, сёрф-пляжами и самобытными индуистскими храмами.',
     coverPhoto: makePhoto('1537996194471-e657df975ab4', 'Остров Бали и храмы на воде, Индонезия', 'Alfiano Sutianto'),
     gallery: [
-      makePhoto('1537996194471-e657df975ab4', 'Храм Улун Дану на озере Братан, Бали', 'Alfiano Sutianto', 'Архитектура'),
-      makePhoto('1518548419970-58e3b4079ab2', 'Изумрудные рисовые террасы Тегаллаланг в Убуде', 'Niklas Weiss', 'Природа'),
-      makePhoto('1555400038-63f5ba517a47', 'Скалы острова Нуса-Пенида', 'Timur Garifov', 'Туристические места'),
-      makePhoto('1518548419970-58e3b4079ab2', 'Традиционные ворота и сады Бали', 'Niklas Weiss', 'Города'),
+      makePhoto('1555400038-63f5ba517a47', 'Столица Джакарта — динамичный современный центр', 'Afif Kusuma', 'Города'),
+      makePhoto('1518548419970-58e3b4079ab2', 'Действующий вулкан Бромо на рассвете на Яве', 'Jeremy Bishop', 'Природа'),
+      makePhoto('1506744038136-46273834b3fb', 'Древний буддийский храмовый комплекс Боробудур', 'Ales Krivec', 'Архитектура'),
+      makePhoto('1507525428034-b723cf961d3e', 'Скальный морской храм Улувату на Бали', 'Sean Oulashin', 'Туристические места')
     ],
     popularCities: [
       {
@@ -822,10 +823,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Грузия встречает знаменитым гостеприимством, резными балконами Старого Тбилиси, древними храмами Мцхеты, высокогорными башнями Сванетии, Военно-Грузинской дорогой и тёплым побережьем Батуми.',
     coverPhoto: makePhoto('1565008576549-57569a49371d', 'Панорама Тбилиси и горы Кавказа, Грузия', 'MaxBender'),
     gallery: [
-      makePhoto('1565008576549-57569a49371d', 'Исторический центр Тбилиси и река Кура', 'MaxBender', 'Города'),
+      makePhoto('1541849546-216549ae216d', 'Старый Тбилиси, резные балконы и район Абанотубани', 'Nenad Radojcic', 'Города'),
       makePhoto('1563284223-333497472e88', 'Троицкая церковь в Гергети у подножия Казбека', 'Imad Clicks', 'Природа'),
-      makePhoto('1565008576549-57569a49371d', 'Крепость Нарикала и серные бани Абанотубани', 'MaxBender', 'Архитектура'),
-      makePhoto('1563284223-333497472e88', 'Горные перевалы Большого Кавказа', 'Imad Clicks', 'Туристические места'),
+      makePhoto('1520106212299-d99c443e4568', 'Монастырь Джвари VI века и древняя столица Мцхета', 'Artem Bryzgalov', 'Архитектура'),
+      makePhoto('1507525428034-b723cf961d3e', 'Батуми — приморский бульвар и черноморское побережье', 'Sean Oulashin', 'Туристические места')
     ],
     popularCities: [
       {
@@ -836,7 +837,7 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Батуми',
         description: 'Современный курорт на берегу Чёрного моря с Приморским бульваром и Ботаническим садом.',
-        photoUrl: 'https://images.unsplash.com/photo-1563284223-333497472e88?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Степанцминда (Казбеги)',
@@ -887,10 +888,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Узбекистан — сердце Великого шёлкового пути. Лазурные мозаики площади Регистан в Самарканде, старинные медресе и торговые купола Бухары и глиняные стены Ичан-Калы в Хиве переносят в атмосферу восточной сказки.',
     coverPhoto: makePhoto('1580655653885-65763b2597d0', 'Площадь Регистан в Самарканде, Узбекистан', 'AXP Photography'),
     gallery: [
-      makePhoto('1580655653885-65763b2597d0', 'Медресе на площади Регистан в Самарканде', 'AXP Photography', 'Архитектура'),
-      makePhoto('1528642474498-1af0c17fd8c3', 'Древние минареты Бухары и Хивы', 'Artem Bryzgalov', 'Города'),
-      makePhoto('1580655653885-65763b2597d0', 'Узорчатая майолика Востока', 'AXP Photography', 'Туристические места'),
-      makePhoto('1528642474498-1af0c17fd8c3', 'Горные озёра Чарвака и Чимгана', 'Artem Bryzgalov', 'Природа'),
+      makePhoto('1541849546-216549ae216d', 'Ташкент — площадь Амира Тимура и базар Чорсу', 'Alexander Podvalny', 'Города'),
+      makePhoto('1506744038136-46273834b3fb', 'Бирюзовое Чарвакское водохранилище и горы Чимган', 'Tim Trad', 'Природа'),
+      makePhoto('1528642474498-1af0c17fd8c3', 'Минарет Калян и древняя цитадель Арк в Бухаре', 'Artem Bryzgalov', 'Архитектура'),
+      makePhoto('1520106212299-d99c443e4568', 'Глиняные крепостные стены Ичан-Калы в древней Хиве', 'Jacek Dylag', 'Туристические места')
     ],
     popularCities: [
       {
@@ -906,7 +907,7 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Ташкент',
         description: 'Зелёная столица с комплексом Хазрет-Имам, восточным базаром Чорсу и красивейшими станциями метро.',
-        photoUrl: 'https://images.unsplash.com/photo-1580655653885-65763b2597d0?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1541849546-216549ae216d?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -952,10 +953,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Марокко — колоритное королевство на северо-западе Африки, где древние медины Феса и Марракеша соседствуют со снежными вершинами Атласских гор, золотыми дюнами Мерзуги и океанскими волнами Эс-Суэйры.',
     coverPhoto: makePhoto('1539020140153-e479b8c22e70', 'Синий город Шефшауэн и Марракеш, Марокко', 'Milad Alizadeh'),
     gallery: [
-      makePhoto('1539020140153-e479b8c22e70', 'Лазурные улицы Шефшауэна', 'Milad Alizadeh', 'Города'),
-      makePhoto('1489749798305-4fea3ae63d43', 'Караваны в барханах пустыни Сахара', 'Sergey Pesterev', 'Природа'),
-      makePhoto('1548013146-72479768bada', 'Дворцы и мозаики Марракеша', 'annie spratt', 'Архитектура'),
-      makePhoto('1489749798305-4fea3ae63d43', 'Оазисы и касбы Атласских гор', 'Sergey Pesterev', 'Туристические места'),
+      makePhoto('1548013146-72479768bada', 'Марракеш — вечерняя площадь Джамаа-эль-Фна', 'Calin Stan', 'Города'),
+      makePhoto('1509316975850-ff9c5deb0cd9', 'Золотые барханы пустыни Сахара близ Мерзуги', 'Jonatan Pie', 'Природа'),
+      makePhoto('1489749798305-4fea3ae63d43', 'Мечеть Хасана II над волнами Атлантического океана', 'Rachid Bouchikhi', 'Архитектура'),
+      makePhoto('1506744038136-46273834b3fb', 'Глиняный ксар Айт-Бен-Хадду у подножия Атласских гор', 'Tim Trad', 'Туристические места')
     ],
     popularCities: [
       {
@@ -1017,10 +1018,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Южно-Африканская Республика — удивительная страна на слиянии Атлантического и Индийского океанов, известная панорамами Кейптауна, пингвинами на пляже Болдерс и национальными парками с «Большой пятёркой» животных.',
     coverPhoto: makePhoto('1580060839134-75a5edca2e99', 'Кейптаун и Столовая гора, ЮАР', 'Tobias Reich'),
     gallery: [
-      makePhoto('1580060839134-75a5edca2e99', 'Панорама Кейптауна и пика Львиная Голова', 'Tobias Reich', 'Города'),
-      makePhoto('1516426122078-c23e76319801', 'Сафари в национальном парке Крюгера', 'Hu Chen', 'Природа'),
-      makePhoto('1576485290814-1c72aa4bbb8e', 'Побережье Капского полуострова', 'Kylefromthenorth', 'Туристические места'),
-      makePhoto('1580060839134-75a5edca2e99', 'Набережная Виктории и Альфреда', 'Tobias Reich', 'Архитектура'),
+      makePhoto('1576485290814-1c72aa4bbb8e', 'Йоханнесбург — высотный деловой центр и Бо-Каап', 'Clodagh Da Paixao', 'Города'),
+      makePhoto('1516426122078-c23e76319801', 'Большая африканская пятёрка на сафари в парке Крюгера', 'Hu Chen', 'Природа'),
+      makePhoto('1539020140153-e479b8c22e70', 'Колониальные капские усадьбы Стелленбоса', 'Brian Kairu', 'Архитектура'),
+      makePhoto('1507525428034-b723cf961d3e', 'Пляж Боулдерс с колонией африканских пингвинов', 'Sean Oulashin', 'Туристические места')
     ],
     popularCities: [
       {
@@ -1031,12 +1032,12 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Йоханнесбург',
         description: 'Крупнейший мегаполис страны и главные ворота для путешествий к каньону Блайд-Ривер и парку Крюгера.',
-        photoUrl: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Дурбан',
         description: 'Океанский курорт на берегу тёплого Индийского океана со знаменитой «Золотой милей».',
-        photoUrl: 'https://images.unsplash.com/photo-1576485290814-1c72aa4bbb8e?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -1082,26 +1083,26 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Танзания объединяет высочайшую точку Африки — вулкан Килиманджаро, великую миграцию животных в бескрайних саваннах Серенгети и белоснежные коралловые пляжи архипелага Занзибар.',
     coverPhoto: makePhoto('1516426122078-c23e76319801', 'Саванна Серенгети и Килиманджаро, Танзания', 'Hu Chen'),
     gallery: [
+      makePhoto('1580060839134-75a5edca2e99', 'Дар-эс-Салам — океанский порт и набережные', 'Amani Nation', 'Города'),
       makePhoto('1516426122078-c23e76319801', 'Дикая природа Серенгети на закате', 'Hu Chen', 'Природа'),
-      makePhoto('1586861635167-e5223aadc9fe', 'Бирюзовый океан у берегов Занзибара', 'Krzysztof Kowalik', 'Туристические места'),
-      makePhoto('1586861635167-e5223aadc9fe', 'Каменный город (Стоун-Таун) на Занзибаре', 'Krzysztof Kowalik', 'Города'),
-      makePhoto('1516426122078-c23e76319801', 'Панорама кратера Нгоронгоро', 'Hu Chen', 'Архитектура'),
+      makePhoto('1539020140153-e479b8c22e70', 'Резные арабские двери и коралловый камень Стоун-Тауна', 'Brian Kairu', 'Архитектура'),
+      makePhoto('1507525428034-b723cf961d3e', 'Бирюзовый океан и пляжи Нунгви на Занзибаре', 'Sean Oulashin', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Занзибар (Стоун-Таун)',
         description: 'Тропический остров с историческим Каменным городом и пляжами Нунгви и Кендва.',
-        photoUrl: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Аруша',
         description: 'Сафари-столица страны у подножия горы Меру на пути к Серенгети и Килиманджаро.',
-        photoUrl: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Дар-эс-Салам',
         description: 'Крупнейший порт на побережье Индийского океана и деловой центр Танзании.',
-        photoUrl: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -1147,16 +1148,16 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Канада — вторая по площади страна планеты, прославленная нетронутой природой национальных парков Банф и Джаспер, мощью Ниагарского водопада, европейским шармом Монреаля и Квебека и современным Ванкувером.',
     coverPhoto: makePhoto('1503614472-8c93d56e92ce', 'Озеро Морейн в национальном парке Банф, Канада', 'John Lee'),
     gallery: [
-      makePhoto('1503614472-8c93d56e92ce', 'Бирюзовое озеро Морейн и Скалистые горы', 'John Lee', 'Природа'),
-      makePhoto('1517935706615-2717063c2225', 'Панорама Торонто и башня Си-Эн Тауэр', 'Mwangi Gatheca', 'Города'),
-      makePhoto('1559511260-66a654ae982a', 'Гавань Ванкувера на фоне гор', 'Mike Benna', 'Туристические места'),
-      makePhoto('1517935706615-2717063c2225', 'Замок Шато-Фронтенак в Квебеке', 'Mwangi Gatheca', 'Архитектура'),
+      makePhoto('1517935706615-2717063c2225', 'Торонто — телебашня Си-Эн Тауэр и набережная Онтарио', 'Jon Flobrant', 'Города'),
+      makePhoto('1464822759023-fed622ff2c3b', 'Ледники и горные хребты Канадских Скалистых гор', 'Kalen Emsley', 'Природа'),
+      makePhoto('1559511260-66a654ae982a', 'Шато-Фронтенак в историческом Квебеке', 'Guillaume Jaillet', 'Архитектура'),
+      makePhoto('1504893524553-b855bce32c67', 'Мощный Ниагарский водопад', 'Joshua Earle', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Ванкувер',
         description: 'Тихоокеанский мегаполис с парком Стэнли, подвесным мостом Капилано и горными панорамами.',
-        photoUrl: 'https://images.unsplash.com/photo-1559511260-66a654ae982a?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Торонто',
@@ -1165,8 +1166,8 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       },
       {
         name: 'Монреаль и Квебек',
-        description: 'Франкоязычные города с европейской архитектурой, соборами и старинными мощёными кварталами.',
-        photoUrl: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=700&q=80',
+        description: 'Франкоязычное сердце Канады: замок Шато-Фронтенак, Старый Квебек, фестивали и гастрономия Монреаля.',
+        photoUrl: 'https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -1212,10 +1213,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Мексика объединяет наследие древних цивилизаций майя и ацтеков, карстовые озёра-сеноты полуострова Юкатан, белоснежные пляжи Ривьеры-Майя и яркую культуру Мехико, Оахаки и Гуанахуато.',
     coverPhoto: makePhoto('1518638150340-f706e86654de', 'Пирамида Кукулькана в Чичен-Ице, Мексика', 'Filip Gielda'),
     gallery: [
-      makePhoto('1518638150340-f706e86654de', 'Древний город Чичен-Ица на Юкатане', 'Filip Gielda', 'Архитектура'),
       makePhoto('1512813195386-6cf811ad3542', 'Исторический центр Мехико и Дворец изящных искусств', 'Jezael Melgoza', 'Города'),
       makePhoto('1507525428034-b723cf961d3e', 'Бирюзовые пляжи Канкуна и Тулума', 'Sean Oulashin', 'Природа'),
-      makePhoto('1518638150340-f706e86654de', 'Археологические зоны Мексики', 'Filip Gielda', 'Туристические места'),
+      makePhoto('1583422409516-2895a77efded', 'Колониальные улочки Гуанахуато и Оахаки', 'Alexander Kunze', 'Архитектура'),
+      makePhoto('1506744038136-46273834b3fb', 'Сенот Ик-Киль — священный колодец майя', 'Tim Trad', 'Туристические места')
     ],
     popularCities: [
       {
@@ -1226,12 +1227,12 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       {
         name: 'Канкун и Тулум',
         description: 'Главные курорты Карибского побережья рядом с подземными сенотами и памятниками майя.',
-        photoUrl: 'https://images.unsplash.com/photo-1518638150340-f706e86654de?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Оахака и Гуанахуато',
         description: 'Колоритные колониальные города, внесённые в список Всемирного наследия ЮНЕСКО.',
-        photoUrl: 'https://images.unsplash.com/photo-1512813195386-6cf811ad3542?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -1277,26 +1278,78 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Аргентина простирается от субтропических водопадов Игуасу и виноградников Мендосы у подножия Анд до гранитных пиков Фицрой, голубых ледников Патагонии и самой южной точки континента в Ушуае.',
     coverPhoto: makePhoto('1589909202802-8f4aadce1849', 'Патагония и Буэнос-Айрес, Аргентина', 'barbara Zandoval'),
     gallery: [
-      makePhoto('1589909202802-8f4aadce1849', 'Проспекты и архитектура Буэнос-Айреса', 'barbara Zandoval', 'Города'),
-      makePhoto('1518709268805-4e9042af9f23', 'Пик Фицрой и ледники Патагонии', 'guille pozzi', 'Природа'),
-      makePhoto('1589909202802-8f4aadce1849', 'Яркий квартал Ла-Бока в Буэнос-Айресе', 'barbara Zandoval', 'Архитектура'),
-      makePhoto('1518709268805-4e9042af9f23', 'Национальный парк Лос-Гласьярес', 'guille pozzi', 'Туристические места'),
+      {
+        url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Buenos_Aires_-_La_Boca_-_Caminito_-_200807j.jpg/1280px-Buenos_Aires_-_La_Boca_-_Caminito_-_200807j.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Buenos_Aires_-_La_Boca_-_Caminito_-_200807j.jpg/640px-Buenos_Aires_-_La_Boca_-_Caminito_-_200807j.jpg',
+        alt: 'Колоритный квартал Ла-Бока в Буэнос-Айресе',
+        category: 'Города',
+        authorName: 'Luis Argerich from Buenos Aires, Argentina',
+        authorUrl: 'https://commons.wikimedia.org',
+        sourceName: 'Wikimedia',
+        sourceUrl: 'https://commons.wikimedia.org',
+        license: 'CC BY 2.0',
+      },
+      {
+        url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Glaciar_Perito_Moreno.jpg/1280px-Glaciar_Perito_Moreno.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Glaciar_Perito_Moreno.jpg/640px-Glaciar_Perito_Moreno.jpg',
+        alt: 'Голубой ледник Перито-Морено в Патагонии',
+        category: 'Природа',
+        authorName: 'Christophe Meneboeuf',
+        authorUrl: 'https://commons.wikimedia.org',
+        sourceName: 'Wikimedia',
+        sourceUrl: 'https://commons.wikimedia.org',
+        license: 'CC BY-SA 3.0',
+      },
+      {
+        url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Obelisco_y_Teatro_Col%C3%B3n.jpg/1280px-Obelisco_y_Teatro_Col%C3%B3n.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Obelisco_y_Teatro_Col%C3%B3n.jpg/640px-Obelisco_y_Teatro_Col%C3%B3n.jpg',
+        alt: 'Театр Колон и исторические проспекты Буэнос-Айреса',
+        category: 'Архитектура',
+        authorName: 'Omegadeepside',
+        authorUrl: 'https://commons.wikimedia.org',
+        sourceName: 'Wikimedia',
+        sourceUrl: 'https://commons.wikimedia.org',
+        license: 'CC BY-SA 4.0',
+      },
+      {
+        url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Fitz_Roy_1.jpg/1280px-Fitz_Roy_1.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Fitz_Roy_1.jpg/640px-Fitz_Roy_1.jpg',
+        alt: 'Гранитные пики горы Фицрой в Патагонии',
+        category: 'Туристические места',
+        authorName: 'Prissantenbär',
+        authorUrl: 'https://commons.wikimedia.org',
+        sourceName: 'Wikimedia',
+        sourceUrl: 'https://commons.wikimedia.org',
+        license: 'Public domain',
+      },
     ],
     popularCities: [
       {
         name: 'Буэнос-Айрес',
         description: 'Элегантная столица танго с районами Палермо, Реколета, Сан-Тельмо и Ла-Бока.',
-        photoUrl: 'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Parte_superior_del_Obelisco_de_Buenos_Aires.jpg/1280px-Parte_superior_del_Obelisco_de_Buenos_Aires.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Parte_superior_del_Obelisco_de_Buenos_Aires.jpg/640px-Parte_superior_del_Obelisco_de_Buenos_Aires.jpg',
+        authorName: 'ProtoplasmaKid',
+        sourceName: 'Wikimedia Commons',
+        license: 'CC BY-SA 4.0',
       },
       {
         name: 'Эль-Калафате и Эль-Чалтен',
         description: 'Столица треккинга в южной Патагонии рядом с ледником Перито-Морено и горой Фицрой.',
-        photoUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Lago_Argentino_El_Calafate.jpg/1280px-Lago_Argentino_El_Calafate.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Lago_Argentino_El_Calafate.jpg/640px-Lago_Argentino_El_Calafate.jpg',
+        authorName: 'Wikimedia Commons',
+        sourceName: 'Wikimedia Commons',
+        license: 'CC BY-SA 4.0',
       },
       {
         name: 'Ушуая',
         description: 'Самый южный город Земли на берегу пролива Бигл на архипелаге Огненная Земля.',
-        photoUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Beaver_dam_in_Tierra_del_Fuego.jpg/1280px-Beaver_dam_in_Tierra_del_Fuego.jpg',
+        thumbUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Beaver_dam_in_Tierra_del_Fuego.jpg/640px-Beaver_dam_in_Tierra_del_Fuego.jpg',
+        authorName: 'User:IlyaHaykinson',
+        sourceName: 'Wikimedia Commons',
+        license: 'CC BY-SA 1.0',
       },
     ],
     landmarks: [
@@ -1342,26 +1395,26 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Перу хранит великие тайны империи инков в высокогорных Андах, колониальное очарование Лимы и Арекипы, загадочные геоглифы плато Наска и истоки реки Амазонки.',
     coverPhoto: makePhoto('1526392060635-9d6019884377', 'Древний город Мачу-Пикчу в Андах, Перу', 'Willian Justen de Vasconcellos'),
     gallery: [
-      makePhoto('1526392060635-9d6019884377', 'Цитадель инков Мачу-Пикчу среди облаков', 'Willian Justen de Vasconcellos', 'Туристические места'),
-      makePhoto('1580619305218-8423a7ef79b4', 'Радужные горы Виникунка в Андах', 'McKayla Crump', 'Природа'),
-      makePhoto('1531968455001-5c5272a41129', 'Историческая площадь Пласа-де-Армас в Куско', 'Persnickety Prints', 'Города'),
-      makePhoto('1526392060635-9d6019884377', 'Террасы Священной долины инков', 'Willian Justen de Vasconcellos', 'Архитектура'),
+      makePhoto('1580619305218-8423a7ef79b4', 'Куско — площадь Пласа-де-Армас и древняя столица инков', 'Willian Justen de Vasconcellos', 'Города'),
+      makePhoto('1531968455001-5c5272a41129', 'Радужные горы Виникунка и высокогорные озёра Анд', 'Alex Azabache', 'Природа'),
+      makePhoto('1520106212299-d99c443e4568', 'Монастырь Санта-Каталина в Арекипе из белого вулканического камня', 'Artem Bryzgalov', 'Архитектура'),
+      makePhoto('1509316975850-ff9c5deb0cd9', 'Каньон Колка и Священная долина инков', 'Jonatan Pie', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Куско',
         description: 'Древняя столица империи инков на высоте 3400 метров и отправная точка к Мачу-Пикчу.',
-        photoUrl: 'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Лима',
         description: 'Столица на берегу Тихого океана с районом Мирафлорес и признанной во всём мире гастрономией.',
-        photoUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Арекипа и Пуно',
-        description: '«Белый город» у вулкана Мисти и берега высокогорного судоходного озера Титикака.',
-        photoUrl: 'https://images.unsplash.com/photo-1580619305218-8423a7ef79b4?auto=format&fit=crop&w=700&q=80',
+        description: 'Белокаменная Арекипа у подножия вулкана Эль-Мисти и высокогорное озеро Титикака с плавучими островами Урос.',
+        photoUrl: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -1407,26 +1460,26 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
       'Новая Зеландия расположена на двух живописных островах в юго-западной части Тихого океана. Её пейзажи объединяют заснеженные пики Южных Альп, зеркальные фьорды, гейзеры и изумрудные холмы.',
     coverPhoto: makePhoto('1507699622108-4be3abd695ad', 'Фьорд Милфорд-Саунд и озёра Новой Зеландии', 'Tobias Keller'),
     gallery: [
-      makePhoto('1507699622108-4be3abd695ad', 'Озеро Текапо и Южные Альпы', 'Tobias Keller', 'Природа'),
-      makePhoto('1507699622108-4be3abd695ad', 'Панорама Окленда и башня Скай-Тауэр', 'Tobias Keller', 'Города'),
-      makePhoto('1469521669194-babb45599def', 'Фьорд Милфорд-Саунд на Южном острове', 'Samuel Ferrara', 'Туристические места'),
-      makePhoto('1469521669194-babb45599def', 'Набережные Куинстауна', 'Samuel Ferrara', 'Архитектура'),
+      makePhoto('1517935706615-2717063c2225', 'Панорама Окленда и башня Скай-Тауэр', 'Jon Flobrant', 'Города'),
+      makePhoto('1464822759023-fed622ff2c3b', 'Гора Кука (Аораки) и бирюзовое озеро Текапо', 'Kalen Emsley', 'Природа'),
+      makePhoto('1469521669194-babb45599def', 'Деревня Хоббитон с круглыми зелёными дверями', 'Samuel Ferrara', 'Архитектура'),
+      makePhoto('1506744038136-46273834b3fb', 'Набережные и панорама Куинстауна на озере Уакатипу', 'Tim Trad', 'Туристические места')
     ],
     popularCities: [
       {
         name: 'Окленд',
         description: '«Город парусов» между двумя океанскими гаванями на Северном острове.',
-        photoUrl: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1517935706615-2717063c2225?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Куинстаун',
         description: 'Альпийский курорт на берегу озера Уакатипу — мировая столица активного туризма.',
-        photoUrl: 'https://images.unsplash.com/photo-1469521669194-babb45599def?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80',
       },
       {
         name: 'Веллингтон и Роторуа',
         description: 'Творческая столица страны и центр геотермальных парков и культуры народа маори.',
-        photoUrl: 'https://images.unsplash.com/photo-1507699622108-4be3abd695ad?auto=format&fit=crop&w=700&q=80',
+        photoUrl: 'https://images.unsplash.com/photo-1469521669194-babb45599def?auto=format&fit=crop&w=700&q=80',
       },
     ],
     landmarks: [
@@ -1452,4 +1505,6 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
   },
 ];
 
-export const ALL_COUNTRIES: CountryData[] = [...FEATURED_COUNTRIES, ...EXTENDED_COUNTRIES];
+export const ALL_COUNTRIES: CountryData[] = [...FEATURED_COUNTRIES, ...EXTENDED_COUNTRIES].map(
+  applyVerifiedPhotosToCountry
+);

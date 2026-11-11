@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  ShieldCheck,
 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth.store';
 import { useTripStore } from '@/stores/trip.store';
@@ -70,6 +71,11 @@ const navItems = computed(() => [
     name: 'Профиль',
     to: '/profile',
     icon: User,
+  },
+  {
+    name: 'Диагностика фото',
+    to: '/diagnostics/photos',
+    icon: ShieldCheck,
   },
 ]);
 

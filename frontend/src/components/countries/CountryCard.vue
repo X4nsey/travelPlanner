@@ -24,7 +24,9 @@ const emit = defineEmits<{
     <div>
       <!-- Country Cover Photo with consistent 16:10 aspect ratio -->
       <SmartImage
-        :src="country.coverPhoto?.thumbUrl || country.coverPhoto?.url"
+        :src="country.coverPhoto?.url"
+        :thumbSrc="country.coverPhoto?.thumbUrl"
+        size="md"
         :alt="country.nameRu"
         :fallbackTitle="country.nameRu"
         :fallbackFlag="country.flagEmoji"

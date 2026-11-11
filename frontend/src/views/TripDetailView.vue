@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, defineAsyncComponent, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import {
   ArrowLeft,
@@ -15,10 +15,30 @@ import {
   CalendarDays,
   StickyNote,
   RefreshCw,
+  Coins,
+  Receipt,
+  TrendingUp,
+  AlertCircle,
+  Filter,
+  Car,
+  Utensils,
+  Hotel,
+  Ticket,
+  ShoppingBag,
+  MoreHorizontal,
+  CheckCircle2,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { useToastStore } from '@/stores/toast.store';
-import type { EventFormPayload, ItineraryEvent } from '@/types';
+import { expenseService } from '@/services/expense.service';
+import type {
+  EventFormPayload,
+  ItineraryEvent,
+  TripExpense,
+  ExpenseFormPayload,
+  TripExpenseSummary,
+  ExpenseCategory,
+} from '@/types';
 import {
   formatDateRange,
   formatRussianDate,
@@ -29,11 +49,22 @@ import {
   getTripTimingStatus,
 } from '@/composables/useFormatters';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
-import EventFormModal from '@/components/trips/EventFormModal.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+
+const EventFormModal = defineAsyncComponent(
+  () => import('@/components/trips/EventFormModal.vue')
+);
+
+const ExpenseCategoryChart = defineAsyncComponent(
+  () => import('@/components/trips/ExpenseCategoryChart.vue')
+);
+
+const ExpenseFormModal = defineAsyncComponent(
+  () => import('@/components/trips/ExpenseFormModal.vue')
+);
 
 const route = useRoute();
 const router = useRouter();
@@ -41,7 +72,7 @@ const tripStore = useTripStore();
 const toastStore = useToastStore();
 
 const tripId = computed(() => route.params.id as string);
-const activeTab = ref<'overview' | 'itinerary'>('overview');
+const activeTab = ref<'overview' | 'itinerary' | 'expenses'>('overview');
 
 // Trip deletion state
 const showDeleteTripConfirm = ref(false);
@@ -52,11 +83,27 @@ const eventModalOpen = ref(false);
 const selectedDayDate = ref('');
 const editingEvent = ref<ItineraryEvent | null>(null);
 const isSavingEvent = ref(false);
-const eventModalRef = ref<InstanceType<typeof EventFormModal> | null>(null);
+const eventModalRef = ref<{ setError: (msg: string | null) => void } | null>(null);
 
 // Event deletion state
 const eventToDelete = ref<ItineraryEvent | null>(null);
 const isDeletingEvent = ref(false);
+
+// Expenses state
+const tripExpenses = ref<TripExpense[]>([]);
+const expenseSummary = ref<TripExpenseSummary | null>(null);
+const isLoadingExpenses = ref(false);
+const expensesError = ref<string | null>(null);
+
+const expenseModalOpen = ref(false);
+const editingExpense = ref<TripExpense | null>(null);
+const isSavingExpense = ref(false);
+const expenseModalRef = ref<{ setError: (msg: string | null) => void } | null>(null);
+
+const expenseToDelete = ref<TripExpense | null>(null);
+const isDeletingExpense = ref(false);
+
+const selectedCategoryFilter = ref<ExpenseCategory | null>(null);
 
 const trip = computed(() => tripStore.currentTrip);
 
@@ -89,17 +136,54 @@ const totalEstimatedEventsCost = computed(() => {
   return list.reduce((sum, ev) => sum + (ev.estimatedCost ? Number(ev.estimatedCost) : 0), 0);
 });
 
+const filteredExpenses = computed(() => {
+  if (!selectedCategoryFilter.value) {
+    return tripExpenses.value;
+  }
+  return tripExpenses.value.filter((e) => e.category === selectedCategoryFilter.value);
+});
+
 function loadTrip() {
   if (tripId.value) {
     tripStore.fetchTripById(tripId.value).catch(() => {
       // Handled via tripStore.detailError
     });
+    loadTripExpenses();
+  }
+}
+
+async function loadTripExpenses() {
+  if (!tripId.value) return;
+  isLoadingExpenses.value = true;
+  expensesError.value = null;
+  try {
+    const data = await expenseService.getTripExpenses(tripId.value);
+    tripExpenses.value = data.expenses;
+    expenseSummary.value = data.summary;
+  } catch (err: any) {
+    expensesError.value = err?.message || 'Не удалось загрузить расходы поездки';
+  } finally {
+    isLoadingExpenses.value = false;
   }
 }
 
 onMounted(() => {
+  if (route.query.tab === 'expenses') {
+    activeTab.value = 'expenses';
+  } else if (route.query.tab === 'itinerary') {
+    activeTab.value = 'itinerary';
+  }
   loadTrip();
 });
+
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab === 'expenses' || newTab === 'itinerary' || newTab === 'overview') {
+      activeTab.value = newTab;
+    }
+  }
+);
 
 async function handleDeleteTrip() {
   if (!trip.value) return;
@@ -158,6 +242,69 @@ async function confirmDeleteEvent() {
     toastStore.error('Ошибка удаления', err?.message || 'Не удалось удалить мероприятие');
   } finally {
     isDeletingEvent.value = false;
+  }
+}
+
+// Expenses handlers
+function openAddExpenseModal() {
+  editingExpense.value = null;
+  expenseModalOpen.value = true;
+}
+
+function openEditExpenseModal(exp: TripExpense) {
+  editingExpense.value = exp;
+  expenseModalOpen.value = true;
+}
+
+async function handleSaveExpense(payload: ExpenseFormPayload) {
+  if (!trip.value) return;
+  isSavingExpense.value = true;
+  try {
+    if (editingExpense.value) {
+      await expenseService.updateExpense(editingExpense.value.id, payload);
+      toastStore.success('Расход успешно обновлен');
+    } else {
+      await expenseService.createExpense(trip.value.id, payload);
+      toastStore.success('Расход добавлен');
+    }
+    expenseModalOpen.value = false;
+    await loadTripExpenses();
+  } catch (err: any) {
+    expenseModalRef.value?.setError(err?.message || 'Не удалось сохранить расход');
+  } finally {
+    isSavingExpense.value = false;
+  }
+}
+
+async function confirmDeleteExpense() {
+  if (!expenseToDelete.value) return;
+  isDeletingExpense.value = true;
+  try {
+    await expenseService.deleteExpense(expenseToDelete.value.id);
+    toastStore.success('Расход удален');
+    expenseToDelete.value = null;
+    await loadTripExpenses();
+  } catch (err: any) {
+    toastStore.error('Ошибка удаления', err?.message || 'Не удалось удалить расход');
+  } finally {
+    isDeletingExpense.value = false;
+  }
+}
+
+function getCategoryIcon(cat: ExpenseCategory) {
+  switch (cat) {
+    case 'TRANSPORT':
+      return Car;
+    case 'FOOD':
+      return Utensils;
+    case 'LODGING':
+      return Hotel;
+    case 'ENTERTAINMENT':
+      return Ticket;
+    case 'SHOPPING':
+      return ShoppingBag;
+    default:
+      return MoreHorizontal;
   }
 }
 </script>
@@ -336,6 +483,26 @@ async function confirmDeleteEvent() {
             {{ totalEventsCount }}
           </span>
         </button>
+
+        <button
+          type="button"
+          @click="activeTab = 'expenses'"
+          :class="[
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
+            activeTab === 'expenses'
+              ? 'border-teal-600 text-teal-700'
+              : 'border-transparent text-slate-500 hover:text-slate-800',
+          ]"
+        >
+          <Coins class="w-4 h-4" />
+          <span>Расходы и бюджет</span>
+          <span
+            v-if="tripExpenses.length > 0"
+            class="ml-1 px-2 py-0.5 text-xs rounded-full bg-emerald-50 text-emerald-700 font-bold"
+          >
+            {{ tripExpenses.length }}
+          </span>
+        </button>
       </div>
 
       <!-- TAB 1: OVERVIEW -->
@@ -390,18 +557,43 @@ async function confirmDeleteEvent() {
               <dt class="text-slate-500">Общий бюджет</dt>
               <dd class="font-semibold text-slate-900">{{ formatCurrency(trip.budget, trip.currency) }}</dd>
             </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100">
+              <dt class="text-slate-500">Фактические траты</dt>
+              <dd class="font-semibold text-slate-900">
+                {{ formatCurrency(expenseSummary?.totalSpent || 0, trip.currency) }}
+              </dd>
+            </div>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100">
+              <dt class="text-slate-500">Остаток бюджета</dt>
+              <dd
+                class="font-semibold"
+                :class="(expenseSummary?.remainingBudget || 0) < 0 ? 'text-rose-600' : 'text-emerald-600'"
+              >
+                {{ formatCurrency(expenseSummary?.remainingBudget || 0, trip.currency) }}
+              </dd>
+            </div>
             <div class="flex items-center justify-between py-2">
-              <dt class="text-slate-500">Расходы по плану</dt>
+              <dt class="text-slate-500">Оценка по плану</dt>
               <dd class="font-semibold text-slate-900">
                 {{ formatCurrency(totalEstimatedEventsCost, trip.currency) }}
               </dd>
             </div>
           </dl>
+
+          <BaseButton
+            variant="outline"
+            size="sm"
+            class="w-full mt-2"
+            @click="activeTab = 'expenses'"
+          >
+            <Coins class="w-4 h-4 mr-1.5" />
+            <span>Управление расходами</span>
+          </BaseButton>
         </div>
       </div>
 
       <!-- TAB 2: ITINERARY BY DAYS -->
-      <div v-else class="space-y-6">
+      <div v-else-if="activeTab === 'itinerary'" class="space-y-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Расписание по дням поездки</h2>
@@ -560,7 +752,369 @@ async function confirmDeleteEvent() {
           </section>
         </div>
       </div>
+
+      <!-- TAB 3: EXPENSES & BUDGET TRACKER -->
+      <div v-if="activeTab === 'expenses'" class="space-y-6">
+        <!-- Header & Action Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Coins class="w-5 h-5 text-teal-600" />
+              <span>Финансовый помощник</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Контролируйте расходы, следите за остатком бюджета и анализируйте структуру трат
+            </p>
+          </div>
+
+          <BaseButton
+            variant="primary"
+            size="sm"
+            @click="openAddExpenseModal"
+          >
+            <Plus class="w-4 h-4" />
+            <span>Добавить расход</span>
+          </BaseButton>
+        </div>
+
+        <!-- KPI Budget Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Planned Budget -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">План бюджета</span>
+              <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                <Wallet class="w-4 h-4" />
+              </div>
+            </div>
+            <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              {{ formatCurrency(trip.budget, trip.currency) }}
+            </p>
+            <p class="text-xs text-slate-400 mt-1">
+              Запланировано на поездку
+            </p>
+          </div>
+
+          <!-- Total Spent -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Фактически потрачено</span>
+              <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                <Receipt class="w-4 h-4" />
+              </div>
+            </div>
+            <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              {{ formatCurrency(expenseSummary?.totalSpent || 0, trip.currency) }}
+            </p>
+            <p class="text-xs text-slate-400 mt-1">
+              Всего по {{ tripExpenses.length }} {{ tripExpenses.length === 1 ? 'операции' : tripExpenses.length < 5 ? 'операциям' : 'операциям' }}
+            </p>
+          </div>
+
+          <!-- Remaining Budget -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Остаток бюджета</span>
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center"
+                :class="
+                  (expenseSummary?.remainingBudget || 0) < 0
+                    ? 'bg-rose-50 text-rose-600'
+                    : 'bg-emerald-50 text-emerald-600'
+                "
+              >
+                <TrendingUp class="w-4 h-4" />
+              </div>
+            </div>
+            <p
+              class="text-xl sm:text-2xl font-extrabold"
+              :class="
+                (expenseSummary?.remainingBudget || 0) < 0
+                  ? 'text-rose-600'
+                  : 'text-emerald-600'
+              "
+            >
+              {{ formatCurrency(expenseSummary?.remainingBudget || 0, trip.currency) }}
+            </p>
+            <p
+              class="text-xs font-medium mt-1"
+              :class="(expenseSummary?.remainingBudget || 0) < 0 ? 'text-rose-500 font-bold' : 'text-slate-400'"
+            >
+              {{
+                (expenseSummary?.remainingBudget || 0) < 0
+                  ? 'Внимание: бюджет превышен!'
+                  : 'Доступно для трат'
+              }}
+            </p>
+          </div>
+
+          <!-- Spent % Progress -->
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Освоение бюджета</span>
+              <span
+                class="text-xs font-bold px-2 py-0.5 rounded-full"
+                :class="
+                  expenseSummary?.status === 'over_budget'
+                    ? 'bg-rose-100 text-rose-800'
+                    : expenseSummary?.status === 'near_budget'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-emerald-100 text-emerald-800'
+                "
+              >
+                {{
+                  expenseSummary?.status === 'over_budget'
+                    ? 'Превышен'
+                    : expenseSummary?.status === 'near_budget'
+                      ? 'Внимание'
+                      : 'В норме'
+                }}
+              </span>
+            </div>
+            <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              {{ expenseSummary?.spentPercentage || 0 }}%
+            </p>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-300"
+                :style="{ width: Math.min(expenseSummary?.spentPercentage || 0, 100) + '%' }"
+                :class="
+                  expenseSummary?.status === 'over_budget'
+                    ? 'bg-rose-500'
+                    : expenseSummary?.status === 'near_budget'
+                      ? 'bg-amber-500'
+                      : 'bg-teal-500'
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Over-budget warning banner if budget exceeded -->
+        <div
+          v-if="expenseSummary?.status === 'over_budget'"
+          class="flex items-start gap-3 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-900"
+        >
+          <AlertCircle class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <div class="text-xs sm:text-sm">
+            <strong class="font-bold">Предупреждение о перерасходе средств:</strong>
+            Текущие расходы превышают запланированный бюджет на {{ formatCurrency(Math.abs(expenseSummary.remainingBudget), trip.currency) }}. Рекомендуем скорректировать дальнейшие траты.
+          </div>
+        </div>
+
+        <!-- Expenses Grid: Donut Chart on Left, Expenses History on Right -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <!-- Category Breakdown Chart Component -->
+          <div class="lg:col-span-5">
+            <ExpenseCategoryChart
+              :summary="expenseSummary"
+              :selected-category="selectedCategoryFilter"
+              @select-category="selectedCategoryFilter = $event"
+            />
+          </div>
+
+          <!-- History of Expenses List -->
+          <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div>
+                <h3 class="font-extrabold text-slate-900 text-lg sm:text-xl">История расходов</h3>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  Все зафиксированные траты в хронологическом порядке
+                </p>
+              </div>
+
+              <!-- Quick Reset Filter Button -->
+              <div v-if="selectedCategoryFilter" class="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  @click="selectedCategoryFilter = null"
+                  class="text-xs px-3 py-1.5 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                >
+                  Сбросить фильтр
+                </button>
+              </div>
+            </div>
+
+            <!-- Category Pills Filter Bar (No ugly horizontal scrollbar, wraps neatly) -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                @click="selectedCategoryFilter = null"
+                :class="[
+                  'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all',
+                  selectedCategoryFilter === null
+                    ? 'bg-slate-900 text-white shadow-sm'
+                    : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700',
+                ]"
+              >
+                <span>Все</span>
+                <span
+                  class="px-1.5 py-0.5 rounded-md text-[11px]"
+                  :class="selectedCategoryFilter === null ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'"
+                >
+                  {{ tripExpenses.length }}
+                </span>
+              </button>
+
+              <button
+                v-for="catItem in expenseSummary?.byCategory || []"
+                :key="catItem.category"
+                type="button"
+                @click="selectedCategoryFilter = selectedCategoryFilter === catItem.category ? null : catItem.category"
+                :class="[
+                  'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-bold transition-all',
+                  selectedCategoryFilter === catItem.category
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-200/80 hover:border-slate-300 hover:bg-slate-50',
+                ]"
+              >
+                <span
+                  class="w-2.5 h-2.5 rounded-full shrink-0"
+                  :style="{ backgroundColor: catItem.color }"
+                ></span>
+                <span>{{ catItem.nameRu }}</span>
+                <span
+                  class="text-xs font-semibold opacity-75"
+                  :class="selectedCategoryFilter === catItem.category ? 'text-white' : 'text-slate-500'"
+                >
+                  ({{ catItem.count }})
+                </span>
+              </button>
+            </div>
+
+            <!-- Empty List State -->
+            <div
+              v-if="filteredExpenses.length === 0"
+              class="flex flex-col items-center justify-center py-14 px-4 text-center"
+            >
+              <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                <Receipt class="w-7 h-7" />
+              </div>
+              <p class="text-base font-bold text-slate-800">
+                {{ selectedCategoryFilter ? 'В этой категории пока нет расходов' : 'Расходы ещё не зафиксированы' }}
+              </p>
+              <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-sm">
+                {{
+                  selectedCategoryFilter
+                    ? 'Сбросьте фильтр или добавьте новый расход в эту категорию'
+                    : 'Внесите первую трату, чтобы отслеживать фактический бюджет поездки'
+                }}
+              </p>
+              <div class="flex items-center gap-2 mt-4">
+                <BaseButton
+                  v-if="selectedCategoryFilter"
+                  variant="outline"
+                  size="sm"
+                  @click="selectedCategoryFilter = null"
+                >
+                  Сбросить фильтр
+                </BaseButton>
+                <BaseButton
+                  variant="primary"
+                  size="sm"
+                  @click="openAddExpenseModal"
+                >
+                  <Plus class="w-4 h-4" />
+                  <span>Добавить расход</span>
+                </BaseButton>
+              </div>
+            </div>
+
+            <!-- Expenses Items List (Larger, prominent typography & clear structure) -->
+            <div v-else class="space-y-3">
+              <div
+                v-for="exp in filteredExpenses"
+                :key="exp.id"
+                class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-slate-200/80 hover:border-slate-300 bg-white hover:bg-slate-50/60 shadow-sm transition-all duration-150 gap-4 group"
+              >
+                <!-- Left: Category Icon, Title, Date, Description -->
+                <div class="flex items-start sm:items-center gap-4 min-w-0">
+                  <div
+                    class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-sm"
+                    :style="{ backgroundColor: exp.categoryColor }"
+                  >
+                    <component :is="getCategoryIcon(exp.category)" class="w-6 h-6" />
+                  </div>
+
+                  <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                      <span class="text-base sm:text-lg font-bold text-slate-900">
+                        {{ exp.categoryNameRu }}
+                      </span>
+                      <span class="inline-flex items-center text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200/60">
+                        {{ formatRussianDate(exp.expenseDate) }}
+                      </span>
+                    </div>
+
+                    <p
+                      v-if="exp.description"
+                      class="text-sm text-slate-600 mt-1 leading-relaxed"
+                    >
+                      {{ exp.description }}
+                    </p>
+                    <p v-else class="text-xs text-slate-400 italic mt-1">
+                      Без описания
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Right: Amount and Action Buttons -->
+                <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0 sm:pl-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                  <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    {{ formatCurrency(exp.amount, exp.currency) }}
+                  </span>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      @click="openEditExpenseModal(exp)"
+                      class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-colors"
+                      title="Редактировать расход"
+                    >
+                      <Pencil class="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      @click="expenseToDelete = exp"
+                      class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors"
+                      title="Удалить расход"
+                    >
+                      <Trash2 class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- Expense Add/Edit Modal -->
+    <ExpenseFormModal
+      v-if="trip"
+      ref="expenseModalRef"
+      :open="expenseModalOpen"
+      :tripCurrency="trip.currency"
+      :tripStartDate="trip.startDate"
+      :editingExpense="editingExpense"
+      :loading="isSavingExpense"
+      @close="expenseModalOpen = false"
+      @submit="handleSaveExpense"
+    />
+
+    <!-- Confirm Delete Expense Modal -->
+    <ConfirmDialog
+      :open="Boolean(expenseToDelete)"
+      title="Удалить расход?"
+      :message="`Вы действительно хотите удалить расход на сумму ${formatCurrency(expenseToDelete?.amount || 0, expenseToDelete?.currency || 'RUB')}?`"
+      confirmText="Удалить"
+      :loading="isDeletingExpense"
+      @confirm="confirmDeleteExpense"
+      @cancel="expenseToDelete = null"
+    />
 
     <!-- Event Add/Edit Modal -->
     <EventFormModal
@@ -570,6 +1124,8 @@ async function confirmDeleteEvent() {
       :tripStartDate="trip.startDate"
       :tripEndDate="trip.endDate"
       :currency="trip.currency"
+      :country="trip.country"
+      :city="trip.city"
       :defaultDate="selectedDayDate"
       :editingEvent="editingEvent"
       :loading="isSavingEvent"

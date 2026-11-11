@@ -11,9 +11,12 @@ import {
   PlaneTakeoff,
   MapPin,
   CheckCircle2,
+  Heart,
 } from 'lucide-vue-next';
 import type { CountryData } from '@/types';
 import { useCountryStore } from '@/stores/country.store';
+import { useTripStore } from '@/stores/trip.store';
+import { GLOBE_COLORS } from '@/constants/globe-colors';
 import SmartImage from '@/components/ui/SmartImage.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import FavoriteButton from './FavoriteButton.vue';
@@ -35,6 +38,7 @@ const emit = defineEmits<{
 }>();
 
 const countryStore = useCountryStore();
+const tripStore = useTripStore();
 
 const formattedPopulation = computed(() => {
   if (!props.country || !props.country.population) return null;
@@ -50,6 +54,22 @@ const hasDetailedPage = computed(() => {
   if (!props.country) return false;
   return countryStore.isInCatalog(props.country.slug);
 });
+
+const isFavoriteCountry = computed(() => {
+  if (!props.country) return false;
+  return countryStore.isFavorite(props.country.slug);
+});
+
+const countryPlannedTripsCount = computed(() => {
+  if (!props.country) return 0;
+  const nameRu = props.country.nameRu.toLowerCase();
+  const nameEn = props.country.nameEn.toLowerCase();
+  const slug = props.country.slug.toLowerCase();
+  return tripStore.trips.filter((t) => {
+    const tc = t.country.trim().toLowerCase();
+    return tc === nameRu || tc === nameEn || tc === slug;
+  }).length;
+});
 </script>
 
 <template>
@@ -61,6 +81,8 @@ const hasDetailedPage = computed(() => {
         <!-- Cover Image Header -->
         <SmartImage
           :src="country.coverPhoto?.url"
+          :thumbSrc="country.coverPhoto?.thumbUrl"
+          size="lg"
           :alt="country.nameRu"
           :fallbackTitle="country.nameRu"
           :fallbackFlag="country.flagEmoji"
@@ -94,6 +116,8 @@ const hasDetailedPage = computed(() => {
               v-if="country.flagUrl"
               :src="country.flagUrl"
               :alt="country.nameRu"
+              loading="lazy"
+              decoding="async"
               class="w-10 h-7 object-cover rounded-md shadow border border-white/30 shrink-0"
             />
             <span v-else class="text-3xl">{{ country.flagEmoji }}</span>
@@ -111,6 +135,35 @@ const hasDetailedPage = computed(() => {
 
         <!-- Country Details Content -->
         <div class="p-5 sm:p-6 space-y-5">
+          <!-- Status Badges matching Globe Color System -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-orange-50 text-orange-800 border border-orange-200/80"
+            >
+              <span
+                class="w-2 h-2 rounded-full shrink-0"
+                :style="{ backgroundColor: GLOBE_COLORS.selected }"
+              />
+              <span>Выбрана на глобусе</span>
+            </span>
+
+            <span
+              v-if="countryPlannedTripsCount > 0"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+            >
+              <PlaneTakeoff class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Запланировано поездок: {{ countryPlannedTripsCount }}</span>
+            </span>
+
+            <span
+              v-if="isFavoriteCountry"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold bg-purple-50 text-purple-800 border border-purple-200/80"
+            >
+              <Heart class="w-3.5 h-3.5 text-purple-600 fill-purple-600 shrink-0" />
+              <span>В избранном</span>
+            </span>
+          </div>
+
           <!-- Description -->
           <p class="text-sm text-slate-600 leading-relaxed">
             {{ country.description }}

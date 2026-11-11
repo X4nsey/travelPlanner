@@ -1,3 +1,5 @@
+import { applyVerifiedPhotosToCountry } from './verified-wikimedia-photos.data';
+
 export type ContinentName =
   | 'Европа'
   | 'Азия'
@@ -6,22 +8,51 @@ export type ContinentName =
   | 'Южная Америка'
   | 'Океания';
 
+export type PhotoVerificationStatus =
+  | 'verified'
+  | 'needs_review'
+  | 'missing'
+  | 'broken'
+  | 'rejected';
+
+export type PhotoEntityType =
+  | 'country'
+  | 'city'
+  | 'landmark'
+  | 'nature'
+  | 'architecture';
+
 export interface CountryPhoto {
   url: string;
   thumbUrl: string;
   alt: string;
   category?: 'Города' | 'Природа' | 'Архитектура' | 'Туристические места' | 'Обложка';
+  objectName?: string;
+  country?: string;
+  city?: string;
+  entityType?: PhotoEntityType;
   authorName: string;
   authorUrl: string;
-  sourceName: 'Unsplash' | 'Pexels' | 'Wikimedia';
+  sourceName: 'Unsplash' | 'Pexels' | 'Wikimedia' | 'Wikimedia Commons' | 'Local';
   sourceUrl: string;
+  license?: string;
+  verified?: boolean;
+  verificationStatus?: PhotoVerificationStatus;
+  verificationNotes?: string;
 }
 
 export interface CountryCityItem {
   name: string;
   description: string;
   photoUrl: string;
+  thumbUrl?: string;
   authorName?: string;
+  authorUrl?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  license?: string;
+  verified?: boolean;
+  verificationStatus?: PhotoVerificationStatus;
 }
 
 export interface CountryLandmarkItem {
@@ -29,6 +60,15 @@ export interface CountryLandmarkItem {
   city: string;
   category: string;
   description: string;
+  photoUrl?: string;
+  thumbUrl?: string;
+  authorName?: string;
+  authorUrl?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  license?: string;
+  verified?: boolean;
+  verificationStatus?: PhotoVerificationStatus;
 }
 
 export interface CountryData {
@@ -60,6 +100,26 @@ export interface CountryData {
   featured?: boolean;
 }
 
+
+function wPhoto(
+  url: string,
+  thumbUrl: string,
+  alt: string,
+  authorName = 'Wikimedia Commons',
+  category: CountryPhoto['category'] = 'Обложка'
+): CountryPhoto {
+  return {
+    url,
+    thumbUrl,
+    alt,
+    category,
+    authorName,
+    authorUrl: 'https://commons.wikimedia.org',
+    sourceName: 'Wikimedia',
+    sourceUrl: 'https://commons.wikimedia.org',
+  };
+}
+
 function uPhoto(
   id: string,
   alt: string,
@@ -68,8 +128,8 @@ function uPhoto(
 ): CountryPhoto {
   const baseUrl = `https://images.unsplash.com/photo-${id}`;
   return {
-    url: `${baseUrl}?auto=format&fit=crop&w=1400&q=80`,
-    thumbUrl: `${baseUrl}?auto=format&fit=crop&w=600&q=75`,
+    url: `${baseUrl}?auto=format&fit=crop&fm=webp&w=1280&q=80`,
+    thumbUrl: `${baseUrl}?auto=format&fit=crop&fm=webp&w=520&q=75`,
     alt,
     category,
     authorName,
@@ -79,7 +139,7 @@ function uPhoto(
   };
 }
 
-export const FEATURED_COUNTRIES: CountryData[] = [
+const RAW_FEATURED_COUNTRIES: CountryData[] = [
   {
     slug: 'russia',
     isoNumeric: '643',
@@ -103,7 +163,7 @@ export const FEATURED_COUNTRIES: CountryData[] = [
     coverPhoto: uPhoto('1513326738677-b964603b136d', 'Москва, Россия', 'Nikolay Vorobyev'),
     gallery: [
       uPhoto('1556610961-2fecc5927173', 'Санкт-Петербург и разводные мосты', 'Michael Parulava', 'Города'),
-      uPhoto('1548625361-16800b455387', 'Озеро Байкал зимой', ' Philipp Trubchenko', 'Природа'),
+      wPhoto('https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Baikal%2C_Cape_Burhan%2C_Olkhon_Island%2C_Lake_Baikal%2C_Russia.jpg/1280px-Baikal%2C_Cape_Burhan%2C_Olkhon_Island%2C_Lake_Baikal%2C_Russia.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Baikal%2C_Cape_Burhan%2C_Olkhon_Island%2C_Lake_Baikal%2C_Russia.jpg/640px-Baikal%2C_Cape_Burhan%2C_Olkhon_Island%2C_Lake_Baikal%2C_Russia.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail', 'Озеро Байкал — мыс Бурхан и скала Шаманка на острове Ольхон', 'Wikimedia Commons', 'Природа'),
       uPhoto('1520106212299-d99c443e4568', 'Архитектура исторического центра Москвы', 'Artem Bryzgalov', 'Архитектура'),
       uPhoto('1508804185872-d7badad00f7d', 'Горные пейзажи Алтая', 'Sasha Freemind', 'Туристические места'),
     ],
@@ -318,7 +378,7 @@ export const FEATURED_COUNTRIES: CountryData[] = [
       uPhoto('1503899036084-c55cdd92da26', 'Вечерние кварталы Токио', 'Jezael Melgoza', 'Города'),
       uPhoto('1490806843957-31f4c9a91c65', 'Гора Фудзи и цветение сакуры', 'JJ Ying', 'Природа'),
       uPhoto('1478436127897-769e1b3f0f36', 'Красные ворота тории Фусими Инари в Киото', 'finding dan', 'Архитектура'),
-      uPhoto('1528164344705-475426879c0d', 'Замок Химэдзи и японские сады', 'Soragrit Wongsa', 'Туристические места'),
+      wPhoto('https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Himeji_castle_in_may_2015.jpg/1280px-Himeji_castle_in_may_2015.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail', 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Himeji_castle_in_may_2015.jpg/640px-Himeji_castle_in_may_2015.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail', 'Белоснежный замок Химэдзи (Замок белой цапли)', 'Wikimedia Commons', 'Туристические места'),
     ],
     popularCities: [
       {
@@ -888,3 +948,7 @@ export const FEATURED_COUNTRIES: CountryData[] = [
     featured: true,
   },
 ];
+
+export const FEATURED_COUNTRIES: CountryData[] = RAW_FEATURED_COUNTRIES.map(
+  applyVerifiedPhotosToCountry
+);
