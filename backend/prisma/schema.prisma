@@ -22,6 +22,33 @@ enum ExpenseCategory {
   OTHER
 }
 
+enum TripType {
+  BEACH
+  SIGHTSEEING
+  MOUNTAIN
+  BUSINESS
+  WINTER_SPORT
+  WELLNESS_SPA
+  MIXED
+}
+
+enum PackingCategory {
+  DOCUMENTS
+  CLOTHING
+  FOOTWEAR
+  TECH
+  HYGIENE
+  PERSONAL
+  MEDICINE
+  ACTIVITY
+  OTHER
+}
+
+enum PackingItemSource {
+  GENERATED
+  CUSTOM
+}
+
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -60,6 +87,7 @@ model Trip {
   travelersCount Int              @default(1)
   budget         Decimal          @default(0) @db.Decimal(12, 2)
   currency       Currency         @default(RUB)
+  tripType       TripType?
   description    String           @default("")
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
@@ -67,6 +95,7 @@ model Trip {
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   events         ItineraryEvent[]
   expenses       TripExpense[]
+  packingList    PackingList?
 
   @@index([userId])
   @@index([userId, startDate])
@@ -139,4 +168,41 @@ model PhotoRecord {
   @@index([verificationStatus])
   @@index([manualOverride])
 }
+
+model PackingList {
+  id              String        @id @default(uuid())
+  tripId          String        @unique
+  lastGeneratedAt DateTime?
+  contextSnapshot Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  trip            Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  items           PackingItem[]
+}
+
+model PackingItem {
+  id             String            @id @default(uuid())
+  packingListId  String
+  category       PackingCategory
+  name           String
+  quantity       Int?
+  isPacked       Boolean           @default(false)
+  source         PackingItemSource @default(GENERATED)
+  ruleKey        String?
+  reason         String?
+  isEditedByUser Boolean           @default(false)
+  isOutdated     Boolean           @default(false)
+  isDismissed    Boolean           @default(false)
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  packingList    PackingList       @relation(fields: [packingListId], references: [id], onDelete: Cascade)
+
+  @@unique([packingListId, ruleKey])
+  @@index([packingListId, category])
+  @@index([packingListId, isDismissed])
+}
+
 

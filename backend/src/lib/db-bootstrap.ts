@@ -194,6 +194,17 @@ export async function ensureDatabaseReady(): Promise<void> {
       console.warn('[Database] Ошибка проверки столбца manualOverride в PhotoRecord:', colErr);
     }
   }
+
+  const packingListRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."PackingList"')::text as reg`;
+  const packingItemRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."PackingItem"')::text as reg`;
+  const packingTablesExist =
+    Boolean(packingListRegResult?.[0]?.reg) && Boolean(packingItemRegResult?.[0]?.reg);
+
+  if (!packingTablesExist) {
+    console.log('[Database] Применяем миграцию умного списка вещей (PackingList, PackingItem)...');
+    await applyMigrationFile('../../prisma/migrations/20261113000000_add_smart_packing_list/migration.sql');
+    console.log('[Database] Миграция Smart Packing List успешно применена.');
+  }
 }
 
 export async function shutdownDatabase(): Promise<void> {
