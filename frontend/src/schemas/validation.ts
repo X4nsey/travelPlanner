@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ORDERED_PACKING_CATEGORIES, TRIP_TYPE_VALUES } from '@/constants/packing';
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -72,6 +73,16 @@ export const tripValidationSchema = z
     currency: z.enum(['RUB', 'USD', 'EUR'], {
       errorMap: () => ({ message: 'Выберите валюту бюджета' }),
     }),
+    tripType: z
+      .union([
+        z.enum(TRIP_TYPE_VALUES, {
+          errorMap: () => ({ message: 'Выберите корректный тип поездки' }),
+        }),
+        z.literal(''),
+        z.null(),
+      ])
+      .optional()
+      .transform((val) => (val === '' || val === undefined ? null : val)),
     description: z
       .string()
       .max(2000, 'Описание не должно превышать 2000 символов')
@@ -195,3 +206,56 @@ export const expenseValidationSchema = z.object({
     .optional()
     .default(''),
 });
+
+const packingCategorySchema = z.enum(ORDERED_PACKING_CATEGORIES, {
+  errorMap: () => ({ message: 'Выберите корректную категорию вещи' }),
+});
+
+const packingQuantitySchema = z
+  .union([
+    z
+      .number({ invalid_type_error: 'Количество должно быть числом' })
+      .int('Количество должно быть целым числом')
+      .min(1, 'Количество должно быть не менее 1')
+      .max(999, 'Количество не может превышать 999'),
+    z.null(),
+  ])
+  .optional();
+
+export const createPackingItemValidationSchema = z
+  .object({
+    name: z
+      .string({ required_error: 'Название вещи обязательно' })
+      .trim()
+      .min(1, 'Название вещи не может быть пустым')
+      .max(200, 'Название вещи не должно превышать 200 символов'),
+    category: packingCategorySchema,
+    quantity: packingQuantitySchema,
+  })
+  .strict('Переданы недопустимые или служебные поля');
+
+export const updatePackingItemValidationSchema = z
+  .object({
+    name: z
+      .string({ invalid_type_error: 'Название вещи должно быть строкой' })
+      .trim()
+      .min(1, 'Название вещи не может быть пустым')
+      .max(200, 'Название вещи не должно превышать 200 символов')
+      .optional(),
+    category: packingCategorySchema.optional(),
+    quantity: packingQuantitySchema,
+    isPacked: z
+      .boolean({ invalid_type_error: 'Поле isPacked должно быть логическим значением' })
+      .optional(),
+  })
+  .strict('Запрещено изменять служебные или недопустимые поля')
+  .refine(
+    (data) =>
+      data.name !== undefined ||
+      data.category !== undefined ||
+      data.quantity !== undefined ||
+      data.isPacked !== undefined,
+    {
+      message: 'Необходимо указать хотя бы одно поле для обновления',
+    }
+  );

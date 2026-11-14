@@ -6,6 +6,7 @@ import { useTripStore } from '@/stores/trip.store';
 import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
 import type { TripFormPayload, Currency } from '@/types';
+import { isValidTripType, normalizeTripType } from '@/constants/packing';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import TripForm from '@/components/trips/TripForm.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
@@ -44,6 +45,16 @@ onMounted(async () => {
     ['RUB', 'USD', 'EUR'].includes(route.query.currency)
       ? (route.query.currency as Currency)
       : undefined;
+  const rawQueryTripType =
+    typeof route.query.tripType === 'string' ? route.query.tripType.trim() : undefined;
+  const queryTripType =
+    rawQueryTripType === undefined
+      ? undefined
+      : rawQueryTripType === '' || rawQueryTripType.toLowerCase() === 'null'
+        ? null
+        : isValidTripType(rawQueryTripType.toUpperCase())
+          ? normalizeTripType(rawQueryTripType)
+          : undefined;
 
   if (isEditMode.value && tripId.value) {
     try {
@@ -57,6 +68,7 @@ onMounted(async () => {
         travelersCount: trip.travelersCount,
         budget: trip.budget,
         currency: trip.currency,
+        tripType: trip.tripType ?? null,
         description: trip.description,
         ...(draft || {}),
       };
@@ -75,6 +87,9 @@ onMounted(async () => {
       }
       if (queryCurrency) {
         baseValues.currency = queryCurrency;
+      }
+      if (queryTripType !== undefined) {
+        baseValues.tripType = queryTripType;
       }
       if (queryDescription) {
         baseValues.description = queryDescription;
@@ -109,6 +124,10 @@ onMounted(async () => {
       baseValues.currency = matchedCountry.defaultTripCurrency;
     }
 
+    if (queryTripType !== undefined) {
+      baseValues.tripType = queryTripType;
+    }
+
     if (queryTitle) {
       baseValues.title = queryTitle;
     } else if (!baseValues.title && baseValues.country) {
@@ -130,7 +149,15 @@ onMounted(async () => {
 });
 
 function handleOpenGlobe(currentDraft: Partial<TripFormPayload>) {
-  countryStore.setTripPickerDraft(currentDraft, route.path);
+  const mergedDraft: Partial<TripFormPayload> = {
+    ...currentDraft,
+    ...(currentDraft.tripType !== undefined
+      ? {}
+      : initialFormValues.value?.tripType !== undefined
+        ? { tripType: initialFormValues.value.tripType }
+        : {}),
+  };
+  countryStore.setTripPickerDraft(mergedDraft, route.path);
   router.push({
     path: '/explore',
     query: {
@@ -145,13 +172,21 @@ async function handleSubmit(payload: TripFormPayload) {
   isSubmitting.value = true;
   serverError.value = null;
 
+  const preparedPayload: TripFormPayload = {
+    ...payload,
+    tripType:
+      payload.tripType !== undefined
+        ? payload.tripType
+        : (initialFormValues.value?.tripType ?? null),
+  };
+
   try {
     if (isEditMode.value && tripId.value) {
-      const res = await tripStore.updateTrip(tripId.value, payload);
+      const res = await tripStore.updateTrip(tripId.value, preparedPayload);
       toastStore.success('Поездка успешно обновлена');
       router.push(`/trips/${res.trip.id}`);
     } else {
-      const res = await tripStore.createTrip(payload);
+      const res = await tripStore.createTrip(preparedPayload);
       toastStore.success('Поездка успешно создана');
       router.push(`/trips/${res.trip.id}`);
     }

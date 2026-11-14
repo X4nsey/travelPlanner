@@ -34,6 +34,7 @@ export function serializeTrip(trip: any) {
     travelersCount: trip.travelersCount,
     budget: Number(trip.budget),
     currency: trip.currency,
+    tripType: trip.tripType ?? null,
     description: trip.description || '',
     eventsCount: trip._count?.events ?? (Array.isArray(trip.events) ? trip.events.length : undefined),
     ...(Array.isArray(trip.events)
@@ -100,6 +101,7 @@ export class TripService {
         travelersCount: input.travelersCount,
         budget: input.budget,
         currency: input.currency,
+        tripType: input.tripType ?? null,
         description: input.description ?? '',
       },
       include: {
@@ -154,6 +156,7 @@ export class TripService {
         ...(input.travelersCount !== undefined ? { travelersCount: input.travelersCount } : {}),
         ...(input.budget !== undefined ? { budget: input.budget } : {}),
         ...(input.currency !== undefined ? { currency: input.currency } : {}),
+        ...(input.tripType !== undefined ? { tripType: input.tripType } : {}),
         ...(input.description !== undefined ? { description: input.description } : {}),
       },
       include: {

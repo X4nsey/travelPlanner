@@ -8,6 +8,26 @@ function isValidIsoDate(val: string): boolean {
   return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(val);
 }
 
+export const tripTypeEnum = z.enum(
+  [
+    'BEACH',
+    'SIGHTSEEING',
+    'MOUNTAIN',
+    'BUSINESS',
+    'WINTER_SPORT',
+    'WELLNESS_SPA',
+    'MIXED',
+  ],
+  {
+    errorMap: () => ({
+      message:
+        'Выберите корректный тип поездки: BEACH, SIGHTSEEING, MOUNTAIN, BUSINESS, WINTER_SPORT, WELLNESS_SPA или MIXED',
+    }),
+  }
+);
+
+const tripTypeSchema = z.union([tripTypeEnum, z.null()]).optional();
+
 const baseTripFields = {
   title: z
     .string({ required_error: 'Название поездки обязательно' })
@@ -44,6 +64,7 @@ const baseTripFields = {
   currency: z.enum(['RUB', 'USD', 'EUR'], {
     errorMap: () => ({ message: 'Выберите одну из поддерживаемых валют: RUB, USD или EUR' }),
   }),
+  tripType: tripTypeSchema,
   description: z
     .string()
     .trim()
@@ -69,6 +90,7 @@ export const updateTripSchema = z
     travelersCount: baseTripFields.travelersCount.optional(),
     budget: baseTripFields.budget.optional(),
     currency: baseTripFields.currency.optional(),
+    tripType: tripTypeSchema,
     description: z.string().trim().max(2000, 'Описание не должно превышать 2000 символов').optional(),
   })
   .refine(
