@@ -9,6 +9,7 @@ import eventRoutes from './routes/event.routes';
 import countryRoutes from './routes/country.routes';
 import favoriteRoutes from './routes/favorite.routes';
 import expenseRoutes from './routes/expense.routes';
+import packingRoutes from './routes/packing.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { AppError } from './lib/errors';
 
@@ -60,6 +61,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/packing', packingRoutes);
 app.use('/api/countries', countryRoutes);
 app.use('/api/favorites', favoriteRoutes);
 

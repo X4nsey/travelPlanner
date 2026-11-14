@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { TripController } from '../controllers/trip.controller';
 import { EventController } from '../controllers/event.controller';
 import { ExpenseController } from '../controllers/expense.controller';
+import { PackingController } from '../controllers/packing.controller';
 import { requireAuth } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -21,5 +22,11 @@ router.post('/:tripId/events', EventController.createForTrip);
 // Nested expenses routes for a specific trip
 router.get('/:tripId/expenses', ExpenseController.listByTrip);
 router.post('/:tripId/expenses', ExpenseController.createForTrip);
+
+// Nested smart packing list routes for a specific trip
+router.get('/:tripId/packing', PackingController.getByTrip);
+router.post('/:tripId/packing/generate', PackingController.generateForTrip);
+router.post('/:tripId/packing/items', PackingController.createItemForTrip);
+router.delete('/:tripId/packing/outdated', PackingController.clearOutdatedForTrip);
 
 export default router;
