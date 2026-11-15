@@ -4,7 +4,8 @@ import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { CalendarDays, MapPin } from 'lucide-vue-next';
 import { tripValidationSchema } from '@/schemas/validation';
-import type { TripFormPayload, Currency, CountryData } from '@/types';
+import type { TripFormPayload, Currency, CountryData, TripType } from '@/types';
+import { TRIP_TYPE_OPTIONS, normalizeTripType } from '@/constants/packing';
 import { calculateInclusiveDays, formatDaysLabel, getTodayIso } from '@/composables/useFormatters';
 import { useCountryStore } from '@/stores/country.store';
 import CountrySelect from '@/components/countries/CountrySelect.vue';
@@ -47,6 +48,7 @@ const { handleSubmit, errors, setValues, setFieldError } = useForm({
     travelersCount: props.initialValues?.travelersCount ?? 1,
     budget: props.initialValues?.budget ?? 0,
     currency: (props.initialValues?.currency ?? 'RUB') as Currency,
+    tripType: (props.initialValues?.tripType ?? '') as TripType | '',
     description: props.initialValues?.description ?? '',
   },
 });
@@ -64,6 +66,7 @@ watch(
         travelersCount: vals.travelersCount ?? 1,
         budget: vals.budget ?? 0,
         currency: (vals.currency ?? 'RUB') as Currency,
+        tripType: (vals.tripType ?? '') as TripType | '',
         description: vals.description ?? '',
       });
     }
@@ -79,7 +82,20 @@ const { value: endDate } = useField<string>('endDate');
 const { value: travelersCount } = useField<number>('travelersCount');
 const { value: budget } = useField<number>('budget');
 const { value: currency } = useField<Currency>('currency');
+const { value: tripType } = useField<TripType | '' | null>('tripType');
 const { value: description } = useField<string>('description');
+
+const tripTypeSelectValue = computed({
+  get: () => (tripType.value ?? '') as string,
+  set: (val: string) => {
+    tripType.value = (val || '') as TripType | '';
+  },
+});
+
+const tripTypeOptions = TRIP_TYPE_OPTIONS.map((opt) => ({
+  value: opt.formValue,
+  label: opt.label,
+}));
 
 const selectedCountryData = computed<CountryData | undefined>(() => {
   if (!country.value) return undefined;
@@ -114,6 +130,7 @@ function handleOpenGlobePicker() {
     travelersCount: Number(travelersCount.value ?? 1),
     budget: Number(budget.value ?? 0),
     currency: (currency.value ?? 'RUB') as Currency,
+    tripType: normalizeTripType(tripType.value),
     description: description.value ?? '',
   });
 }
@@ -141,6 +158,7 @@ const onSubmit = handleSubmit((values) => {
     travelersCount: Number(values.travelersCount),
     budget: Number(values.budget),
     currency: values.currency as Currency,
+    tripType: normalizeTripType(values.tripType),
     description: values.description?.trim() ?? '',
   });
 });
@@ -211,6 +229,20 @@ defineExpose({
           </button>
         </div>
       </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-1.5">
+      <BaseSelect
+        v-model="tripTypeSelectValue"
+        name="tripType"
+        label="Тип поездки"
+        :options="tripTypeOptions"
+        :error="errors.tripType"
+        :disabled="loading"
+      />
+      <p class="text-xs text-slate-500">
+        Тип поездки помогает точнее сформировать список вещей. Если тип не указан, система попробует определить его автоматически.
+      </p>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">

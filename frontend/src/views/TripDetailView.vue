@@ -27,10 +27,14 @@ import {
   ShoppingBag,
   MoreHorizontal,
   CheckCircle2,
+  Briefcase,
+  Compass,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
+import { usePackingStore } from '@/stores/packing.store';
 import { useToastStore } from '@/stores/toast.store';
 import { expenseService } from '@/services/expense.service';
+import { getTripTypeLabelRu } from '@/constants/packing';
 import type {
   EventFormPayload,
   ItineraryEvent,
@@ -66,13 +70,18 @@ const ExpenseFormModal = defineAsyncComponent(
   () => import('@/components/trips/ExpenseFormModal.vue')
 );
 
+const PackingListSection = defineAsyncComponent(
+  () => import('@/components/packing/PackingListSection.vue')
+);
+
 const route = useRoute();
 const router = useRouter();
 const tripStore = useTripStore();
+const packingStore = usePackingStore();
 const toastStore = useToastStore();
 
 const tripId = computed(() => route.params.id as string);
-const activeTab = ref<'overview' | 'itinerary' | 'expenses'>('overview');
+const activeTab = ref<'overview' | 'itinerary' | 'expenses' | 'packing'>('overview');
 
 // Trip deletion state
 const showDeleteTripConfirm = ref(false);
@@ -148,6 +157,9 @@ function loadTrip() {
     tripStore.fetchTripById(tripId.value).catch(() => {
       // Handled via tripStore.detailError
     });
+    packingStore.fetchPackingList(tripId.value).catch(() => {
+      // Handled via packingStore.error
+    });
     loadTripExpenses();
   }
 }
@@ -172,14 +184,27 @@ onMounted(() => {
     activeTab.value = 'expenses';
   } else if (route.query.tab === 'itinerary') {
     activeTab.value = 'itinerary';
+  } else if (route.query.tab === 'packing') {
+    activeTab.value = 'packing';
   }
   loadTrip();
+});
+
+watch(tripId, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    loadTrip();
+  }
 });
 
 watch(
   () => route.query.tab,
   (newTab) => {
-    if (newTab === 'expenses' || newTab === 'itinerary' || newTab === 'overview') {
+    if (
+      newTab === 'expenses' ||
+      newTab === 'itinerary' ||
+      newTab === 'overview' ||
+      newTab === 'packing'
+    ) {
       activeTab.value = newTab;
     }
   }
@@ -368,6 +393,14 @@ function getCategoryIcon(cat: ExpenseCategory) {
                 <MapPin class="w-3.5 h-3.5" />
                 {{ trip.country }}, {{ trip.city }}
               </span>
+
+              <span
+                v-if="trip.tripType"
+                class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200/70"
+              >
+                <Compass class="w-3.5 h-3.5" />
+                {{ getTripTypeLabelRu(trip.tripType) }}
+              </span>
             </div>
 
             <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
@@ -450,12 +483,12 @@ function getCategoryIcon(cat: ExpenseCategory) {
       </div>
 
       <!-- Tabs Switcher -->
-      <div class="flex items-center gap-2 border-b border-slate-200">
+      <div class="flex items-center gap-2 border-b border-slate-200 overflow-x-auto">
         <button
           type="button"
           @click="activeTab = 'overview'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
             activeTab === 'overview'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -469,7 +502,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
           type="button"
           @click="activeTab = 'itinerary'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
             activeTab === 'itinerary'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -488,7 +521,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
           type="button"
           @click="activeTab = 'expenses'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
             activeTab === 'expenses'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -501,6 +534,31 @@ function getCategoryIcon(cat: ExpenseCategory) {
             class="ml-1 px-2 py-0.5 text-xs rounded-full bg-emerald-50 text-emerald-700 font-bold"
           >
             {{ tripExpenses.length }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          @click="activeTab = 'packing'"
+          :class="[
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            activeTab === 'packing'
+              ? 'border-teal-600 text-teal-700'
+              : 'border-transparent text-slate-500 hover:text-slate-800',
+          ]"
+        >
+          <Briefcase class="w-4 h-4" />
+          <span>Список вещей</span>
+          <span
+            v-if="packingStore.totalCount > 0"
+            :class="[
+              'ml-1 px-2 py-0.5 text-xs rounded-full font-bold',
+              packingStore.packedCount === packingStore.totalCount
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-teal-50 text-teal-700',
+            ]"
+          >
+            {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
           </span>
         </button>
       </div>
@@ -1089,6 +1147,14 @@ function getCategoryIcon(cat: ExpenseCategory) {
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- TAB 4: PACKING LIST -->
+      <div v-else-if="activeTab === 'packing'">
+        <PackingListSection
+          :tripId="trip.id"
+          :tripType="trip.tripType"
+        />
       </div>
     </div>
 
