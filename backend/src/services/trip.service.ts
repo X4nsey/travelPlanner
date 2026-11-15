@@ -115,8 +115,10 @@ export class TripService {
   static async updateTrip(userId: string, tripId: string, input: UpdateTripInput) {
     const existing = await this.getTripAndVerifyOwner(userId, tripId, true);
 
-    const newStartDateStr = input.startDate ?? formatDateOnly(existing.startDate);
-    const newEndDateStr = input.endDate ?? formatDateOnly(existing.endDate);
+    const oldStartDateStr = formatDateOnly(existing.startDate);
+    const oldEndDateStr = formatDateOnly(existing.endDate);
+    const newStartDateStr = input.startDate ?? oldStartDateStr;
+    const newEndDateStr = input.endDate ?? oldEndDateStr;
 
     if (newEndDateStr < newStartDateStr) {
       throw new AppError(
@@ -145,6 +147,14 @@ export class TripService {
       );
     }
 
+    const nextCountry = input.country !== undefined ? input.country : existing.country;
+    const nextCity = input.city !== undefined ? input.city : existing.city;
+    const weatherFieldsChanged =
+      nextCountry.trim() !== existing.country.trim() ||
+      nextCity.trim() !== existing.city.trim() ||
+      newStartDateStr !== oldStartDateStr ||
+      newEndDateStr !== oldEndDateStr;
+
     const updated = await prisma.trip.update({
       where: { id: tripId },
       data: {
@@ -164,6 +174,12 @@ export class TripService {
         _count: { select: { events: true } },
       },
     });
+
+    if (weatherFieldsChanged) {
+      await prisma.tripWeatherCache.deleteMany({
+        where: { tripId },
+      });
+    }
 
     return serializeTrip(updated);
   }

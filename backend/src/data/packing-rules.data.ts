@@ -34,6 +34,10 @@ export interface PackingRuleContext {
   hasSnorkelOrDiving: boolean;
   hasAscentOrMountainTrail: boolean;
   tripType: TripType | null;
+  weatherRainyDaysCount?: number;
+  weatherHasHeavyRain?: boolean;
+  weatherHasSnow?: boolean;
+  weatherMaxWindKmh?: number;
 }
 
 export interface PackingRuleDefinition {
@@ -284,7 +288,10 @@ export const PACKING_RULES_CATALOG: PackingRuleDefinition[] = [
     name: 'Лёгкая ветровка или непромокаемая куртка',
     quantityScope: 'PER_PERSON',
     sortOrder: 160,
-    matches: (ctx) => ctx.climateHint !== 'cool_season',
+    matches: (ctx) =>
+      ctx.climateHint !== 'cool_season' ||
+      Boolean(ctx.weatherHasHeavyRain) ||
+      (ctx.weatherMaxWindKmh ?? 0) >= 40,
     computeBaseQuantity: () => 1,
     buildReason: (ctx) =>
       joinReasons([
@@ -299,13 +306,17 @@ export const PACKING_RULES_CATALOG: PackingRuleDefinition[] = [
     quantityScope: 'PER_PERSON',
     sortOrder: 170,
     matches: (ctx) =>
-      ctx.climateHint === 'cool_season' || ctx.activities.has('winter_sport'),
+      ctx.climateHint === 'cool_season' ||
+      ctx.activities.has('winter_sport') ||
+      Boolean(ctx.weatherHasSnow),
     computeBaseQuantity: () => 1,
     buildReason: (ctx) =>
       joinReasons([
         ctx.activities.has('winter_sport')
           ? ctx.activityReasons.winter_sport
-          : ctx.climateLabelRu,
+          : ctx.weatherHasSnow
+            ? `По прогнозу возможен снег (${ctx.climateLabelRu})`
+            : ctx.climateLabelRu,
         formatPeopleNote(ctx),
       ]),
   },
@@ -463,13 +474,17 @@ export const PACKING_RULES_CATALOG: PackingRuleDefinition[] = [
     quantityScope: 'PER_PERSON',
     sortOrder: 330,
     matches: (ctx) =>
-      ctx.climateHint === 'cool_season' || ctx.activities.has('winter_sport'),
+      ctx.climateHint === 'cool_season' ||
+      ctx.activities.has('winter_sport') ||
+      Boolean(ctx.weatherHasSnow),
     computeBaseQuantity: () => 1,
     buildReason: (ctx) =>
       joinReasons([
         ctx.activities.has('winter_sport')
           ? ctx.activityReasons.winter_sport
-          : ctx.climateLabelRu,
+          : ctx.weatherHasSnow
+            ? `По прогнозу возможен снег (${ctx.climateLabelRu})`
+            : ctx.climateLabelRu,
         formatPeopleNote(ctx),
       ]),
   },
@@ -1065,13 +1080,17 @@ export const PACKING_RULES_CATALOG: PackingRuleDefinition[] = [
     sortOrder: 1000,
     matches: (ctx) =>
       ctx.climateHint !== 'warm_season' ||
-      hasAnyActivity(ctx, ['sightseeing', 'hiking', 'camping']),
+      hasAnyActivity(ctx, ['sightseeing', 'hiking', 'camping']) ||
+      Boolean(ctx.weatherHasHeavyRain) ||
+      (ctx.weatherRainyDaysCount ?? 0) >= 2,
     computeBaseQuantity: () => 1,
     buildReason: (ctx) =>
       joinReasons([
         hasAnyActivity(ctx, ['hiking', 'camping'])
           ? 'На случай внезапного дождя (дождевик удобнее зонта на тропе)'
-          : `На случай переменчивой погоды (${ctx.climateLabelRu})`,
+          : ctx.weatherHasHeavyRain || (ctx.weatherRainyDaysCount ?? 0) >= 2
+            ? `Ожидаются осадки (${ctx.climateLabelRu})`
+            : `На случай переменчивой погоды (${ctx.climateLabelRu})`,
         formatPeopleNote(ctx),
       ]),
   },

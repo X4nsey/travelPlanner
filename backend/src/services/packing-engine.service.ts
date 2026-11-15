@@ -9,6 +9,27 @@ import {
   QuantityScope,
 } from '../data/packing-rules.data';
 
+export type WeatherSourceMode = 'forecast' | 'seasonal_reference' | 'heuristic';
+
+export interface WeatherPackingContext {
+  sourceMode: 'forecast' | 'seasonal_reference';
+  climateHint: ClimateHint;
+  climateLabelRu: string;
+  resolvedCity?: string;
+  resolvedCountry?: string;
+  summary?: {
+    avgTempMin: number;
+    avgTempMax: number;
+    minTemp: number;
+    maxTemp: number;
+    totalPrecipitationMm: number;
+    rainyDaysCount: number;
+    maxWindKmh: number;
+    hasSnow: boolean;
+    hasHeavyRain: boolean;
+  };
+}
+
 export interface EngineEventInput {
   title: string;
   description?: string | null;
@@ -26,6 +47,7 @@ export interface EngineTripInput {
   travelersCount?: number | null;
   tripType?: TripType | null;
   description?: string | null;
+  weatherContext?: WeatherPackingContext | null;
   events?: EngineEventInput[];
 }
 
@@ -55,6 +77,7 @@ export interface PackingEngineContextSummary {
   travelersAssumed: boolean;
   climateHint: ClimateHint;
   climateLabelRu: string;
+  weatherSourceMode: WeatherSourceMode;
   countryMatchedSlug: string | null;
   detectedActivities: DetectedActivityInfo[];
   lowConfidenceSignals: ActivityTag[];
@@ -587,11 +610,24 @@ export class PackingEngineService {
       ? CountryService.findCountryByIdentifier(input.country)
       : undefined;
 
-    const { climateHint, climateLabelRu } = estimateClimateHeuristic(
-      countryData?.coordinates?.lat ?? null,
-      startIso,
-      endIso
-    );
+    let climateHint: ClimateHint;
+    let climateLabelRu: string;
+    let weatherSourceMode: WeatherSourceMode;
+
+    if (input.weatherContext) {
+      climateHint = input.weatherContext.climateHint;
+      climateLabelRu = input.weatherContext.climateLabelRu;
+      weatherSourceMode = input.weatherContext.sourceMode;
+    } else {
+      const heuristic = estimateClimateHeuristic(
+        countryData?.coordinates?.lat ?? null,
+        startIso,
+        endIso
+      );
+      climateHint = heuristic.climateHint;
+      climateLabelRu = heuristic.climateLabelRu;
+      weatherSourceMode = 'heuristic';
+    }
 
     const segments = buildSegments(input);
     const tripType = input.tripType ?? null;
@@ -690,6 +726,10 @@ export class PackingEngineService {
       hasSnorkelOrDiving,
       hasAscentOrMountainTrail,
       tripType,
+      weatherRainyDaysCount: input.weatherContext?.summary?.rainyDaysCount,
+      weatherHasHeavyRain: input.weatherContext?.summary?.hasHeavyRain,
+      weatherHasSnow: input.weatherContext?.summary?.hasSnow,
+      weatherMaxWindKmh: input.weatherContext?.summary?.maxWindKmh,
     };
 
     const items: GeneratedPackingCandidate[] = [];
@@ -748,6 +788,7 @@ export class PackingEngineService {
         travelersAssumed,
         climateHint,
         climateLabelRu,
+        weatherSourceMode,
         countryMatchedSlug: countryData?.slug ?? null,
         detectedActivities,
         lowConfidenceSignals,

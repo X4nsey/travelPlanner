@@ -92,10 +92,11 @@ model Trip {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   events         ItineraryEvent[]
   expenses       TripExpense[]
   packingList    PackingList?
+  weatherCache   TripWeatherCache?
 
   @@index([userId])
   @@index([userId, startDate])
@@ -203,6 +204,27 @@ model PackingItem {
   @@unique([packingListId, ruleKey])
   @@index([packingListId, category])
   @@index([packingListId, isDismissed])
+}
+
+model TripWeatherCache {
+  id              String   @id @default(uuid())
+  tripId          String   @unique
+  resolvedCity    String
+  resolvedCountry String
+  latitude        Float
+  longitude       Float
+  timezone        String
+  sourceMode      String
+  climateHint     String
+  climateLabelRu  String
+  summary         Json
+  daily           Json
+  fetchedAt       DateTime @default(now())
+  expiresAt       DateTime
+
+  trip            Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
 }
 
 

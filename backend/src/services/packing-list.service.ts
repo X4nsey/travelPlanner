@@ -10,6 +10,7 @@ import { AppError } from '../lib/errors';
 import { CreatePackingItemInput, UpdatePackingItemInput } from '../schemas/packing.schema';
 import { PackingEngineService } from './packing-engine.service';
 import { TripService } from './trip.service';
+import { WeatherService } from './weather.service';
 
 export const PACKING_CATEGORY_META: Record<
   PackingCategory,
@@ -212,6 +213,8 @@ export class PackingListService {
       'events' in trip && Array.isArray(trip.events) ? trip.events : []
     ) as ItineraryEvent[];
 
+    const weatherContext = await WeatherService.getWeatherContextForPacking(tripId, userId);
+
     const engineResult = PackingEngineService.generateRecommendations({
       title: trip.title,
       country: trip.country,
@@ -221,6 +224,7 @@ export class PackingListService {
       travelersCount: trip.travelersCount,
       tripType: trip.tripType ?? null,
       description: trip.description ?? '',
+      weatherContext,
       events: tripEvents.map((ev) => ({
         title: ev.title,
         description: ev.description,
