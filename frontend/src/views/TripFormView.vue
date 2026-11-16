@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
+import { useWeatherStore } from '@/stores/weather.store';
 import type { TripFormPayload, Currency } from '@/types';
 import { isValidTripType, normalizeTripType } from '@/constants/packing';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
@@ -18,6 +19,7 @@ const router = useRouter();
 const tripStore = useTripStore();
 const countryStore = useCountryStore();
 const toastStore = useToastStore();
+const weatherStore = useWeatherStore();
 
 const tripId = computed(() => route.params.id as string | undefined);
 const isEditMode = computed(() => Boolean(tripId.value));
@@ -26,6 +28,7 @@ const isSubmitting = ref(false);
 const serverError = ref<string | null>(null);
 const loadError = ref<string | null>(null);
 const initialFormValues = ref<Partial<TripFormPayload> | undefined>(undefined);
+const originalWeatherSignature = ref<string | null>(null);
 
 onMounted(async () => {
   await countryStore.ensureCountriesLoaded().catch(() => {});
@@ -59,6 +62,7 @@ onMounted(async () => {
   if (isEditMode.value && tripId.value) {
     try {
       const trip = await tripStore.fetchTripById(tripId.value);
+      originalWeatherSignature.value = `${trip.country.trim()}|${trip.city.trim()}|${trip.startDate}|${trip.endDate}`;
       const baseValues: Partial<TripFormPayload> = {
         title: trip.title,
         country: trip.country,
@@ -183,6 +187,13 @@ async function handleSubmit(payload: TripFormPayload) {
   try {
     if (isEditMode.value && tripId.value) {
       const res = await tripStore.updateTrip(tripId.value, preparedPayload);
+      const updatedWeatherSignature = `${res.trip.country.trim()}|${res.trip.city.trim()}|${res.trip.startDate}|${res.trip.endDate}`;
+      if (
+        !originalWeatherSignature.value ||
+        originalWeatherSignature.value !== updatedWeatherSignature
+      ) {
+        weatherStore.invalidateTripWeather(tripId.value);
+      }
       toastStore.success('Поездка успешно обновлена');
       router.push(`/trips/${res.trip.id}`);
     } else {

@@ -175,6 +175,7 @@ export interface PackingContextSnapshot {
   travelersAssumed: boolean;
   climateHint: PackingClimateHint;
   climateLabelRu: string;
+  weatherSourceMode?: 'forecast' | 'seasonal_reference' | 'heuristic';
   countryMatchedSlug: string | null;
   detectedActivities: PackingDetectedActivity[];
   lowConfidenceSignals: PackingActivityTag[];
@@ -435,4 +436,6 @@ export interface CountryData {
   featured?: boolean;
   favoritedAt?: string;
 }
+
+export * from './weather';
 

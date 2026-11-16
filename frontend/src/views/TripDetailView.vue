@@ -29,12 +29,15 @@ import {
   CheckCircle2,
   Briefcase,
   Compass,
+  CloudSun,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
+import { useWeatherStore } from '@/stores/weather.store';
 import { useToastStore } from '@/stores/toast.store';
 import { expenseService } from '@/services/expense.service';
 import { getTripTypeLabelRu } from '@/constants/packing';
+import { formatTemperatureRange } from '@/utils/weatherFormatters';
 import type {
   EventFormPayload,
   ItineraryEvent,
@@ -74,14 +77,21 @@ const PackingListSection = defineAsyncComponent(
   () => import('@/components/packing/PackingListSection.vue')
 );
 
+const TripWeatherSection = defineAsyncComponent(
+  () => import('@/components/weather/TripWeatherSection.vue')
+);
+
 const route = useRoute();
 const router = useRouter();
 const tripStore = useTripStore();
 const packingStore = usePackingStore();
+const weatherStore = useWeatherStore();
 const toastStore = useToastStore();
 
+type TripDetailTab = 'overview' | 'itinerary' | 'expenses' | 'packing' | 'weather';
+
 const tripId = computed(() => route.params.id as string);
-const activeTab = ref<'overview' | 'itinerary' | 'expenses' | 'packing'>('overview');
+const activeTab = ref<TripDetailTab>('overview');
 
 // Trip deletion state
 const showDeleteTripConfirm = ref(false);
@@ -115,6 +125,21 @@ const isDeletingExpense = ref(false);
 const selectedCategoryFilter = ref<ExpenseCategory | null>(null);
 
 const trip = computed(() => tripStore.currentTrip);
+
+const currentTripWeather = computed(
+  () => weatherStore.weatherByTripId[tripId.value] ?? null
+);
+
+const weatherTabTempRange = computed(() => {
+  if (!currentTripWeather.value) return null;
+  const { minTemp, maxTemp } = currentTripWeather.value.summary;
+  return formatTemperatureRange(minTemp, maxTemp);
+});
+
+const tripWeatherContextKey = computed(() => {
+  if (!trip.value) return null;
+  return `${trip.value.id}|${trip.value.country.trim()}|${trip.value.city.trim()}|${trip.value.startDate}|${trip.value.endDate}`;
+});
 
 const timing = computed(() => {
   if (!trip.value) return null;
@@ -160,7 +185,22 @@ function loadTrip() {
     packingStore.fetchPackingList(tripId.value).catch(() => {
       // Handled via packingStore.error
     });
+    weatherStore.fetchTripWeather(tripId.value).catch(() => {
+      // Handled via weatherStore.errorByTripId
+    });
     loadTripExpenses();
+  }
+}
+
+function syncTabFromQuery(tabQuery: unknown) {
+  if (
+    tabQuery === 'overview' ||
+    tabQuery === 'itinerary' ||
+    tabQuery === 'expenses' ||
+    tabQuery === 'packing' ||
+    tabQuery === 'weather'
+  ) {
+    activeTab.value = tabQuery;
   }
 }
 
@@ -180,13 +220,7 @@ async function loadTripExpenses() {
 }
 
 onMounted(() => {
-  if (route.query.tab === 'expenses') {
-    activeTab.value = 'expenses';
-  } else if (route.query.tab === 'itinerary') {
-    activeTab.value = 'itinerary';
-  } else if (route.query.tab === 'packing') {
-    activeTab.value = 'packing';
-  }
+  syncTabFromQuery(route.query.tab);
   loadTrip();
 });
 
@@ -196,17 +230,20 @@ watch(tripId, (newId, oldId) => {
   }
 });
 
+watch(tripWeatherContextKey, (nextKey, prevKey) => {
+  if (!nextKey || !prevKey || nextKey === prevKey) return;
+  const nextId = nextKey.split('|')[0];
+  const prevId = prevKey.split('|')[0];
+  if (nextId === prevId && tripId.value === nextId) {
+    weatherStore.invalidateTripWeather(nextId);
+    weatherStore.fetchTripWeather(nextId).catch(() => {});
+  }
+});
+
 watch(
   () => route.query.tab,
   (newTab) => {
-    if (
-      newTab === 'expenses' ||
-      newTab === 'itinerary' ||
-      newTab === 'overview' ||
-      newTab === 'packing'
-    ) {
-      activeTab.value = newTab;
-    }
+    syncTabFromQuery(newTab);
   }
 );
 
@@ -559,6 +596,26 @@ function getCategoryIcon(cat: ExpenseCategory) {
             ]"
           >
             {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          @click="activeTab = 'weather'"
+          :class="[
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            activeTab === 'weather'
+              ? 'border-teal-600 text-teal-700'
+              : 'border-transparent text-slate-500 hover:text-slate-800',
+          ]"
+        >
+          <CloudSun class="w-4 h-4" />
+          <span>Погода</span>
+          <span
+            v-if="weatherTabTempRange"
+            class="ml-1 px-2 py-0.5 text-xs rounded-full bg-sky-50 text-sky-700 font-bold tabular-nums"
+          >
+            {{ weatherTabTempRange }}
           </span>
         </button>
       </div>
@@ -1154,6 +1211,16 @@ function getCategoryIcon(cat: ExpenseCategory) {
         <PackingListSection
           :tripId="trip.id"
           :tripType="trip.tripType"
+        />
+      </div>
+
+      <!-- TAB 5: WEATHER -->
+      <div v-else-if="activeTab === 'weather'">
+        <TripWeatherSection
+          :tripId="trip.id"
+          :tripCity="trip.city"
+          :tripCountry="trip.country"
+          @go-to-packing="activeTab = 'packing'"
         />
       </div>
     </div>

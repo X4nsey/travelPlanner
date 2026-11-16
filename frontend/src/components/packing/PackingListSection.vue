@@ -16,12 +16,15 @@ import {
   getTripTypeLabelRu,
 } from '@/constants/packing';
 import { usePackingStore } from '@/stores/packing.store';
+import { useWeatherStore } from '@/stores/weather.store';
 import { useToastStore } from '@/stores/toast.store';
+import { formatTemperatureRange } from '@/utils/weatherFormatters';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+import WeatherIcon from '@/components/weather/WeatherIcon.vue';
 import PackingProgress from './PackingProgress.vue';
 import PackingCategoryCard from './PackingCategoryCard.vue';
 import PackingItemFormModal from './PackingItemFormModal.vue';
@@ -45,7 +48,28 @@ interface Props {
 const props = defineProps<Props>();
 
 const packingStore = usePackingStore();
+const weatherStore = useWeatherStore();
 const toastStore = useToastStore();
+
+const currentWeather = computed(() => weatherStore.weatherByTripId[props.tripId] ?? null);
+
+const weatherSummaryBadge = computed(() => {
+  const w = currentWeather.value;
+  if (!w) return null;
+
+  const iconType = w.summary.hasSnow
+    ? 'snow'
+    : w.summary.hasHeavyRain
+      ? 'heavy_rain'
+      : (w.daily[0]?.iconType ?? 'partly_cloudy');
+
+  return {
+    iconType,
+    tempRange: formatTemperatureRange(w.summary.minTemp, w.summary.maxTemp),
+    climateLabelRu: w.climateLabelRu,
+    sourceLabelRu: w.sourceLabelRu,
+  };
+});
 
 const statusFilter = ref<PackingStatusFilter>('all');
 const latestMergeSnapshot = ref<MergeSummarySnapshot | null>(null);
@@ -181,6 +205,26 @@ async function handleGenerateList() {
   try {
     const res = await packingStore.generatePackingList(props.tripId);
     const stats = res.mergeStats;
+
+    // Убеждаемся, что погодный контекст в weatherStore актуален после генерации
+    const existingWeather = weatherStore.weatherByTripId[props.tripId];
+    const snapshot = res.packingList?.contextSnapshot;
+    const isWeatherExpired = existingWeather
+      ? new Date(existingWeather.expiresAt).getTime() <= Date.now()
+      : true;
+    const isWeatherMismatched = Boolean(
+      existingWeather &&
+        snapshot &&
+        (snapshot.climateHint !== existingWeather.climateHint ||
+          (snapshot.weatherSourceMode &&
+            snapshot.weatherSourceMode !== 'heuristic' &&
+            snapshot.weatherSourceMode !== existingWeather.sourceMode))
+    );
+
+    if (!existingWeather || isWeatherExpired || isWeatherMismatched) {
+      await weatherStore.fetchTripWeather(props.tripId, { force: true }).catch(() => {});
+    }
+
     const preservedCount = Math.max(
       0,
       res.summary.total - res.summary.outdated - stats.addedCount
@@ -313,6 +357,23 @@ async function confirmClearOutdated() {
         <p class="text-xs sm:text-sm text-slate-500">
           Интеллектуальный подбор вещей с учётом направления, дат, типа поездки и событий маршрута.
         </p>
+        <div
+          v-if="weatherSummaryBadge"
+          class="inline-flex flex-wrap items-center gap-2 mt-1.5 px-3 py-1.5 rounded-xl bg-sky-50/80 border border-sky-200/70 text-xs text-slate-700"
+        >
+          <WeatherIcon :type="weatherSummaryBadge.iconType" size="sm" />
+          <span class="font-bold text-slate-900 tabular-nums">
+            {{ weatherSummaryBadge.tempRange }}
+          </span>
+          <span class="text-slate-400">·</span>
+          <span class="font-semibold text-teal-800">
+            {{ weatherSummaryBadge.climateLabelRu }}
+          </span>
+          <span class="text-slate-400">·</span>
+          <span class="text-slate-500">
+            {{ weatherSummaryBadge.sourceLabelRu }}
+          </span>
+        </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2.5 shrink-0">
