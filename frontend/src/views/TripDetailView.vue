@@ -30,12 +30,16 @@ import {
   Briefcase,
   Compass,
   CloudSun,
+  BookOpen,
+  Globe2,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
 import { useWeatherStore } from '@/stores/weather.store';
+import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
 import { expenseService } from '@/services/expense.service';
+import { countryService } from '@/services/country.service';
 import { getTripTypeLabelRu } from '@/constants/packing';
 import { formatTemperatureRange } from '@/utils/weatherFormatters';
 import type {
@@ -45,6 +49,7 @@ import type {
   ExpenseFormPayload,
   TripExpenseSummary,
   ExpenseCategory,
+  CountryTravelInfo,
 } from '@/types';
 import {
   formatDateRange,
@@ -81,17 +86,28 @@ const TripWeatherSection = defineAsyncComponent(
   () => import('@/components/weather/TripWeatherSection.vue')
 );
 
+const CountryTravelInfoSection = defineAsyncComponent(
+  () => import('@/components/countries/CountryTravelInfoSection.vue')
+);
+
 const route = useRoute();
 const router = useRouter();
 const tripStore = useTripStore();
 const packingStore = usePackingStore();
 const weatherStore = useWeatherStore();
+const countryStore = useCountryStore();
 const toastStore = useToastStore();
 
-type TripDetailTab = 'overview' | 'itinerary' | 'expenses' | 'packing' | 'weather';
+type TripDetailTab = 'overview' | 'itinerary' | 'expenses' | 'packing' | 'weather' | 'travel-info';
 
 const tripId = computed(() => route.params.id as string);
 const activeTab = ref<TripDetailTab>('overview');
+
+// Country travel info state
+const fetchedTravelInfo = ref<CountryTravelInfo | null>(null);
+const fetchedTravelInfoSlug = ref<string | null>(null);
+const isLoadingTravelInfo = ref(false);
+const travelInfoError = ref<string | null>(null);
 
 // Trip deletion state
 const showDeleteTripConfirm = ref(false);
@@ -125,6 +141,22 @@ const isDeletingExpense = ref(false);
 const selectedCategoryFilter = ref<ExpenseCategory | null>(null);
 
 const trip = computed(() => tripStore.currentTrip);
+
+const matchedCountry = computed(() => {
+  if (!trip.value?.country) return undefined;
+  return countryStore.findCountryByQuery(trip.value.country);
+});
+
+const resolvedTravelInfo = computed<CountryTravelInfo | null>(() => {
+  if (!matchedCountry.value) return null;
+  if (matchedCountry.value.travelInfo) {
+    return matchedCountry.value.travelInfo;
+  }
+  if (fetchedTravelInfoSlug.value === matchedCountry.value.slug) {
+    return fetchedTravelInfo.value;
+  }
+  return null;
+});
 
 const currentTripWeather = computed(
   () => weatherStore.weatherByTripId[tripId.value] ?? null
@@ -177,6 +209,36 @@ const filteredExpenses = computed(() => {
   return tripExpenses.value.filter((e) => e.category === selectedCategoryFilter.value);
 });
 
+async function loadCountryTravelInfo(force = false) {
+  travelInfoError.value = null;
+  try {
+    await countryStore.ensureCountriesLoaded();
+    const country = matchedCountry.value;
+    if (!country) {
+      fetchedTravelInfo.value = null;
+      fetchedTravelInfoSlug.value = null;
+      return;
+    }
+    if (country.travelInfo && !force) {
+      fetchedTravelInfo.value = country.travelInfo;
+      fetchedTravelInfoSlug.value = country.slug;
+      return;
+    }
+    if (!force && fetchedTravelInfoSlug.value === country.slug && fetchedTravelInfo.value) {
+      return;
+    }
+    isLoadingTravelInfo.value = true;
+    const response = await countryService.getCountryTravelInfo(country.slug);
+    fetchedTravelInfo.value = response.travelInfo;
+    fetchedTravelInfoSlug.value = country.slug;
+  } catch (err: any) {
+    travelInfoError.value =
+      err?.message || 'Не удалось загрузить памятку путешественника для выбранной страны';
+  } finally {
+    isLoadingTravelInfo.value = false;
+  }
+}
+
 function loadTrip() {
   if (tripId.value) {
     tripStore.fetchTripById(tripId.value).catch(() => {
@@ -189,16 +251,22 @@ function loadTrip() {
       // Handled via weatherStore.errorByTripId
     });
     loadTripExpenses();
+    loadCountryTravelInfo().catch(() => {});
   }
 }
 
 function syncTabFromQuery(tabQuery: unknown) {
+  if (tabQuery === 'country') {
+    activeTab.value = 'travel-info';
+    return;
+  }
   if (
     tabQuery === 'overview' ||
     tabQuery === 'itinerary' ||
     tabQuery === 'expenses' ||
     tabQuery === 'packing' ||
-    tabQuery === 'weather'
+    tabQuery === 'weather' ||
+    tabQuery === 'travel-info'
   ) {
     activeTab.value = tabQuery;
   }
@@ -229,6 +297,15 @@ watch(tripId, (newId, oldId) => {
     loadTrip();
   }
 });
+
+watch(
+  () => trip.value?.country,
+  (newCountry) => {
+    if (newCountry) {
+      loadCountryTravelInfo().catch(() => {});
+    }
+  }
+);
 
 watch(tripWeatherContextKey, (nextKey, prevKey) => {
   if (!nextKey || !prevKey || nextKey === prevKey) return;
@@ -616,6 +693,27 @@ function getCategoryIcon(cat: ExpenseCategory) {
             class="ml-1 px-2 py-0.5 text-xs rounded-full bg-sky-50 text-sky-700 font-bold tabular-nums"
           >
             {{ weatherTabTempRange }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          @click="activeTab = 'travel-info'"
+          :class="[
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            activeTab === 'travel-info'
+              ? 'border-teal-600 text-teal-700'
+              : 'border-transparent text-slate-500 hover:text-slate-800',
+          ]"
+        >
+          <BookOpen class="w-4 h-4" />
+          <span>О стране</span>
+          <span
+            v-if="matchedCountry"
+            class="ml-0.5 text-sm leading-none"
+            aria-hidden="true"
+          >
+            {{ matchedCountry.flagEmoji }}
           </span>
         </button>
       </div>
@@ -1222,6 +1320,76 @@ function getCategoryIcon(cat: ExpenseCategory) {
           :tripCountry="trip.country"
           @go-to-packing="activeTab = 'packing'"
         />
+      </div>
+
+      <!-- TAB 6: COUNTRY TRAVEL INFO -->
+      <div v-else-if="activeTab === 'travel-info'" class="space-y-6">
+        <BaseSpinner
+          v-if="(countryStore.isLoadingCatalog && !countryStore.isCatalogLoaded) || isLoadingTravelInfo"
+          label="Загружаем памятку о стране..."
+        />
+
+        <div
+          v-else-if="(countryStore.catalogError && !countryStore.isCatalogLoaded) || travelInfoError"
+          class="space-y-4 max-w-2xl"
+        >
+          <BaseAlert
+            type="error"
+            title="Не удалось загрузить памятку путешественника"
+            :message="travelInfoError || countryStore.catalogError || 'Попробуйте повторить запрос'"
+          />
+          <BaseButton variant="secondary" size="sm" @click="loadCountryTravelInfo(true)">
+            <RefreshCw class="w-4 h-4" />
+            <span>Повторить</span>
+          </BaseButton>
+        </div>
+
+        <CountryTravelInfoSection
+          v-else-if="matchedCountry && resolvedTravelInfo"
+          :country="matchedCountry"
+          :travelInfo="resolvedTravelInfo"
+          :tripCity="trip.city"
+        />
+
+        <!-- Fallback for custom / manually typed country -->
+        <div
+          v-else
+          class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-5"
+        >
+          <div class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center text-teal-600 mx-auto">
+            <Globe2 class="w-8 h-8" />
+          </div>
+
+          <div class="space-y-2">
+            <h2 class="text-xl font-extrabold text-slate-900">
+              Памятка для направления «{{ trip.country }}» пока не найдена
+            </h2>
+            <p class="text-sm text-slate-500 leading-relaxed">
+              Похоже, страна указана вручную или отсутствует в нашем справочнике стран.
+              Выберите страну из каталога в настройках поездки, чтобы автоматически получить подробную памятку о визах, оплате, транспорте, связи и безопасности.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <BaseButton
+              variant="primary"
+              size="md"
+              @click="router.push(`/trips/${trip.id}/edit`)"
+            >
+              <Pencil class="w-4 h-4" />
+              <span>Выбрать страну в поездке</span>
+            </BaseButton>
+
+            <BaseButton
+              variant="outline"
+              size="md"
+              @click="router.push('/countries')"
+            >
+              <Compass class="w-4 h-4" />
+              <span>Открыть каталог стран</span>
+            </BaseButton>
+          </div>
+        </div>
       </div>
     </div>
 

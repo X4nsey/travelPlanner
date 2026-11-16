@@ -407,6 +407,36 @@ export interface PhotoDiagnosticsReport {
   generatedAt: string;
 }
 
+export interface TravelInfoSection {
+  summary: string;
+  details: string[];
+  officialLinks?: Array<{ title: string; url: string }>;
+  lastUpdated?: string; // YYYY-MM
+}
+
+export interface CountryTravelInfo {
+  entryRules: TravelInfoSection; // Визы, правила въезда, паспорта
+  moneyAndPayments: TravelInfoSection; // Валюта, карты, наличные, чаевые
+  transport: TravelInfoSection; // Общественный транспорт, такси, аренда авто
+  cultureAndEtiquette: TravelInfoSection; // Обычаи, дресс-код, правила поведения
+  telecomAndInternet: TravelInfoSection; // SIM-карты, eSIM, Wi-Fi
+  safetyAndEmergency: TravelInfoSection; // Экстренные номера, уровень безопасности
+  practicalTips: TravelInfoSection; // Розетки, напряжение, розничные часы, вода
+}
+
+export interface CountryTravelInfoResponse extends CountryTravelInfo {
+  slug: string;
+  nameRu: string;
+  nameEn: string;
+  flagEmoji: string;
+  flagUrl: string;
+  capital: string;
+  currency: string;
+  languages: string[];
+  timezone?: string;
+  travelInfo: CountryTravelInfo;
+}
+
 export interface CountryData {
   slug: string;
   isoNumeric: string;
@@ -433,6 +463,7 @@ export interface CountryData {
   gallery: CountryPhoto[];
   popularCities: CountryCityItem[];
   landmarks: CountryLandmarkItem[];
+  travelInfo?: CountryTravelInfo;
   featured?: boolean;
   favoritedAt?: string;
 }

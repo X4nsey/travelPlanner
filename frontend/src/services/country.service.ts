@@ -3,6 +3,7 @@ import type {
   ApiSuccessResponse,
   CountryData,
   CountryPhoto,
+  CountryTravelInfoResponse,
   PhotoDiagnosticsReport,
 } from '@/types';
 
@@ -46,6 +47,13 @@ export const countryService = {
       `/countries/${encodeURIComponent(slug)}`
     );
     return data.data.country;
+  },
+
+  async getCountryTravelInfo(slug: string): Promise<CountryTravelInfoResponse> {
+    const { data } = await apiClient.get<ApiSuccessResponse<CountryTravelInfoResponse>>(
+      `/countries/${encodeURIComponent(slug)}/travel-info`
+    );
+    return data.data;
   },
 
   async getCountryPhotos(slug: string): Promise<{
