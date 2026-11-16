@@ -1,4 +1,9 @@
-import { CountryData, CountryPhoto, FEATURED_COUNTRIES } from './countries.data';
+import {
+  CountryData,
+  CountryPhoto,
+  FEATURED_COUNTRIES,
+  ensureCountryTravelInfo,
+} from './countries.data';
 import { applyVerifiedPhotosToCountry } from './verified-wikimedia-photos.data';
 
 function makePhoto(
@@ -20,7 +25,7 @@ function makePhoto(
   };
 }
 
-export const EXTENDED_COUNTRIES: CountryData[] = [
+const RAW_EXTENDED_COUNTRIES: CountryData[] = [
   {
     slug: 'germany',
     isoNumeric: '276',
@@ -1505,6 +1510,10 @@ export const EXTENDED_COUNTRIES: CountryData[] = [
   },
 ];
 
+export const EXTENDED_COUNTRIES: CountryData[] = RAW_EXTENDED_COUNTRIES.map((country) =>
+  ensureCountryTravelInfo(applyVerifiedPhotosToCountry(country))
+);
+
 export const ALL_COUNTRIES: CountryData[] = [...FEATURED_COUNTRIES, ...EXTENDED_COUNTRIES].map(
-  applyVerifiedPhotosToCountry
+  (country) => ensureCountryTravelInfo(applyVerifiedPhotosToCountry(country))
 );

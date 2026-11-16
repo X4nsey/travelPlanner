@@ -26,6 +26,15 @@ export class CountryController {
     }
   }
 
+  static async getTravelInfo(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await CountryService.getCountryTravelInfo(req.params.slug);
+      return sendSuccess(res, result, 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async getPhotos(req: Request, res: Response, next: NextFunction) {
     try {
       const photos = await CountryService.getCountryPhotos(req.params.slug);

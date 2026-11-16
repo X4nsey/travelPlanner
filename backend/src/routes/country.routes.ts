@@ -10,6 +10,7 @@ router.post('/diagnostics/photos/reset', CountryController.resetPhoto);
 router.post('/diagnostics/photos/reverify', CountryController.reverifyPhoto);
 router.post('/diagnostics/photos/wikimedia-search', CountryController.autoSearchWikimedia);
 router.get('/:slug', CountryController.getBySlug);
+router.get('/:slug/travel-info', CountryController.getTravelInfo);
 router.get('/:slug/photos', CountryController.getPhotos);
 
 export default router;

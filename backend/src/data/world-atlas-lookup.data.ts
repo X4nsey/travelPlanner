@@ -1,4 +1,9 @@
-import { ContinentName, CountryData, CountryPhoto } from './countries.data';
+import {
+  ContinentName,
+  CountryData,
+  CountryPhoto,
+  ensureCountryTravelInfo,
+} from './countries.data';
 import { ALL_COUNTRIES } from './countries-catalog-extended.data';
 import { applyVerifiedPhotosToCountry } from './verified-wikimedia-photos.data';
 
@@ -666,7 +671,7 @@ function expandCompactSpec(spec: CompactCountrySpec): CountryData {
     'Обложка'
   );
 
-  return {
+  return ensureCountryTravelInfo({
     slug: spec.slug,
     isoNumeric: spec.isoNumeric,
     isoAlpha2: spec.isoAlpha2,
@@ -712,10 +717,10 @@ function expandCompactSpec(spec: CompactCountrySpec): CountryData {
         description: `Живописные природные ландшафты и обзорные маршруты региона.`,
       },
     ],
-  };
+  });
 }
 
 export const FULL_COUNTRIES_CATALOG: CountryData[] = [
   ...ALL_COUNTRIES,
   ...COMPACT_SPECS.map(expandCompactSpec),
-].map(applyVerifiedPhotosToCountry);
+].map((country) => ensureCountryTravelInfo(applyVerifiedPhotosToCountry(country)));
