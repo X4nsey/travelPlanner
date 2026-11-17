@@ -42,7 +42,7 @@ export interface WeatherDailyItemDto {
 }
 
 export interface TripWeatherResponseDto {
-  tripId: string;
+  tripId?: string;
   resolvedCity: string;
   resolvedCountry: string;
   latitude: number;
@@ -58,4 +58,11 @@ export interface TripWeatherResponseDto {
   fromCache: boolean;
   fetchedAt: string;
   expiresAt: string;
+}
+
+export interface DestinationWeatherPreviewParams {
+  country: string;
+  city?: string;
+  startDate?: string;
+  endDate?: string;
 }

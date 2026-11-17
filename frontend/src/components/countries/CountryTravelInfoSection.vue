@@ -31,9 +31,14 @@ interface Props {
   country: CountryData;
   travelInfo: CountryTravelInfo;
   tripCity?: string;
+  showCountryLink?: boolean;
+  showQuickFacts?: boolean;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showCountryLink: true,
+  showQuickFacts: true,
+});
 
 type TravelSectionKey = keyof CountryTravelInfo;
 
@@ -236,6 +241,7 @@ function formatLastUpdated(value?: string): string {
         </div>
 
         <RouterLink
+          v-if="showCountryLink"
           :to="`/countries/${country.slug}`"
           class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-bold shadow-sm transition-colors shrink-0"
         >
@@ -246,7 +252,10 @@ function formatLastUpdated(value?: string): string {
       </div>
 
       <!-- Quick Country Facts -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-slate-100">
+      <div
+        v-if="showQuickFacts"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-slate-100"
+      >
         <div class="p-3.5 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3">
           <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
             <Landmark class="w-4 h-4" />

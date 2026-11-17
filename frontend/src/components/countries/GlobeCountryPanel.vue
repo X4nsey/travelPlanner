@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { RouterLink } from 'vue-router';
 import {
   Landmark,
   Globe2,
@@ -12,6 +13,10 @@ import {
   MapPin,
   CheckCircle2,
   Heart,
+  BookOpen,
+  Plane,
+  ShieldAlert,
+  ArrowRight,
 } from 'lucide-vue-next';
 import type { CountryData } from '@/types';
 import { useCountryStore } from '@/stores/country.store';
@@ -230,6 +235,56 @@ const countryPlannedTripsCount = computed(() => {
                 <MapPin class="w-3 h-3 text-teal-600" />
                 {{ city.name }}
               </span>
+            </div>
+          </div>
+
+          <!-- Compact Travel Info Memo -->
+          <div
+            v-if="country.travelInfo"
+            class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-3"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                <BookOpen class="w-4 h-4 text-teal-600 shrink-0" />
+                <span>Памятка путешественника</span>
+              </div>
+
+              <RouterLink
+                v-if="hasDetailedPage"
+                :to="`/countries/${country.slug}#country-travel-info`"
+                :target="pickerMode ? '_blank' : undefined"
+                :rel="pickerMode ? 'noopener noreferrer' : undefined"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors shrink-0"
+              >
+                <span>Подробный разбор</span>
+                <ArrowRight class="w-3.5 h-3.5" />
+              </RouterLink>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+              <div class="flex items-start gap-2">
+                <Plane class="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                <p class="text-slate-600 leading-relaxed">
+                  <span class="font-semibold text-slate-800">Правила въезда:</span>
+                  {{ country.travelInfo.entryRules.summary }}
+                </p>
+              </div>
+
+              <div class="flex items-start gap-2">
+                <Coins class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                <p class="text-slate-600 leading-relaxed">
+                  <span class="font-semibold text-slate-800">Оплата:</span>
+                  {{ country.travelInfo.moneyAndPayments.summary }}
+                </p>
+              </div>
+
+              <div class="flex items-start gap-2">
+                <ShieldAlert class="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                <p class="text-slate-600 leading-relaxed">
+                  <span class="font-semibold text-slate-800">Безопасность:</span>
+                  {{ country.travelInfo.safetyAndEmergency.summary }}
+                </p>
+              </div>
             </div>
           </div>
         </div>

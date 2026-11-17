@@ -10,7 +10,7 @@ import countryRoutes from './routes/country.routes';
 import favoriteRoutes from './routes/favorite.routes';
 import expenseRoutes from './routes/expense.routes';
 import packingRoutes from './routes/packing.routes';
-import weatherRoutes from './routes/weather.routes';
+import weatherRoutes, { weatherPreviewRouter } from './routes/weather.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { AppError } from './lib/errors';
 
@@ -61,6 +61,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/trips', weatherRoutes);
+app.use('/api/weather', weatherPreviewRouter);
 app.use('/api/events', eventRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/packing', packingRoutes);

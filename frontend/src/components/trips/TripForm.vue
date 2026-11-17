@@ -9,6 +9,7 @@ import { TRIP_TYPE_OPTIONS, normalizeTripType } from '@/constants/packing';
 import { calculateInclusiveDays, formatDaysLabel, getTodayIso } from '@/composables/useFormatters';
 import { useCountryStore } from '@/stores/country.store';
 import CountrySelect from '@/components/countries/CountrySelect.vue';
+import TripDestinationPreviewCard from '@/components/trips/TripDestinationPreviewCard.vue';
 import BaseInput from '@/components/ui/BaseInput.vue';
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
@@ -277,6 +278,13 @@ defineExpose({
         Продолжительность поездки: <strong>{{ formatDaysLabel(previewDuration) }}</strong> (включая день начала и окончания)
       </span>
     </div>
+
+    <TripDestinationPreviewCard
+      :country="country || ''"
+      :city="city || ''"
+      :startDate="startDate || ''"
+      :endDate="endDate || ''"
+    />
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
       <BaseInput

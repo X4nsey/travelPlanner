@@ -12,5 +12,6 @@ router.post('/diagnostics/photos/wikimedia-search', CountryController.autoSearch
 router.get('/:slug', CountryController.getBySlug);
 router.get('/:slug/travel-info', CountryController.getTravelInfo);
 router.get('/:slug/photos', CountryController.getPhotos);
+router.get('/:slug/weather', CountryController.getWeather);
 
 export default router;

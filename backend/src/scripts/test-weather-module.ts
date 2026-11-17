@@ -13,6 +13,7 @@ import {
   mapWeatherCode,
   shiftDateToHistoricalYear,
   WeatherDailyItemDto,
+  WeatherService,
 } from '../services/weather.service';
 
 interface TestResponse {
@@ -706,6 +707,145 @@ async function runApiAndCacheTests() {
       'Ошибка погоды не должна ломать генерацию списка вещей'
     );
     console.log('✅ 10. Интеграция WeatherService -> PackingListService -> PackingEngineService проверена.');
+
+    // 9. Предпросмотр погоды без tripId (/api/weather/preview и /api/countries/:slug/weather)
+    WeatherService.clearPreviewCache();
+    const tripWeatherCacheCountBefore = await prisma.tripWeatherCache.count();
+    const forecastCallsBeforePreview = counters.forecast;
+    const archiveCallsBeforePreview = counters.archive;
+
+    // 9a. Публичный запрос только по стране -> столица по умолчанию + 7 дней forecast
+    const previewDefault = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Италия')}`
+    );
+    assert.equal(previewDefault.status, 200);
+    assert.equal(previewDefault.body.data.tripId, undefined);
+    assert.equal(previewDefault.body.data.resolvedCity, 'Рим');
+    assert.equal(previewDefault.body.data.resolvedCountry, 'Италия');
+    assert.equal(previewDefault.body.data.sourceMode, 'forecast');
+    assert.equal(previewDefault.body.data.fromCache, false);
+    assert.equal(previewDefault.body.data.daily.length, 7);
+    assert.equal(counters.forecast, forecastCallsBeforePreview + 1);
+
+    // 9b. Повторный запрос и обращение через /api/countries/italy/weather попадают в in-memory кэш
+    const previewCached = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Италия')}`
+    );
+    assert.equal(previewCached.status, 200);
+    assert.equal(previewCached.body.data.fromCache, true);
+    assert.equal(counters.forecast, forecastCallsBeforePreview + 1);
+
+    const countryWeatherCapitalCached = await request(
+      baseUrl,
+      'GET',
+      '/api/countries/italy/weather'
+    );
+    assert.equal(countryWeatherCapitalCached.status, 200);
+    assert.equal(countryWeatherCapitalCached.body.data.resolvedCity, 'Рим');
+    assert.equal(countryWeatherCapitalCached.body.data.fromCache, true);
+    assert.equal(counters.forecast, forecastCallsBeforePreview + 1);
+
+    // 9c. Переключение города на странице страны (/api/countries/italy/weather?city=Милан)
+    const countryWeatherMilan = await request(
+      baseUrl,
+      'GET',
+      `/api/countries/italy/weather?city=${encodeURIComponent('Милан')}`
+    );
+    assert.equal(countryWeatherMilan.status, 200);
+    assert.equal(countryWeatherMilan.body.data.resolvedCity, 'Милан');
+    assert.equal(countryWeatherMilan.body.data.fromCache, false);
+    assert.equal(countryWeatherMilan.body.data.daily.length, 7);
+    assert.equal(counters.forecast, forecastCallsBeforePreview + 2);
+
+    const countryWeatherMilanCached = await request(
+      baseUrl,
+      'GET',
+      `/api/countries/italy/weather?city=${encodeURIComponent('Милан')}`
+    );
+    assert.equal(countryWeatherMilanCached.status, 200);
+    assert.equal(countryWeatherMilanCached.body.data.fromCache, true);
+    assert.equal(counters.forecast, forecastCallsBeforePreview + 2);
+
+    // 9d. Предпросмотр на дальние даты поездки -> seasonal_reference + in-memory кэш
+    const previewSeasonal = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Япония')}&city=${encodeURIComponent('Токио')}&startDate=2028-02-28&endDate=2028-03-01`
+    );
+    assert.equal(previewSeasonal.status, 200);
+    assert.equal(previewSeasonal.body.data.sourceMode, 'seasonal_reference');
+    assert.equal(previewSeasonal.body.data.fromCache, false);
+    assert.ok(previewSeasonal.body.data.disclaimerRu);
+    assert.deepEqual(
+      previewSeasonal.body.data.daily.map((d: any) => d.date),
+      ['2028-02-28', '2028-02-29', '2028-03-01']
+    );
+    assert.equal(counters.archive, archiveCallsBeforePreview + 1);
+
+    const previewSeasonalCached = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Япония')}&city=${encodeURIComponent('Токио')}&startDate=2028-02-28&endDate=2028-03-01`
+    );
+    assert.equal(previewSeasonalCached.status, 200);
+    assert.equal(previewSeasonalCached.body.data.fromCache, true);
+    assert.equal(counters.archive, archiveCallsBeforePreview + 1);
+
+    // 9e. В таблице TripWeatherCache не появилось лишних записей от preview-запросов
+    const tripWeatherCacheCountAfter = await prisma.tripWeatherCache.count();
+    assert.equal(
+      tripWeatherCacheCountAfter,
+      tripWeatherCacheCountBefore,
+      'Предпросмотр погоды не должен создавать записи в таблице TripWeatherCache'
+    );
+
+    // 9f. Проверка валидации и ошибок 400 / 404 / 422
+    const previewMissingCountry = await request(baseUrl, 'GET', '/api/weather/preview');
+    assert.equal(previewMissingCountry.status, 400);
+    assert.equal(previewMissingCountry.body.error.code, 'VALIDATION_ERROR');
+
+    const previewSingleDate = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Италия')}&startDate=2026-12-01`
+    );
+    assert.equal(previewSingleDate.status, 400);
+
+    const previewReversedDates = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Италия')}&startDate=2026-12-10&endDate=2026-12-05`
+    );
+    assert.equal(previewReversedDates.status, 400);
+
+    const previewInvalidDate = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('Италия')}&startDate=2026-99-99&endDate=2026-12-05`
+    );
+    assert.equal(previewInvalidDate.status, 400);
+
+    const previewUnknownLocation = await request(
+      baseUrl,
+      'GET',
+      `/api/weather/preview?country=${encodeURIComponent('НесуществующаяСтранаXYZ')}&city=${encodeURIComponent('НесуществующийГородXYZ')}`
+    );
+    assert.equal(previewUnknownLocation.status, 422);
+    assert.equal(previewUnknownLocation.body.error.code, 'WEATHER_LOCATION_NOT_FOUND');
+
+    const countryWeatherNotFound = await request(
+      baseUrl,
+      'GET',
+      '/api/countries/atlantis-unknown/weather'
+    );
+    assert.equal(countryWeatherNotFound.status, 404);
+    assert.equal(countryWeatherNotFound.body.error.code, 'COUNTRY_NOT_FOUND');
+
+    console.log('✅ 11. Предпросмотр погоды без tripId (/api/weather/preview, /api/countries/:slug/weather, in-memory кэш, ошибки) проверен.');
 
     console.log('\n🎉 Все модульные и интеграционные тесты погодного модуля успешно пройдены!');
   } finally {

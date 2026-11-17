@@ -44,7 +44,7 @@ export interface WeatherDailyItemDto {
 }
 
 export interface TripWeatherResponseDto {
-  tripId: string;
+  tripId?: string;
   resolvedCity: string;
   resolvedCountry: string;
   latitude: number;
@@ -60,6 +60,13 @@ export interface TripWeatherResponseDto {
   fromCache: boolean;
   fetchedAt: string;
   expiresAt: string;
+}
+
+export interface DestinationWeatherPreviewParams {
+  country: string;
+  city?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface WeatherPackingContext {
@@ -121,8 +128,62 @@ const OPEN_METEO_ARCHIVE_URL = 'https://archive-api.open-meteo.com/v1/archive';
 
 const FORECAST_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const ARCHIVE_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const PREVIEW_CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const PREVIEW_CACHE_MAX_ENTRIES = 200;
 const HTTP_TIMEOUT_MS = 8000;
 const MAX_ARCHIVE_DAYS = 60;
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+interface PreviewCacheEntry {
+  expiresAtMs: number;
+  data: TripWeatherResponseDto;
+}
+
+const destinationPreviewCache = new Map<string, PreviewCacheEntry>();
+
+function isValidIsoDateString(val: string): boolean {
+  if (!ISO_DATE_REGEX.test(val)) return false;
+  const d = new Date(`${val}T00:00:00.000Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(val);
+}
+
+function prunePreviewCache(nowMs: number) {
+  for (const [key, entry] of destinationPreviewCache.entries()) {
+    if (entry.expiresAtMs <= nowMs) {
+      destinationPreviewCache.delete(key);
+    }
+  }
+}
+
+function getCachedPreview(key: string, nowMs: number): TripWeatherResponseDto | null {
+  const entry = destinationPreviewCache.get(key);
+  if (!entry) return null;
+
+  if (entry.expiresAtMs <= nowMs) {
+    destinationPreviewCache.delete(key);
+    return null;
+  }
+
+  // Refresh LRU order on cache hit
+  destinationPreviewCache.delete(key);
+  destinationPreviewCache.set(key, entry);
+  return {
+    ...entry.data,
+    fromCache: true,
+  };
+}
+
+function setCachedPreview(key: string, data: TripWeatherResponseDto, expiresAtMs: number, nowMs: number) {
+  if (destinationPreviewCache.size >= PREVIEW_CACHE_MAX_ENTRIES) {
+    prunePreviewCache(nowMs);
+  }
+  while (destinationPreviewCache.size >= PREVIEW_CACHE_MAX_ENTRIES) {
+    const oldestKey = destinationPreviewCache.keys().next().value;
+    if (oldestKey === undefined) break;
+    destinationPreviewCache.delete(oldestKey);
+  }
+  destinationPreviewCache.set(key, { expiresAtMs, data });
+}
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
@@ -702,60 +763,23 @@ function parseDailyItemFromPayload(
 }
 
 export class WeatherService {
-  static async getTripWeather(
-    tripId: string,
-    userId: string,
-    options: { forceRefresh?: boolean; now?: Date } = {}
-  ): Promise<TripWeatherResponseDto> {
-    const trip = await TripService.getTripAndVerifyOwner(userId, tripId, false);
-    const now = options.now ?? new Date();
-    const startIso = formatDateOnly(trip.startDate);
-    const endIso = formatDateOnly(trip.endDate);
+  static clearPreviewCache(): void {
+    destinationPreviewCache.clear();
+  }
+
+  private static async fetchWeatherForPeriod(params: {
+    country: string;
+    city: string;
+    startIso: string;
+    endIso: string;
+    now: Date;
+  }) {
+    const { country, city, startIso, endIso, now } = params;
     const todayIso = formatDateOnly(now);
     const todayPlus14Iso = addDaysIso(todayIso, 14);
     const todayPlus15Iso = addDaysIso(todayIso, 15);
 
-    if (!options.forceRefresh) {
-      const cached = await prisma.tripWeatherCache.findUnique({
-        where: { tripId },
-      });
-
-      if (cached && cached.expiresAt > now) {
-        const sourceMode =
-          cached.sourceMode === 'forecast' ? 'forecast' : 'seasonal_reference';
-        const daily = Array.isArray(cached.daily)
-          ? (cached.daily as unknown as WeatherDailyItemDto[])
-          : [];
-        const summary = cached.summary as unknown as WeatherSummaryDto;
-        const fromCountryFallback = cached.resolvedCity.includes('(ориентир по стране');
-
-        return {
-          tripId,
-          resolvedCity: cached.resolvedCity,
-          resolvedCountry: cached.resolvedCountry,
-          latitude: cached.latitude,
-          longitude: cached.longitude,
-          timezone: cached.timezone,
-          sourceMode,
-          sourceLabelRu: buildSourceLabelRu(sourceMode),
-          disclaimerRu: buildDisclaimerRu(
-            sourceMode,
-            endIso,
-            todayPlus15Iso,
-            fromCountryFallback
-          ),
-          climateHint: cached.climateHint as ClimateHint,
-          climateLabelRu: cached.climateLabelRu,
-          summary,
-          daily,
-          fromCache: true,
-          fetchedAt: cached.fetchedAt.toISOString(),
-          expiresAt: cached.expiresAt.toISOString(),
-        };
-      }
-    }
-
-    const location = await resolveDestinationLocation(trip.city, trip.country);
+    const location = await resolveDestinationLocation(city, country);
     const isForecastWindow = startIso <= todayPlus14Iso && endIso >= todayIso;
     const sourceMode: WeatherSourceMode = isForecastWindow ? 'forecast' : 'seasonal_reference';
 
@@ -852,21 +876,185 @@ export class WeatherService {
 
     const summary = computeWeatherSummary(daily);
     const { climateHint, climateLabelRu } = deriveClimateFromSummary(summary, sourceMode);
-    const ttlMs = sourceMode === 'forecast' ? FORECAST_CACHE_TTL_MS : ARCHIVE_CACHE_TTL_MS;
-    const fetchedAt = now;
-    const expiresAt = new Date(now.getTime() + ttlMs);
 
-    const cachePayload = {
+    return {
       resolvedCity: location.resolvedCity,
       resolvedCountry: location.resolvedCountry,
       latitude: location.latitude,
       longitude: location.longitude,
       timezone: resolvedTimezone === 'auto' ? 'UTC' : resolvedTimezone,
       sourceMode,
+      sourceLabelRu: buildSourceLabelRu(sourceMode),
+      disclaimerRu: buildDisclaimerRu(
+        sourceMode,
+        endIso,
+        todayPlus15Iso,
+        location.fromCountryFallback
+      ),
       climateHint,
       climateLabelRu,
-      summary: summary as unknown as Prisma.InputJsonValue,
-      daily: daily as unknown as Prisma.InputJsonValue,
+      summary,
+      daily,
+    };
+  }
+
+  static async getDestinationWeatherPreview(
+    params: DestinationWeatherPreviewParams,
+    options: { now?: Date } = {}
+  ): Promise<TripWeatherResponseDto> {
+    const cleanCountry = (params.country || '').trim();
+    if (!cleanCountry) {
+      throw new AppError('Укажите страну для получения прогноза погоды', 400, 'VALIDATION_ERROR');
+    }
+
+    const matchedCountry = CountryService.findCountryByIdentifier(cleanCountry);
+    const cleanCity = (params.city || '').trim();
+    const effectiveCity = cleanCity || matchedCountry?.capital || cleanCountry;
+
+    const now = options.now ?? new Date();
+    const todayIso = formatDateOnly(now);
+
+    const rawStart = (params.startDate || '').trim();
+    const rawEnd = (params.endDate || '').trim();
+
+    let startIso: string;
+    let endIso: string;
+
+    if (!rawStart && !rawEnd) {
+      startIso = todayIso;
+      endIso = addDaysIso(todayIso, 6);
+    } else {
+      if (!rawStart || !rawEnd) {
+        throw new AppError(
+          'Укажите обе даты (startDate и endDate) для прогноза на даты поездки',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
+      if (!isValidIsoDateString(rawStart) || !isValidIsoDateString(rawEnd)) {
+        throw new AppError(
+          'Некорректный формат дат (ожидается ГГГГ-ММ-ДД)',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
+      if (rawEnd < rawStart) {
+        throw new AppError(
+          'Дата окончания не может быть раньше даты начала',
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
+      startIso = rawStart;
+      endIso = rawEnd;
+    }
+
+    const countryKey = normalizeLabel(matchedCountry?.slug || cleanCountry);
+    const cityKey = normalizeLabel(effectiveCity);
+    const cacheKey = `${countryKey}|${cityKey}|${startIso}|${endIso}`;
+
+    const nowMs = now.getTime();
+    const cached = getCachedPreview(cacheKey, nowMs);
+    if (cached) {
+      return cached;
+    }
+
+    const payload = await this.fetchWeatherForPeriod({
+      country: cleanCountry,
+      city: effectiveCity,
+      startIso,
+      endIso,
+      now,
+    });
+
+    const expiresAtMs = nowMs + PREVIEW_CACHE_TTL_MS;
+    const result: TripWeatherResponseDto = {
+      ...payload,
+      fromCache: false,
+      fetchedAt: now.toISOString(),
+      expiresAt: new Date(expiresAtMs).toISOString(),
+    };
+
+    setCachedPreview(cacheKey, result, expiresAtMs, nowMs);
+    return result;
+  }
+
+  static async getTripWeather(
+    tripId: string,
+    userId: string,
+    options: { forceRefresh?: boolean; now?: Date } = {}
+  ): Promise<TripWeatherResponseDto> {
+    const trip = await TripService.getTripAndVerifyOwner(userId, tripId, false);
+    const now = options.now ?? new Date();
+    const startIso = formatDateOnly(trip.startDate);
+    const endIso = formatDateOnly(trip.endDate);
+    const todayIso = formatDateOnly(now);
+    const todayPlus15Iso = addDaysIso(todayIso, 15);
+
+    if (!options.forceRefresh) {
+      const cached = await prisma.tripWeatherCache.findUnique({
+        where: { tripId },
+      });
+
+      if (cached && cached.expiresAt > now) {
+        const sourceMode =
+          cached.sourceMode === 'forecast' ? 'forecast' : 'seasonal_reference';
+        const daily = Array.isArray(cached.daily)
+          ? (cached.daily as unknown as WeatherDailyItemDto[])
+          : [];
+        const summary = cached.summary as unknown as WeatherSummaryDto;
+        const fromCountryFallback = cached.resolvedCity.includes('(ориентир по стране');
+
+        return {
+          tripId,
+          resolvedCity: cached.resolvedCity,
+          resolvedCountry: cached.resolvedCountry,
+          latitude: cached.latitude,
+          longitude: cached.longitude,
+          timezone: cached.timezone,
+          sourceMode,
+          sourceLabelRu: buildSourceLabelRu(sourceMode),
+          disclaimerRu: buildDisclaimerRu(
+            sourceMode,
+            endIso,
+            todayPlus15Iso,
+            fromCountryFallback
+          ),
+          climateHint: cached.climateHint as ClimateHint,
+          climateLabelRu: cached.climateLabelRu,
+          summary,
+          daily,
+          fromCache: true,
+          fetchedAt: cached.fetchedAt.toISOString(),
+          expiresAt: cached.expiresAt.toISOString(),
+        };
+      }
+    }
+
+    const weatherData = await this.fetchWeatherForPeriod({
+      country: trip.country,
+      city: trip.city,
+      startIso,
+      endIso,
+      now,
+    });
+
+    const ttlMs =
+      weatherData.sourceMode === 'forecast' ? FORECAST_CACHE_TTL_MS : ARCHIVE_CACHE_TTL_MS;
+    const fetchedAt = now;
+    const expiresAt = new Date(now.getTime() + ttlMs);
+
+    const cachePayload = {
+      resolvedCity: weatherData.resolvedCity,
+      resolvedCountry: weatherData.resolvedCountry,
+      latitude: weatherData.latitude,
+      longitude: weatherData.longitude,
+      timezone: weatherData.timezone,
+      sourceMode: weatherData.sourceMode,
+      climateHint: weatherData.climateHint,
+      climateLabelRu: weatherData.climateLabelRu,
+      summary: weatherData.summary as unknown as Prisma.InputJsonValue,
+      daily: weatherData.daily as unknown as Prisma.InputJsonValue,
       fetchedAt,
       expiresAt,
     };
@@ -900,18 +1088,13 @@ export class WeatherService {
       latitude: saved.latitude,
       longitude: saved.longitude,
       timezone: saved.timezone,
-      sourceMode,
-      sourceLabelRu: buildSourceLabelRu(sourceMode),
-      disclaimerRu: buildDisclaimerRu(
-        sourceMode,
-        endIso,
-        todayPlus15Iso,
-        location.fromCountryFallback
-      ),
-      climateHint,
-      climateLabelRu,
-      summary,
-      daily,
+      sourceMode: weatherData.sourceMode,
+      sourceLabelRu: weatherData.sourceLabelRu,
+      disclaimerRu: weatherData.disclaimerRu,
+      climateHint: weatherData.climateHint,
+      climateLabelRu: weatherData.climateLabelRu,
+      summary: weatherData.summary,
+      daily: weatherData.daily,
       fromCache: false,
       fetchedAt: saved.fetchedAt.toISOString(),
       expiresAt: saved.expiresAt.toISOString(),

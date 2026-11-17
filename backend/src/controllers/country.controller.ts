@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { CountryService } from '../services/country.service';
 import { PhotoService } from '../services/photo.service';
+import { WeatherService } from '../services/weather.service';
+import { parseWeatherPreviewQuery } from './weather.controller';
 import { AppError, sendSuccess } from '../lib/errors';
 
 export class CountryController {
@@ -39,6 +41,26 @@ export class CountryController {
     try {
       const photos = await CountryService.getCountryPhotos(req.params.slug);
       return sendSuccess(res, photos, 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async getWeather(req: Request, res: Response, next: NextFunction) {
+    try {
+      const country = CountryService.findCountryByIdentifier(req.params.slug);
+      if (!country) {
+        throw new AppError('Страна не найдена в каталоге', 404, 'COUNTRY_NOT_FOUND');
+      }
+
+      const { city, startDate, endDate } = parseWeatherPreviewQuery(req.query);
+      const result = await WeatherService.getDestinationWeatherPreview({
+        country: country.slug,
+        city,
+        startDate,
+        endDate,
+      });
+      return sendSuccess(res, result, 200);
     } catch (err) {
       next(err);
     }

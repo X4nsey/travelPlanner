@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import {
   ArrowLeft,
@@ -26,6 +26,8 @@ import AdaptiveLayout from '@/layouts/AdaptiveLayout.vue';
 import SmartImage from '@/components/ui/SmartImage.vue';
 import FavoriteButton from '@/components/countries/FavoriteButton.vue';
 import AuthPromptModal from '@/components/countries/AuthPromptModal.vue';
+import CountryTravelInfoSection from '@/components/countries/CountryTravelInfoSection.vue';
+import CountryWeatherPreview from '@/components/weather/CountryWeatherPreview.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
@@ -63,6 +65,14 @@ async function loadCountry() {
     loadError.value = err?.message || 'Страна не найдена';
   } finally {
     isLoading.value = false;
+  }
+
+  if (country.value && route.hash && route.hash.startsWith('#')) {
+    await nextTick();
+    const targetEl = document.getElementById(route.hash.slice(1));
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 }
 
@@ -378,7 +388,10 @@ function openAuthPromptForFavorite() {
         </div>
       </section>
 
-      <!-- 3. PHOTO GALLERY -->
+      <!-- 3. WEATHER PREVIEW (7 DAYS + CITY SWITCHER) -->
+      <CountryWeatherPreview :country="country" />
+
+      <!-- 4. PHOTO GALLERY -->
       <section v-if="galleryPhotos.length > 0" class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
@@ -570,6 +583,29 @@ function openAuthPromptForFavorite() {
             </div>
           </article>
         </div>
+      </section>
+
+      <!-- 7. TRAVEL GUIDE / PAMYATKA -->
+      <section
+        v-if="country.travelInfo"
+        id="country-travel-info"
+        class="space-y-4 scroll-mt-6"
+      >
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">
+            Путеводитель и памятка путешественника
+          </h2>
+          <p class="text-sm text-slate-500">
+            Визовые правила, оплата, транспорт, связь, культура, безопасность и бытовые советы перед поездкой в страну «{{ country.nameRu }}»
+          </p>
+        </div>
+
+        <CountryTravelInfoSection
+          :country="country"
+          :travelInfo="country.travelInfo"
+          :showCountryLink="false"
+          :showQuickFacts="false"
+        />
       </section>
 
       <!-- Bottom CTA Banner -->
