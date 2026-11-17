@@ -469,4 +469,5 @@ export interface CountryData {
 }
 
 export * from './weather';
+export * from './guideExport';
 

@@ -32,6 +32,7 @@ import {
   CloudSun,
   BookOpen,
   Globe2,
+  FileDown,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
@@ -65,6 +66,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+import type { GuideReloadableSection } from '@/components/trips/TripGuideExportModal.vue';
 
 const EventFormModal = defineAsyncComponent(
   () => import('@/components/trips/EventFormModal.vue')
@@ -88,6 +90,10 @@ const TripWeatherSection = defineAsyncComponent(
 
 const CountryTravelInfoSection = defineAsyncComponent(
   () => import('@/components/countries/CountryTravelInfoSection.vue')
+);
+
+const TripGuideExportModal = defineAsyncComponent(
+  () => import('@/components/trips/TripGuideExportModal.vue')
 );
 
 const route = useRoute();
@@ -446,6 +452,42 @@ function getCategoryIcon(cat: ExpenseCategory) {
       return MoreHorizontal;
   }
 }
+
+// Guide PDF / HTML export modal state
+const guideExportModalOpen = ref(false);
+
+const guideLoadingStates = computed(() => ({
+  expenses: isLoadingExpenses.value,
+  packing: packingStore.isLoading,
+  weather: Boolean(weatherStore.loadingByTripId[tripId.value]),
+  travelInfo:
+    (countryStore.isLoadingCatalog && !countryStore.isCatalogLoaded) ||
+    isLoadingTravelInfo.value,
+}));
+
+const guideErrorStates = computed(() => ({
+  expenses: expensesError.value,
+  packing: packingStore.error,
+  weather: weatherStore.errorByTripId[tripId.value] ?? null,
+  travelInfo:
+    travelInfoError.value ||
+    (countryStore.catalogError && !countryStore.isCatalogLoaded
+      ? countryStore.catalogError
+      : null),
+}));
+
+function handleReloadGuideSection(section: GuideReloadableSection) {
+  if (!tripId.value) return;
+  if (section === 'expenses') {
+    loadTripExpenses();
+  } else if (section === 'packing') {
+    packingStore.fetchPackingList(tripId.value, { force: true }).catch(() => {});
+  } else if (section === 'weather') {
+    weatherStore.fetchTripWeather(tripId.value, { force: true }).catch(() => {});
+  } else if (section === 'travelInfo') {
+    loadCountryTravelInfo(true).catch(() => {});
+  }
+}
 </script>
 
 <template>
@@ -524,6 +566,15 @@ function getCategoryIcon(cat: ExpenseCategory) {
 
           <!-- Action Buttons -->
           <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <BaseButton
+              variant="secondary"
+              size="sm"
+              @click="guideExportModalOpen = true"
+            >
+              <FileDown class="w-4 h-4" />
+              <span>Путеводитель / PDF</span>
+            </BaseButton>
+
             <BaseButton
               variant="outline"
               size="sm"
@@ -1462,6 +1513,27 @@ function getCategoryIcon(cat: ExpenseCategory) {
       :loading="isDeletingEvent"
       @confirm="confirmDeleteEvent"
       @cancel="eventToDelete = null"
+    />
+
+    <!-- Guide Export & PDF Modal -->
+    <TripGuideExportModal
+      v-if="trip"
+      :open="guideExportModalOpen"
+      :trip="trip"
+      :calendarDays="calendarDays"
+      :eventsByDate="eventsByDate"
+      :totalEstimatedEventsCost="totalEstimatedEventsCost"
+      :expenses="tripExpenses"
+      :expenseSummary="expenseSummary"
+      :packingItems="packingStore.items"
+      :packingSummary="packingStore.summary"
+      :weather="currentTripWeather"
+      :matchedCountry="matchedCountry || null"
+      :travelInfo="resolvedTravelInfo"
+      :loadingStates="guideLoadingStates"
+      :errorStates="guideErrorStates"
+      @close="guideExportModalOpen = false"
+      @reload-section="handleReloadGuideSection"
     />
   </DashboardLayout>
 </template>
