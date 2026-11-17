@@ -1272,14 +1272,19 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-passport-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: stretch;
       background: #ffffff;
     }
 
     .tp-passport-cell {
+      height: 100%;
+      box-sizing: border-box;
+      margin-bottom: 0;
       padding: ${isCompact ? '9px 12px' : '11px 14px'};
       border-right: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       gap: 2px;
     }
 
@@ -1379,19 +1384,24 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-overview-kpis {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 12px;
+      align-items: stretch;
+      gap: ${isCompact ? '10px' : '14px'};
+      margin-top: 14px;
       padding-top: 12px;
       border-top: 1px solid #f1f5f9;
     }
 
     .tp-mini-kpi {
+      height: 100%;
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 0;
       background: #f8fafc;
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 9px 11px;
       border: 1px solid #e2e8f0;
     }
 
@@ -1404,18 +1414,23 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-weather-summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
+      align-items: stretch;
+      gap: ${isCompact ? '10px' : '14px'};
+      margin-bottom: 14px;
     }
 
     .tp-weather-stat {
+      height: 100%;
+      box-sizing: border-box;
+      margin-bottom: 0;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      padding: 9px 11px;
+      padding: 10px 12px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      justify-content: space-between;
+      gap: 3px;
     }
 
     .tp-weather-stat strong {
@@ -1432,7 +1447,7 @@ function getGuideStyles(preset: GuidePreset): string {
       padding: 8px 12px;
       border-radius: 8px;
       font-size: 11px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .tp-callout-info {
@@ -1444,18 +1459,23 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-weather-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
+      align-items: stretch;
+      gap: ${isCompact ? '10px' : '14px'};
     }
 
     .tp-weather-grid.is-compact {
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 6px;
+      align-items: stretch;
+      gap: 10px;
     }
 
     .tp-weather-day {
+      height: 100%;
+      box-sizing: border-box;
+      margin-bottom: 0;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      padding: 9px 10px;
+      padding: 10px 11px;
       background: #ffffff;
       display: flex;
       flex-direction: column;
@@ -1693,18 +1713,23 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-budget-kpis {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
+      align-items: stretch;
+      gap: ${isCompact ? '10px' : '14px'};
+      margin-bottom: 14px;
     }
 
     .tp-kpi-box {
+      height: 100%;
+      box-sizing: border-box;
+      margin-bottom: 0;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       padding: 10px 12px;
       background: #f8fafc;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      justify-content: space-between;
+      gap: 4px;
     }
 
     .tp-kpi-top {
@@ -1887,15 +1912,30 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-pack-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      align-items: start;
+      gap: 14px;
+      align-items: stretch;
     }
 
     .tp-pack-card {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 11px 13px;
       background: #ffffff;
+    }
+
+    .tp-pack-grid > .tp-pack-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+
+    .tp-pack-grid > .tp-pack-card:last-child:nth-child(odd) .tp-pack-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 16px;
     }
 
     .tp-pack-card-head {
@@ -1996,11 +2036,16 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-pack-compact-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
-      align-items: start;
+      gap: 10px;
+      align-items: stretch;
     }
 
     .tp-pack-compact-group {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
       border: 1px solid #e2e8f0;
       border-radius: 9px;
       padding: 8px 10px;
@@ -2054,18 +2099,19 @@ function getGuideStyles(preset: GuidePreset): string {
     .tp-country-facts {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: stretch;
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       overflow: hidden;
       background: #f8fafc;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
 
     .tp-country-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 9px;
-      align-items: start;
+      gap: ${isCompact ? '10px' : '14px'};
+      align-items: stretch;
     }
 
     .tp-country-grid.is-detailed {
@@ -2073,11 +2119,20 @@ function getGuideStyles(preset: GuidePreset): string {
     }
 
     .tp-country-card {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 0;
       border: 1px solid #e2e8f0;
       border-left-width: 4px;
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 11px 13px;
       background: #ffffff;
+    }
+
+    .tp-country-grid:not(.is-detailed) > .tp-country-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
     }
 
     .tp-country-card-head {
@@ -2173,8 +2228,26 @@ function getGuideStyles(preset: GuidePreset): string {
       .tp-weather-grid.is-compact,
       .tp-pack-grid,
       .tp-pack-compact-grid,
-      .tp-country-grid {
+      .tp-country-grid,
+      .tp-pack-grid > .tp-pack-card:last-child:nth-child(odd) .tp-pack-list {
         grid-template-columns: 1fr;
+      }
+
+      .tp-pack-grid > .tp-pack-card:last-child:nth-child(odd),
+      .tp-country-grid:not(.is-detailed) > .tp-country-card:last-child:nth-child(odd) {
+        grid-column: auto;
+      }
+
+      .tp-passport-cell {
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .tp-passport-cell:nth-child(2n) {
+        border-right: 0;
+      }
+
+      .tp-passport-cell:nth-last-child(-n + 2) {
+        border-bottom: 0;
       }
 
       .tp-event-row {

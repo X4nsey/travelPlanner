@@ -82,8 +82,118 @@ const emit = defineEmits<{
 
 const toastStore = useToastStore();
 
-const selectedPreset = ref<GuidePreset>('guidebook');
-const sections = reactive<GuideSectionsConfig>(getDefaultGuideSections('guidebook'));
+const GUIDE_PREFS_STORAGE_KEY = 'travelplanner.guideExportPrefs.v1';
+const VALID_PRESETS: readonly GuidePreset[] = ['guidebook', 'compact', 'detailed'];
+const SECTION_KEYS: readonly (keyof GuideSectionsConfig)[] = [
+  'includeCoverPhoto',
+  'includeOverviewAndNotes',
+  'includeWeather',
+  'includeItinerary',
+  'includeAllCalendarDays',
+  'includeBudgetSummary',
+  'includeExpensesTable',
+  'includePackingList',
+  'onlyUnpackedItems',
+  'includeCountryInfo',
+];
+
+function createDefaultSectionsByPreset(): Record<GuidePreset, GuideSectionsConfig> {
+  return {
+    guidebook: getDefaultGuideSections('guidebook'),
+    compact: getDefaultGuideSections('compact'),
+    detailed: getDefaultGuideSections('detailed'),
+  };
+}
+
+function isValidPreset(value: unknown): value is GuidePreset {
+  return typeof value === 'string' && (VALID_PRESETS as readonly string[]).includes(value);
+}
+
+function sanitizeStoredSections(raw: unknown, preset: GuidePreset): GuideSectionsConfig {
+  const defaults = getDefaultGuideSections(preset);
+  if (!raw || typeof raw !== 'object') return defaults;
+
+  const candidate = raw as Record<string, unknown>;
+  for (const key of SECTION_KEYS) {
+    if (typeof candidate[key] === 'boolean') {
+      defaults[key] = candidate[key] as boolean;
+    }
+  }
+  return defaults;
+}
+
+function loadStoredGuidePreferences(): {
+  activePreset: GuidePreset;
+  sectionsByPreset: Record<GuidePreset, GuideSectionsConfig>;
+} {
+  const fallback = {
+    activePreset: 'guidebook' as GuidePreset,
+    sectionsByPreset: createDefaultSectionsByPreset(),
+  };
+
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return fallback;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(GUIDE_PREFS_STORAGE_KEY);
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw) as {
+      activePreset?: unknown;
+      sectionsByPreset?: Record<string, unknown>;
+    };
+
+    const nextPreset = isValidPreset(parsed?.activePreset)
+      ? parsed.activePreset
+      : fallback.activePreset;
+
+    const rawMap =
+      parsed?.sectionsByPreset && typeof parsed.sectionsByPreset === 'object'
+        ? parsed.sectionsByPreset
+        : {};
+
+    return {
+      activePreset: nextPreset,
+      sectionsByPreset: {
+        guidebook: sanitizeStoredSections(rawMap.guidebook, 'guidebook'),
+        compact: sanitizeStoredSections(rawMap.compact, 'compact'),
+        detailed: sanitizeStoredSections(rawMap.detailed, 'detailed'),
+      },
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function saveGuidePreferences(
+  preset: GuidePreset,
+  map: Record<GuidePreset, GuideSectionsConfig>
+): void {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    window.localStorage.setItem(
+      GUIDE_PREFS_STORAGE_KEY,
+      JSON.stringify({
+        activePreset: preset,
+        sectionsByPreset: {
+          guidebook: { ...map.guidebook },
+          compact: { ...map.compact },
+          detailed: { ...map.detailed },
+        },
+      })
+    );
+  } catch {
+    // Ignore storage quota or private-mode access errors
+  }
+}
+
+const initialPrefs = loadStoredGuidePreferences();
+const activePreset = ref<GuidePreset>(initialPrefs.activePreset);
+const sectionsByPreset = reactive<Record<GuidePreset, GuideSectionsConfig>>(
+  initialPrefs.sectionsByPreset
+);
+const activeSections = computed(() => sectionsByPreset[activePreset.value]);
 const isPrinting = ref(false);
 const printError = ref<string | null>(null);
 
@@ -93,21 +203,30 @@ const presetIcons: Record<GuidePreset, typeof BookOpen> = {
   detailed: FileSpreadsheet,
 };
 
-function applyPreset(preset: GuidePreset) {
-  selectedPreset.value = preset;
-  Object.assign(sections, getDefaultGuideSections(preset));
+function selectPreset(preset: GuidePreset) {
+  activePreset.value = preset;
 }
 
 function resetToPresetDefaults() {
-  Object.assign(sections, getDefaultGuideSections(selectedPreset.value));
+  Object.assign(
+    sectionsByPreset[activePreset.value],
+    getDefaultGuideSections(activePreset.value)
+  );
 }
 
 const isCustomizedFromPreset = computed(() => {
-  const defaults = getDefaultGuideSections(selectedPreset.value);
-  return (Object.keys(defaults) as Array<keyof GuideSectionsConfig>).some(
-    (key) => sections[key] !== defaults[key]
-  );
+  const defaults = getDefaultGuideSections(activePreset.value);
+  const current = activeSections.value;
+  return SECTION_KEYS.some((key) => current[key] !== defaults[key]);
 });
+
+watch(
+  [activePreset, sectionsByPreset],
+  () => {
+    saveGuidePreferences(activePreset.value, sectionsByPreset);
+  },
+  { deep: true }
+);
 
 watch(
   () => props.open,
@@ -166,14 +285,15 @@ const loadingLabels = computed(() => {
 });
 
 const activeSectionsCount = computed(() => {
+  const current = activeSections.value;
   let count = 0;
-  if (sections.includeCoverPhoto) count += 1;
-  if (sections.includeOverviewAndNotes) count += 1;
-  if (sections.includeWeather) count += 1;
-  if (sections.includeItinerary) count += 1;
-  if (sections.includeBudgetSummary || sections.includeExpensesTable) count += 1;
-  if (sections.includePackingList) count += 1;
-  if (sections.includeCountryInfo) count += 1;
+  if (current.includeCoverPhoto) count += 1;
+  if (current.includeOverviewAndNotes) count += 1;
+  if (current.includeWeather) count += 1;
+  if (current.includeItinerary) count += 1;
+  if (current.includeBudgetSummary || current.includeExpensesTable) count += 1;
+  if (current.includePackingList) count += 1;
+  if (current.includeCountryInfo) count += 1;
   return count;
 });
 
@@ -194,8 +314,8 @@ const guidePayload = computed<TripGuideDataPayload>(() => ({
 const previewHtml = computed(() => {
   if (!props.open) return '';
   return buildTripGuideHtml(guidePayload.value, {
-    preset: selectedPreset.value,
-    sections: { ...sections },
+    preset: activePreset.value,
+    sections: { ...activeSections.value },
     includeToolbar: false,
   });
 });
@@ -207,8 +327,8 @@ async function handlePrintPdf() {
 
   try {
     const printableHtml = buildTripGuideHtml(guidePayload.value, {
-      preset: selectedPreset.value,
-      sections: { ...sections },
+      preset: activePreset.value,
+      sections: { ...activeSections.value },
       includeToolbar: false,
     });
     await printTripGuideToPdf(printableHtml);
@@ -226,8 +346,8 @@ async function handlePrintPdf() {
 
 function handleDownloadHtml() {
   const standaloneHtml = buildTripGuideHtml(guidePayload.value, {
-    preset: selectedPreset.value,
-    sections: { ...sections },
+    preset: activePreset.value,
+    sections: { ...activeSections.value },
     includeToolbar: true,
   });
   const filename = buildTripGuideFilename(props.trip);
@@ -309,7 +429,7 @@ function handleDownloadHtml() {
 
               <!-- Presets Selector -->
               <div class="space-y-2.5">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-2">
                   <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">
                     1. Формат путеводителя
                   </h3>
@@ -317,10 +437,10 @@ function handleDownloadHtml() {
                     v-if="isCustomizedFromPreset"
                     type="button"
                     @click="resetToPresetDefaults"
-                    class="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800"
+                    class="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800 shrink-0"
                   >
                     <RotateCcw class="w-3 h-3" />
-                    <span>Сбросить</span>
+                    <span>Сбросить по умолчанию</span>
                   </button>
                 </div>
 
@@ -329,10 +449,10 @@ function handleDownloadHtml() {
                     v-for="preset in ORDERED_GUIDE_PRESETS"
                     :key="preset.id"
                     type="button"
-                    @click="applyPreset(preset.id)"
+                    @click="selectPreset(preset.id)"
                     :class="[
                       'w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3',
-                      selectedPreset === preset.id
+                      activePreset === preset.id
                         ? 'bg-white border-teal-500 ring-2 ring-teal-500/15 shadow-sm'
                         : 'bg-white/80 border-slate-200/80 hover:border-slate-300 hover:bg-white',
                     ]"
@@ -340,7 +460,7 @@ function handleDownloadHtml() {
                     <div
                       :class="[
                         'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
-                        selectedPreset === preset.id
+                        activePreset === preset.id
                           ? 'bg-teal-600 text-white'
                           : 'bg-slate-100 text-slate-600',
                       ]"
@@ -356,7 +476,7 @@ function handleDownloadHtml() {
                         <span
                           :class="[
                             'text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0',
-                            selectedPreset === preset.id
+                            activePreset === preset.id
                               ? 'bg-teal-50 text-teal-700'
                               : 'bg-slate-100 text-slate-600',
                           ]"
@@ -387,7 +507,7 @@ function handleDownloadHtml() {
                   <!-- Cover Photo -->
                   <label class="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50/70 transition-colors">
                     <input
-                      v-model="sections.includeCoverPhoto"
+                      v-model="activeSections.includeCoverPhoto"
                       type="checkbox"
                       class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                     />
@@ -407,7 +527,7 @@ function handleDownloadHtml() {
                   <!-- Overview & Notes -->
                   <label class="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50/70 transition-colors">
                     <input
-                      v-model="sections.includeOverviewAndNotes"
+                      v-model="activeSections.includeOverviewAndNotes"
                       type="checkbox"
                       class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                     />
@@ -425,7 +545,7 @@ function handleDownloadHtml() {
                   <div class="p-3 hover:bg-slate-50/70 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
-                        v-model="sections.includeWeather"
+                        v-model="activeSections.includeWeather"
                         type="checkbox"
                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
@@ -473,7 +593,7 @@ function handleDownloadHtml() {
                   <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
-                        v-model="sections.includeItinerary"
+                        v-model="activeSections.includeItinerary"
                         type="checkbox"
                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
@@ -490,12 +610,12 @@ function handleDownloadHtml() {
                     <label
                       :class="[
                         'flex items-center gap-2.5 pl-7 text-xs',
-                        sections.includeItinerary ? 'cursor-pointer text-slate-600' : 'opacity-50 cursor-not-allowed text-slate-400',
+                        activeSections.includeItinerary ? 'cursor-pointer text-slate-600' : 'opacity-50 cursor-not-allowed text-slate-400',
                       ]"
                     >
                       <input
-                        v-model="sections.includeAllCalendarDays"
-                        :disabled="!sections.includeItinerary"
+                        v-model="activeSections.includeAllCalendarDays"
+                        :disabled="!activeSections.includeItinerary"
                         type="checkbox"
                         class="h-3.5 w-3.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
@@ -507,7 +627,7 @@ function handleDownloadHtml() {
                   <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
-                        v-model="sections.includeBudgetSummary"
+                        v-model="activeSections.includeBudgetSummary"
                         type="checkbox"
                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
@@ -524,7 +644,7 @@ function handleDownloadHtml() {
                     <label class="flex items-center justify-between gap-2 pl-7 text-xs cursor-pointer text-slate-600">
                       <span class="inline-flex items-center gap-2.5">
                         <input
-                          v-model="sections.includeExpensesTable"
+                          v-model="activeSections.includeExpensesTable"
                           type="checkbox"
                           class="h-3.5 w-3.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                         />
@@ -555,7 +675,7 @@ function handleDownloadHtml() {
                   <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
-                        v-model="sections.includePackingList"
+                        v-model="activeSections.includePackingList"
                         type="checkbox"
                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
@@ -582,12 +702,12 @@ function handleDownloadHtml() {
                     <label
                       :class="[
                         'flex items-center gap-2.5 pl-7 text-xs',
-                        sections.includePackingList ? 'cursor-pointer text-slate-600' : 'opacity-50 cursor-not-allowed text-slate-400',
+                        activeSections.includePackingList ? 'cursor-pointer text-slate-600' : 'opacity-50 cursor-not-allowed text-slate-400',
                       ]"
                     >
                       <input
-                        v-model="sections.onlyUnpackedItems"
-                        :disabled="!sections.includePackingList"
+                        v-model="activeSections.onlyUnpackedItems"
+                        :disabled="!activeSections.includePackingList"
                         type="checkbox"
                         class="h-3.5 w-3.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
@@ -614,7 +734,7 @@ function handleDownloadHtml() {
                   <div class="p-3 hover:bg-slate-50/70 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
-                        v-model="sections.includeCountryInfo"
+                        v-model="activeSections.includeCountryInfo"
                         type="checkbox"
                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                       />
