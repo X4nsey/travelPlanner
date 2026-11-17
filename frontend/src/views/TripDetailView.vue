@@ -648,12 +648,14 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       </div>
 
       <!-- Tabs Switcher -->
-      <div class="flex items-center gap-2 border-b border-slate-200 overflow-x-auto">
+      <div
+        class="flex items-stretch gap-2 overflow-x-auto overflow-y-hidden bg-[linear-gradient(to_top,#e2e8f0_1px,transparent_1px)]"
+      >
         <button
           type="button"
           @click="activeTab = 'overview'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
             activeTab === 'overview'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -667,7 +669,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           type="button"
           @click="activeTab = 'itinerary'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
             activeTab === 'itinerary'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -686,7 +688,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           type="button"
           @click="activeTab = 'expenses'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
             activeTab === 'expenses'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -706,7 +708,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           type="button"
           @click="activeTab = 'packing'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
             activeTab === 'packing'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -731,7 +733,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           type="button"
           @click="activeTab = 'weather'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
             activeTab === 'weather'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
@@ -751,7 +753,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           type="button"
           @click="activeTab = 'travel-info'"
           :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
             activeTab === 'travel-info'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800',
