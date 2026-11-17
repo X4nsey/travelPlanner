@@ -214,6 +214,15 @@ export async function ensureDatabaseReady(): Promise<void> {
     await applyMigrationFile('../../prisma/migrations/20261116000000_add_trip_weather_cache/migration.sql');
     console.log('[Database] Миграция TripWeatherCache успешно применена.');
   }
+
+  const tripDocumentRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."TripDocument"')::text as reg`;
+  const tripDocumentTableExists = Boolean(tripDocumentRegResult?.[0]?.reg);
+
+  if (!tripDocumentTableExists) {
+    console.log('[Database] Применяем миграцию органайзера документов и броней (TripDocument)...');
+    await applyMigrationFile('../../prisma/migrations/20261118000000_add_trip_documents/migration.sql');
+    console.log('[Database] Миграция TripDocument успешно применена.');
+  }
 }
 
 export async function shutdownDatabase(): Promise<void> {

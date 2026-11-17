@@ -50,6 +50,17 @@ export function errorHandler(
     });
   }
 
+  // Handle oversized request body
+  if (err && typeof err === 'object' && ((err as any).type === 'entity.too.large' || (err as any).status === 413)) {
+    return res.status(413).json({
+      success: false,
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'Размер запроса превышает допустимый лимит. Максимальный размер вложения — 4 МБ.',
+      },
+    });
+  }
+
   console.error('[Server Error]:', err);
 
   return res.status(500).json({

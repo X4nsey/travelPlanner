@@ -49,6 +49,22 @@ enum PackingItemSource {
   CUSTOM
 }
 
+enum DocumentCategory {
+  FLIGHT_TICKET
+  HOTEL_BOOKING
+  INSURANCE
+  VISA_PASSPORT
+  EXCURSION_TICKET
+  RENTAL_TRANSFER
+  OTHER
+}
+
+enum DocumentStatus {
+  REQUIRED
+  PENDING
+  READY
+}
+
 model User {
   id           String   @id @default(uuid())
   name         String
@@ -97,6 +113,7 @@ model Trip {
   expenses       TripExpense[]
   packingList    PackingList?
   weatherCache   TripWeatherCache?
+  documents      TripDocument[]
 
   @@index([userId])
   @@index([userId, startDate])
@@ -225,6 +242,32 @@ model TripWeatherCache {
   trip            Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@index([expiresAt])
+}
+
+model TripDocument {
+  id             String           @id @default(uuid())
+  tripId         String
+  title          String
+  category       DocumentCategory @default(OTHER)
+  status         DocumentStatus   @default(READY)
+  provider       String           @default("")
+  referenceCode  String           @default("")
+  eventDate      DateTime?        @db.Date
+  endDate        DateTime?        @db.Date
+  externalUrl    String           @default("")
+  notes          String           @default("")
+  fileName       String?
+  fileMimeType   String?
+  fileSize       Int?
+  fileDataBase64 String?          @db.Text
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  trip           Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId])
+  @@index([tripId, category])
+  @@index([tripId, status])
 }
 
 

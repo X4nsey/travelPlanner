@@ -3,6 +3,7 @@ import { TripController } from '../controllers/trip.controller';
 import { EventController } from '../controllers/event.controller';
 import { ExpenseController } from '../controllers/expense.controller';
 import { PackingController } from '../controllers/packing.controller';
+import { DocumentController } from '../controllers/document.controller';
 import { requireAuth } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -28,5 +29,10 @@ router.get('/:tripId/packing', PackingController.getByTrip);
 router.post('/:tripId/packing/generate', PackingController.generateForTrip);
 router.post('/:tripId/packing/items', PackingController.createItemForTrip);
 router.delete('/:tripId/packing/outdated', PackingController.clearOutdatedForTrip);
+
+// Nested documents & bookings routes for a specific trip
+router.get('/:tripId/documents', DocumentController.listByTrip);
+router.post('/:tripId/documents', DocumentController.createForTrip);
+router.post('/:tripId/documents/seed-defaults', DocumentController.seedDefaultsForTrip);
 
 export default router;
