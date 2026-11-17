@@ -4,24 +4,28 @@ import {
   BookOpen,
   CloudSun,
   Coins,
+  Droplets,
   ExternalLink,
   Info,
+  LayoutGrid,
   Lightbulb,
   Loader2,
   MapPin,
+  PanelTopClose,
   Plane,
   RefreshCw,
   Thermometer,
   Umbrella,
 } from 'lucide-vue-next';
-import type { CountryData, TripWeatherResponseDto } from '@/types';
+import type { CountryData, TripWeatherResponseDto, WeatherDailyItemDto } from '@/types';
 import { useCountryStore } from '@/stores/country.store';
 import { weatherService } from '@/services/weather.service';
-import { pluralizeRu } from '@/composables/useFormatters';
+import { formatDaysLabel, pluralizeRu } from '@/composables/useFormatters';
 import {
   formatSignedTemperature,
   formatTemperatureRange,
   formatWeatherDecimal,
+  formatWeatherShortDate,
 } from '@/utils/weatherFormatters';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
@@ -40,6 +44,7 @@ const props = defineProps<Props>();
 const countryStore = useCountryStore();
 
 const detailsModalOpen = ref(false);
+const showAllDailyGrid = ref(false);
 const weather = ref<TripWeatherResponseDto | null>(null);
 const isLoadingWeather = ref(false);
 const weatherError = ref<string | null>(null);
@@ -222,6 +227,25 @@ const rainyDaysLabel = computed(() => {
   const count = weather.value.summary.rainyDaysCount;
   return `${count} ${pluralizeRu(count, ['день', 'дня', 'дней'])}`;
 });
+
+const dailyItems = computed<WeatherDailyItemDto[]>(() => weather.value?.daily ?? []);
+const hasManyDailyItems = computed(() => dailyItems.value.length > 6);
+const isDailyGridExpanded = computed(() => hasManyDailyItems.value && showAllDailyGrid.value);
+
+function hasDayPrecipitation(day: WeatherDailyItemDto): boolean {
+  return (
+    day.precipitationMm > 0 ||
+    (day.precipitationProbMax !== null && day.precipitationProbMax >= 30)
+  );
+}
+
+function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
+  const mmText = `${formatWeatherDecimal(day.precipitationMm)} мм`;
+  if (day.precipitationProbMax !== null) {
+    return `${mmText} · ${day.precipitationProbMax}%`;
+  }
+  return mmText;
+}
 </script>
 
 <template>
@@ -232,8 +256,16 @@ const rainyDaysLabel = computed(() => {
     <!-- Part 1: Quick Country Travel Memo -->
     <div v-if="matchedCountry && hasTravelInfo" class="space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2.5">
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="text-lg shrink-0" aria-hidden="true">{{ matchedCountry.flagEmoji }}</span>
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img
+            v-if="matchedCountry.flagUrl"
+            :src="matchedCountry.flagUrl"
+            :alt="matchedCountry.nameRu"
+            loading="lazy"
+            decoding="async"
+            class="w-7 h-5 object-cover rounded-md shadow-sm border border-slate-200/80 shrink-0"
+          />
+          <span v-else class="text-lg shrink-0" aria-hidden="true">{{ matchedCountry.flagEmoji }}</span>
           <div class="min-w-0">
             <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
               <BookOpen class="w-3.5 h-3.5 text-teal-600 shrink-0" />
@@ -403,6 +435,98 @@ const rainyDaysLabel = computed(() => {
         >
           {{ weather.disclaimerRu }}
         </p>
+
+        <!-- Daily Weather Breakdown -->
+        <div
+          v-if="dailyItems.length > 0"
+          class="pt-2.5 border-t border-slate-100 space-y-2.5"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Погода по дням ({{ formatDaysLabel(dailyItems.length) }})
+            </span>
+
+            <button
+              v-if="hasManyDailyItems"
+              type="button"
+              @click="showAllDailyGrid = !showAllDailyGrid"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-teal-50 border border-slate-200/80 hover:border-teal-200 text-[11px] font-semibold text-slate-700 hover:text-teal-700 transition-colors"
+            >
+              <PanelTopClose v-if="isDailyGridExpanded" class="w-3.5 h-3.5" />
+              <LayoutGrid v-else class="w-3.5 h-3.5" />
+              <span>{{ isDailyGridExpanded ? 'Свернуть в ленту' : 'Развернуть все дни сеткой' }}</span>
+            </button>
+          </div>
+
+          <div
+            :class="
+              isDailyGridExpanded
+                ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5'
+                : 'flex gap-2.5 overflow-x-auto pb-1.5 snap-x snap-mandatory'
+            "
+          >
+            <article
+              v-for="day in dailyItems"
+              :key="day.date"
+              :class="[
+                'rounded-xl border p-2.5 flex flex-col justify-between gap-2 transition-colors',
+                isDailyGridExpanded ? '' : 'w-[142px] sm:w-[148px] shrink-0 snap-start',
+                hasDayPrecipitation(day)
+                  ? 'bg-sky-50/40 border-sky-200/90 hover:border-sky-300'
+                  : 'bg-slate-50/70 border-slate-200/80 hover:border-teal-200',
+              ]"
+            >
+              <div class="flex items-start justify-between gap-1.5">
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 capitalize truncate">
+                    {{ formatWeatherShortDate(day.date) }}
+                  </p>
+                  <p
+                    class="text-[11px] text-slate-500 leading-snug line-clamp-2 min-h-[1.9rem] mt-0.5"
+                    :title="day.conditionRu"
+                  >
+                    {{ day.conditionRu }}
+                  </p>
+                </div>
+
+                <WeatherIcon
+                  :type="day.iconType"
+                  size="sm"
+                  :with-background="true"
+                  :title="day.conditionRu"
+                />
+              </div>
+
+              <div class="flex items-baseline gap-1">
+                <span class="text-sm font-extrabold text-slate-900 tabular-nums">
+                  {{ formatSignedTemperature(day.tempMax, true) }}
+                </span>
+                <span class="text-[11px] font-semibold text-slate-400 tabular-nums">
+                  / {{ formatSignedTemperature(day.tempMin, true) }}
+                </span>
+              </div>
+
+              <div class="pt-1 border-t border-slate-200/60">
+                <span
+                  v-if="hasDayPrecipitation(day)"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-100/90 text-sky-800 border border-sky-200 text-[11px] font-semibold tabular-nums max-w-full truncate"
+                  :title="formatDayPrecipitationBadge(day)"
+                >
+                  <Droplets class="w-3 h-3 text-sky-600 shrink-0" />
+                  <span class="truncate">{{ formatDayPrecipitationBadge(day) }}</span>
+                </span>
+
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1 text-[11px] text-slate-400"
+                >
+                  <Droplets class="w-3 h-3 text-slate-300 shrink-0" />
+                  <span>Без осадков</span>
+                </span>
+              </div>
+            </article>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -419,7 +543,7 @@ const rainyDaysLabel = computed(() => {
     <BaseModal
       v-if="matchedCountry && matchedCountry.travelInfo"
       :open="detailsModalOpen"
-      :title="`${matchedCountry.flagEmoji} ${matchedCountry.nameRu} — памятка путешественника`"
+      :title="`${matchedCountry.nameRu} — памятка путешественника`"
       maxWidth="xl"
       @close="detailsModalOpen = false"
     >

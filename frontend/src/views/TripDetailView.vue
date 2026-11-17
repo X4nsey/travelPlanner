@@ -708,8 +708,16 @@ function getCategoryIcon(cat: ExpenseCategory) {
         >
           <BookOpen class="w-4 h-4" />
           <span>О стране</span>
+          <img
+            v-if="matchedCountry?.flagUrl"
+            :src="matchedCountry.flagUrl"
+            :alt="matchedCountry.nameRu"
+            loading="lazy"
+            decoding="async"
+            class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/80 shadow-sm shrink-0"
+          />
           <span
-            v-if="matchedCountry"
+            v-else-if="matchedCountry"
             class="ml-0.5 text-sm leading-none"
             aria-hidden="true"
           >

@@ -203,8 +203,17 @@ function formatLastUpdated(value?: string): string {
     >
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="flex items-start gap-4 min-w-0">
+          <img
+            v-if="country.flagUrl"
+            :src="country.flagUrl"
+            :alt="country.nameRu"
+            loading="lazy"
+            decoding="async"
+            class="w-14 h-10 object-cover rounded-xl border border-slate-200/80 shadow-sm shrink-0"
+          />
           <div
-            class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center text-3xl shrink-0 shadow-sm"
+            v-else
+            class="w-14 h-10 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-center text-2xl shrink-0 shadow-sm"
             aria-hidden="true"
           >
             {{ country.flagEmoji }}
