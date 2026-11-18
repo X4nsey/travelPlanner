@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, defineAsyncComponent, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, defineAsyncComponent, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import {
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
   MapPin,
   Calendar,
   Clock,
@@ -122,6 +124,46 @@ type TripDetailTab =
 
 const tripId = computed(() => route.params.id as string);
 const activeTab = ref<TripDetailTab>('overview');
+
+// Scrollable tabs bar state (hidden native scrollbar + overflow-only chevron buttons)
+const tabsScrollRef = ref<HTMLElement | null>(null);
+const canScrollTabsLeft = ref(false);
+const canScrollTabsRight = ref(false);
+
+function updateTabsScrollState() {
+  const el = tabsScrollRef.value;
+  if (!el) {
+    canScrollTabsLeft.value = false;
+    canScrollTabsRight.value = false;
+    return;
+  }
+  const maxScrollLeft = el.scrollWidth - el.clientWidth;
+  if (maxScrollLeft <= 2) {
+    canScrollTabsLeft.value = false;
+    canScrollTabsRight.value = false;
+    return;
+  }
+  canScrollTabsLeft.value = el.scrollLeft > 2;
+  canScrollTabsRight.value = el.scrollLeft < maxScrollLeft - 2;
+}
+
+function scrollTabs(direction: 'left' | 'right') {
+  const el = tabsScrollRef.value;
+  if (!el) return;
+  const step = Math.max(180, Math.round(el.clientWidth * 0.6));
+  el.scrollBy({
+    left: direction === 'left' ? -step : step,
+    behavior: 'smooth',
+  });
+}
+
+function selectTab(tab: TripDetailTab, event?: MouseEvent) {
+  activeTab.value = tab;
+  const target = event?.currentTarget as HTMLElement | null;
+  if (target && typeof target.scrollIntoView === 'function') {
+    target.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+  }
+}
 
 // Country travel info state
 const fetchedTravelInfo = ref<CountryTravelInfo | null>(null);
@@ -353,6 +395,48 @@ watch(
   () => route.query.tab,
   (newTab) => {
     syncTabFromQuery(newTab);
+  }
+);
+
+watch(
+  tabsScrollRef,
+  (el, _prev, onCleanup) => {
+    if (!el) {
+      canScrollTabsLeft.value = false;
+      canScrollTabsRight.value = false;
+      return;
+    }
+
+    nextTick(() => updateTabsScrollState());
+
+    const handleResize = () => updateTabsScrollState();
+    window.addEventListener('resize', handleResize);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => updateTabsScrollState());
+      observer.observe(el);
+    }
+
+    onCleanup(() => {
+      window.removeEventListener('resize', handleResize);
+      observer?.disconnect();
+    });
+  },
+  { flush: 'post' }
+);
+
+watch(
+  [
+    totalEventsCount,
+    () => tripExpenses.value.length,
+    () => packingStore.totalCount,
+    () => currentTripDocumentsSummary.value.totalCount,
+    weatherTabTempRange,
+    matchedCountry,
+  ],
+  () => {
+    nextTick(() => updateTabsScrollState());
   }
 );
 
@@ -680,160 +764,192 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       </div>
 
       <!-- Tabs Switcher -->
-      <div
-        class="flex items-stretch gap-2 overflow-x-auto overflow-y-hidden bg-[linear-gradient(to_top,#e2e8f0_1px,transparent_1px)]"
-      >
-        <button
-          type="button"
-          @click="activeTab = 'overview'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'overview'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
+      <div class="relative">
+        <div
+          v-if="canScrollTabsLeft"
+          class="absolute left-0 top-0 bottom-px z-10 flex items-center pr-5 bg-gradient-to-r from-slate-50 via-slate-50/95 to-transparent"
         >
-          <FileText class="w-4 h-4" />
-          <span>Обзор</span>
-        </button>
-
-        <button
-          type="button"
-          @click="activeTab = 'itinerary'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'itinerary'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
-        >
-          <CalendarDays class="w-4 h-4" />
-          <span>План поездки</span>
-          <span
-            class="ml-1 px-2 py-0.5 text-xs rounded-full bg-teal-50 text-teal-700 font-bold"
+          <button
+            type="button"
+            @click="scrollTabs('left')"
+            class="w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-teal-700 hover:border-teal-300 flex items-center justify-center transition-colors"
+            aria-label="Прокрутить вкладки влево"
           >
-            {{ totalEventsCount }}
-          </span>
-        </button>
+            <ChevronLeft class="w-4 h-4" />
+          </button>
+        </div>
 
-        <button
-          type="button"
-          @click="activeTab = 'expenses'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'expenses'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
+        <div
+          ref="tabsScrollRef"
+          @scroll="updateTabsScrollState"
+          class="flex items-stretch gap-1 overflow-x-auto overflow-y-hidden scroll-smooth bg-[linear-gradient(to_top,#e2e8f0_1px,transparent_1px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
-          <Coins class="w-4 h-4" />
-          <span>Расходы и бюджет</span>
-          <span
-            v-if="tripExpenses.length > 0"
-            class="ml-1 px-2 py-0.5 text-xs rounded-full bg-emerald-50 text-emerald-700 font-bold"
-          >
-            {{ tripExpenses.length }}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          @click="activeTab = 'packing'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'packing'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
-        >
-          <Briefcase class="w-4 h-4" />
-          <span>Список вещей</span>
-          <span
-            v-if="packingStore.totalCount > 0"
+          <button
+            type="button"
+            @click="selectTab('overview', $event)"
             :class="[
-              'ml-1 px-2 py-0.5 text-xs rounded-full font-bold',
-              packingStore.packedCount === packingStore.totalCount
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-teal-50 text-teal-700',
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'overview'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
             ]"
           >
-            {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
-          </span>
-        </button>
+            <FileText class="w-4 h-4 shrink-0" />
+            <span>Обзор</span>
+          </button>
 
-        <button
-          type="button"
-          @click="activeTab = 'documents'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'documents'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
-        >
-          <FileCheck2 class="w-4 h-4" />
-          <span>Брони и чек-лист</span>
-          <span
-            v-if="currentTripDocumentsSummary.totalCount > 0"
+          <button
+            type="button"
+            @click="selectTab('itinerary', $event)"
             :class="[
-              'ml-1 px-2 py-0.5 text-xs rounded-full font-bold',
-              currentTripDocumentsSummary.readyCount === currentTripDocumentsSummary.totalCount
-                ? 'bg-emerald-50 text-emerald-700'
-                : 'bg-teal-50 text-teal-700',
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'itinerary'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
             ]"
           >
-            {{ currentTripDocumentsSummary.readyCount }}/{{ currentTripDocumentsSummary.totalCount }}
-          </span>
-        </button>
+            <CalendarDays class="w-4 h-4 shrink-0" />
+            <span>План поездки</span>
+            <span
+              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-teal-50 text-teal-700 font-bold"
+            >
+              {{ totalEventsCount }}
+            </span>
+          </button>
 
-        <button
-          type="button"
-          @click="activeTab = 'weather'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'weather'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
-        >
-          <CloudSun class="w-4 h-4" />
-          <span>Погода</span>
-          <span
-            v-if="weatherTabTempRange"
-            class="ml-1 px-2 py-0.5 text-xs rounded-full bg-sky-50 text-sky-700 font-bold tabular-nums"
+          <button
+            type="button"
+            @click="selectTab('expenses', $event)"
+            :class="[
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'expenses'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
+            ]"
           >
-            {{ weatherTabTempRange }}
-          </span>
-        </button>
+            <Coins class="w-4 h-4 shrink-0" />
+            <span>Бюджет</span>
+            <span
+              v-if="tripExpenses.length > 0"
+              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-emerald-50 text-emerald-700 font-bold"
+            >
+              {{ tripExpenses.length }}
+            </span>
+          </button>
 
-        <button
-          type="button"
-          @click="activeTab = 'travel-info'"
-          :class="[
-            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
-            activeTab === 'travel-info'
-              ? 'border-teal-600 text-teal-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800',
-          ]"
-        >
-          <BookOpen class="w-4 h-4" />
-          <span>О стране</span>
-          <img
-            v-if="matchedCountry?.flagUrl"
-            :src="matchedCountry.flagUrl"
-            :alt="matchedCountry.nameRu"
-            loading="lazy"
-            decoding="async"
-            class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/80 shadow-sm shrink-0"
-          />
-          <span
-            v-else-if="matchedCountry"
-            class="ml-0.5 text-sm leading-none"
-            aria-hidden="true"
+          <button
+            type="button"
+            @click="selectTab('packing', $event)"
+            :class="[
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'packing'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
+            ]"
           >
-            {{ matchedCountry.flagEmoji }}
-          </span>
-        </button>
+            <Briefcase class="w-4 h-4 shrink-0" />
+            <span>Вещи</span>
+            <span
+              v-if="packingStore.totalCount > 0"
+              :class="[
+                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold',
+                packingStore.packedCount === packingStore.totalCount
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-teal-50 text-teal-700',
+              ]"
+            >
+              {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            @click="selectTab('documents', $event)"
+            :class="[
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'documents'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
+            ]"
+          >
+            <FileCheck2 class="w-4 h-4 shrink-0" />
+            <span>Брони</span>
+            <span
+              v-if="currentTripDocumentsSummary.totalCount > 0"
+              :class="[
+                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold',
+                currentTripDocumentsSummary.readyCount === currentTripDocumentsSummary.totalCount
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-teal-50 text-teal-700',
+              ]"
+            >
+              {{ currentTripDocumentsSummary.readyCount }}/{{ currentTripDocumentsSummary.totalCount }}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            @click="selectTab('weather', $event)"
+            :class="[
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'weather'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
+            ]"
+          >
+            <CloudSun class="w-4 h-4 shrink-0" />
+            <span>Погода</span>
+            <span
+              v-if="weatherTabTempRange"
+              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-sky-50 text-sky-700 font-bold tabular-nums"
+            >
+              {{ weatherTabTempRange }}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            @click="selectTab('travel-info', $event)"
+            :class="[
+              'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+              activeTab === 'travel-info'
+                ? 'border-teal-600 text-teal-700'
+                : 'border-transparent text-slate-500 hover:text-slate-800',
+            ]"
+          >
+            <BookOpen class="w-4 h-4 shrink-0" />
+            <span>О стране</span>
+            <img
+              v-if="matchedCountry?.flagUrl"
+              :src="matchedCountry.flagUrl"
+              :alt="matchedCountry.nameRu"
+              loading="lazy"
+              decoding="async"
+              class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/80 shadow-sm shrink-0"
+            />
+            <span
+              v-else-if="matchedCountry"
+              class="ml-0.5 text-sm leading-none"
+              aria-hidden="true"
+            >
+              {{ matchedCountry.flagEmoji }}
+            </span>
+          </button>
+        </div>
+
+        <div
+          v-if="canScrollTabsRight"
+          class="absolute right-0 top-0 bottom-px z-10 flex items-center pl-5 bg-gradient-to-l from-slate-50 via-slate-50/95 to-transparent"
+        >
+          <button
+            type="button"
+            @click="scrollTabs('right')"
+            class="w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-teal-700 hover:border-teal-300 flex items-center justify-center transition-colors"
+            aria-label="Прокрутить вкладки вправо"
+          >
+            <ChevronRight class="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <!-- TAB 1: OVERVIEW -->

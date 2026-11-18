@@ -373,7 +373,66 @@ async function runTests() {
 
     // Удалим вспомогательную карточку перед подсчётом summary
     await request(baseUrl, 'DELETE', `/api/documents/${otherDocId}`, { cookies: user1Cookies });
-    console.log('✅ 4. Правила Privacy-by-Design для VISA_PASSPORT (создание, PATCH, смена категории) проверены');
+
+    // Проверка Privacy-by-Design для категории INSURANCE:
+    // referenceCode принудительно очищается при создании/обновлении/смене категории,
+    // но метаданные локального файла разрешены (файл хранится только в IndexedDB).
+    const createInsuranceAttempt = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
+      cookies: user1Cookies,
+      body: {
+        title: 'Медстраховка ВЗР расширенная',
+        category: 'INSURANCE',
+        status: 'READY',
+        provider: 'Т-Страхование',
+        referenceCode: 'INS-998877-SECRET',
+        fileName: 'med-policy.pdf',
+        fileMimeType: 'application/pdf',
+        fileSize: 120000,
+        fileDataBase64: samplePdfBase64,
+      },
+    });
+    assert.equal(createInsuranceAttempt.status, 201);
+    const createdIns = createInsuranceAttempt.body.data.document;
+    assert.equal(createdIns.category, 'INSURANCE');
+    assert.equal(createdIns.referenceCode, '', 'Для INSURANCE номер полиса должен очищаться при создании');
+    assert.equal(createdIns.hasAttachment, true, 'Для INSURANCE метаданные локального файла разрешены');
+    assert.equal(createdIns.fileName, 'med-policy.pdf');
+    assert.equal(createdIns.fileMimeType, 'application/pdf');
+    assert.equal(createdIns.fileSize, 120000);
+
+    const dbCreatedIns = await prisma.tripDocument.findUnique({ where: { id: createdIns.id } });
+    assert.ok(dbCreatedIns);
+    assert.equal(dbCreatedIns.referenceCode, '');
+    assert.equal(dbCreatedIns.fileDataBase64, null);
+
+    // Смена категории с OTHER на INSURANCE очищает referenceCode, но сохраняет метаданные файла
+    const otherToInsuranceRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
+      cookies: user1Cookies,
+      body: {
+        title: 'Страховка для конвертации',
+        category: 'OTHER',
+        status: 'READY',
+        referenceCode: 'TMP-INS-555',
+        fileName: 'policy-copy.pdf',
+        fileMimeType: 'application/pdf',
+        fileSize: 85000,
+      },
+    });
+    assert.equal(otherToInsuranceRes.status, 201);
+    const otherToInsId = otherToInsuranceRes.body.data.document.id as string;
+
+    const convertedInsRes = await request(baseUrl, 'PATCH', `/api/documents/${otherToInsId}`, {
+      cookies: user1Cookies,
+      body: { category: 'INSURANCE' },
+    });
+    assert.equal(convertedInsRes.status, 200);
+    assert.equal(convertedInsRes.body.data.document.referenceCode, '');
+    assert.equal(convertedInsRes.body.data.document.hasAttachment, true);
+    assert.equal(convertedInsRes.body.data.document.fileName, 'policy-copy.pdf');
+
+    await request(baseUrl, 'DELETE', `/api/documents/${createdIns.id}`, { cookies: user1Cookies });
+    await request(baseUrl, 'DELETE', `/api/documents/${otherToInsId}`, { cookies: user1Cookies });
+    console.log('✅ 4. Правила Privacy-by-Design для VISA_PASSPORT и INSURANCE (очистка номера полиса при сохранении метаданных файла) проверены');
 
     // 5. Получение списка документов и проверка summary
     const listRes = await request(baseUrl, 'GET', `/api/trips/${tripId}/documents`, {
@@ -427,11 +486,22 @@ async function runTests() {
     assert.equal(toPending.status, 200);
     assert.equal(toPending.body.data.document.status, 'PENDING');
     assert.equal(toPending.body.data.document.provider, 'АльфаСтрахование');
+    assert.equal(
+      toPending.body.data.document.referenceCode,
+      '',
+      'Для INSURANCE номер полиса не должен сохраняться при PATCH'
+    );
+
+    const dbInsurancePending = await prisma.tripDocument.findUnique({
+      where: { id: insuranceSeeded.id },
+    });
+    assert.equal(dbInsurancePending?.referenceCode, '');
 
     const toReady = await request(baseUrl, 'PATCH', `/api/documents/${insuranceSeeded.id}`, {
       cookies: user1Cookies,
       body: {
         status: 'READY',
+        referenceCode: 'POL-999111',
         fileName: 'polis-alfa.pdf',
         fileMimeType: 'application/pdf',
         fileSize: 307200,
@@ -440,9 +510,12 @@ async function runTests() {
     });
     assert.equal(toReady.status, 200);
     assert.equal(toReady.body.data.document.status, 'READY');
+    assert.equal(toReady.body.data.document.referenceCode, '');
     assert.equal(toReady.body.data.document.hasAttachment, true);
+    assert.equal(toReady.body.data.document.fileName, 'polis-alfa.pdf');
 
     const dbInsurance = await prisma.tripDocument.findUnique({ where: { id: insuranceSeeded.id } });
+    assert.equal(dbInsurance?.referenceCode, '');
     assert.equal(dbInsurance?.fileDataBase64, null);
 
     // Удаление вложения у отеля через removeAttachment: true

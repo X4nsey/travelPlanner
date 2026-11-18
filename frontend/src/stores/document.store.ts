@@ -139,6 +139,7 @@ export function mergeDocumentWithLocalFile(
   localFilesMap: Record<string, LocalDocumentFileSummary>
 ): TripDocumentItem {
   const isVisaPassport = doc.category === 'VISA_PASSPORT';
+  const hideReferenceCode = isVisaPassport || doc.category === 'INSURANCE';
   if (isVisaPassport) {
     return {
       ...doc,
@@ -155,6 +156,7 @@ export function mergeDocumentWithLocalFile(
   const localMeta = localFilesMap[doc.id] ?? null;
   return {
     ...doc,
+    referenceCode: hideReferenceCode ? '' : doc.referenceCode,
     hasLocalFileOnDevice: Boolean(localMeta),
     localFileMeta: localMeta,
   };
@@ -422,6 +424,7 @@ export const useDocumentStore = defineStore('documents', () => {
   ): Promise<{ document: TripDocumentItem; message?: string }> {
     const requestVersion = getVersion(tripId);
     const isVisaPassport = payload.category === 'VISA_PASSPORT';
+    const hideReferenceCode = isVisaPassport || payload.category === 'INSURANCE';
 
     let validatedFileMeta:
       | { fileName: string; fileMimeType: string; fileSize: number }
@@ -433,7 +436,7 @@ export const useDocumentStore = defineStore('documents', () => {
 
     const requestPayload: CreateTripDocumentPayload = {
       ...payload,
-      referenceCode: isVisaPassport ? '' : payload.referenceCode,
+      referenceCode: hideReferenceCode ? '' : payload.referenceCode,
       fileName: validatedFileMeta?.fileName ?? null,
       fileMimeType: validatedFileMeta?.fileMimeType ?? null,
       fileSize: validatedFileMeta?.fileSize ?? null,
@@ -506,6 +509,7 @@ export const useDocumentStore = defineStore('documents', () => {
     const existingDoc = getDocuments(tripId).find((item) => item.id === documentId);
     const effectiveCategory = payload.category ?? existingDoc?.category ?? 'OTHER';
     const isVisaPassport = effectiveCategory === 'VISA_PASSPORT';
+    const hideReferenceCode = isVisaPassport || effectiveCategory === 'INSURANCE';
 
     let validatedFileMeta:
       | { fileName: string; fileMimeType: string; fileSize: number }
@@ -518,6 +522,10 @@ export const useDocumentStore = defineStore('documents', () => {
     setDocumentMutating(documentId, true);
     try {
       const requestPayload: UpdateTripDocumentPayload = { ...payload };
+
+      if (hideReferenceCode) {
+        requestPayload.referenceCode = '';
+      }
 
       if (isVisaPassport) {
         requestPayload.referenceCode = '';

@@ -19,14 +19,15 @@ export function sanitizeCreateDocumentPayload(
   payload: CreateTripDocumentPayload
 ): CreateTripDocumentPayload {
   const isVisaPassport = payload.category === 'VISA_PASSPORT';
+  const hideReferenceCode = isVisaPassport || payload.category === 'INSURANCE';
 
   const clean: CreateTripDocumentPayload = {
     title: payload.title.trim(),
     category: payload.category,
     status: payload.status,
     provider: payload.provider?.trim() ?? '',
-    // Privacy-by-Design: для VISA_PASSPORT номер документа никогда не отправляется на сервер
-    referenceCode: isVisaPassport ? '' : (payload.referenceCode?.trim() ?? ''),
+    // Privacy-by-Design: для VISA_PASSPORT и INSURANCE номер документа/полиса не отправляется на сервер
+    referenceCode: hideReferenceCode ? '' : (payload.referenceCode?.trim() ?? ''),
     eventDate: normalizeOptionalDate(payload.eventDate) ?? null,
     endDate: normalizeOptionalDate(payload.endDate) ?? null,
     externalUrl: payload.externalUrl?.trim() ?? '',
@@ -46,6 +47,7 @@ export function sanitizeUpdateDocumentPayload(
   payload: UpdateTripDocumentPayload
 ): UpdateTripDocumentPayload {
   const isVisaPassport = payload.category === 'VISA_PASSPORT';
+  const isInsurance = payload.category === 'INSURANCE';
   const clean: UpdateTripDocumentPayload = {};
 
   if (payload.title !== undefined) clean.title = payload.title.trim();
@@ -63,7 +65,9 @@ export function sanitizeUpdateDocumentPayload(
     return clean;
   }
 
-  if (payload.referenceCode !== undefined) {
+  if (isInsurance) {
+    clean.referenceCode = '';
+  } else if (payload.referenceCode !== undefined) {
     clean.referenceCode = payload.referenceCode.trim();
   }
 

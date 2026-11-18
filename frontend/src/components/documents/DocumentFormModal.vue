@@ -90,6 +90,8 @@ const fieldErrors = ref<{
 
 const isEditMode = computed(() => Boolean(props.editingDocument));
 const isVisaPassport = computed(() => category.value === 'VISA_PASSPORT');
+const isInsurance = computed(() => category.value === 'INSURANCE');
+const isReferenceCodeHidden = computed(() => isVisaPassport.value || isInsurance.value);
 
 const isBusy = computed(
   () =>
@@ -158,7 +160,8 @@ watch(
       status.value = props.editingDocument.status;
       provider.value = props.editingDocument.provider || '';
       referenceCode.value =
-        props.editingDocument.category === 'VISA_PASSPORT'
+        props.editingDocument.category === 'VISA_PASSPORT' ||
+        props.editingDocument.category === 'INSURANCE'
           ? ''
           : props.editingDocument.referenceCode || '';
       eventDate.value = props.editingDocument.eventDate || '';
@@ -183,6 +186,8 @@ watch(
 watch(category, (nextCategory) => {
   if (nextCategory === 'VISA_PASSPORT') {
     fileError.value = null;
+    fieldErrors.value = { ...fieldErrors.value, referenceCode: undefined };
+  } else if (nextCategory === 'INSURANCE') {
     fieldErrors.value = { ...fieldErrors.value, referenceCode: undefined };
   }
 });
@@ -251,7 +256,7 @@ function validateForm(): boolean {
     errors.provider = 'Название компании или сервиса не должно превышать 150 символов';
   }
 
-  if (!isVisaPassport.value && referenceCode.value.trim().length > 100) {
+  if (!isReferenceCodeHidden.value && referenceCode.value.trim().length > 100) {
     errors.referenceCode = 'Код брони не должен превышать 100 символов';
   }
 
@@ -307,7 +312,7 @@ async function handleSubmit() {
         category: category.value,
         status: status.value,
         provider: provider.value.trim(),
-        referenceCode: isVisaPassport.value ? '' : referenceCode.value.trim(),
+        referenceCode: isReferenceCodeHidden.value ? '' : referenceCode.value.trim(),
         eventDate: startVal,
         endDate: endVal,
         externalUrl: externalUrl.value.trim(),
@@ -340,7 +345,7 @@ async function handleSubmit() {
         category: category.value,
         status: status.value,
         provider: provider.value.trim(),
-        referenceCode: isVisaPassport.value ? '' : referenceCode.value.trim(),
+        referenceCode: isReferenceCodeHidden.value ? '' : referenceCode.value.trim(),
         eventDate: startVal,
         endDate: endVal,
         externalUrl: externalUrl.value.trim(),
@@ -428,7 +433,7 @@ async function handleSubmit() {
         :disabled="isBusy"
       />
 
-      <div :class="['grid grid-cols-1 gap-4', !isVisaPassport ? 'sm:grid-cols-2' : '']">
+      <div :class="['grid grid-cols-1 gap-4', !isReferenceCodeHidden ? 'sm:grid-cols-2' : '']">
         <BaseInput
           v-model="provider"
           name="docProvider"
@@ -443,14 +448,24 @@ async function handleSubmit() {
         />
 
         <BaseInput
-          v-if="!isVisaPassport"
+          v-if="!isReferenceCodeHidden"
           v-model="referenceCode"
           name="docReferenceCode"
           label="Код брони / номер заказа"
-          placeholder="Например: TK9X7M, BK-442190, POL-7788"
+          placeholder="Например: TK9X7M, BK-442190"
           :error="fieldErrors.referenceCode"
           :disabled="isBusy"
         />
+      </div>
+
+      <div
+        v-if="isInsurance"
+        class="rounded-xl border border-teal-200/80 bg-teal-50/60 px-3.5 py-2.5 flex items-start gap-2.5 text-xs text-teal-900"
+      >
+        <ShieldCheck class="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+        <p class="leading-relaxed">
+          Номер полиса не передаётся на сервер — при необходимости прикрепите PDF полиса локально на этом устройстве.
+        </p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

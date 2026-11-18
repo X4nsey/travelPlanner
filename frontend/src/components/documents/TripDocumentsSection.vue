@@ -281,7 +281,7 @@ async function handleQuickStatusChange(doc: TripDocumentItem, nextStatus: Docume
 }
 
 async function handleCopyReferenceCode(doc: TripDocumentItem) {
-  if (!doc.referenceCode || doc.category === 'VISA_PASSPORT') return;
+  if (!doc.referenceCode || doc.category === 'VISA_PASSPORT' || doc.category === 'INSURANCE') return;
 
   try {
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
@@ -426,7 +426,7 @@ async function confirmDeleteDocument() {
             </span>
           </div>
           <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
-            Сервис <strong>не запрашивает и не хранит на сервере</strong> сканы паспортов, удостоверений личности и паспортные номера — для паспортов и виз ведётся только чек-лист готовности.
+            Сервис <strong>не запрашивает и не хранит на сервере</strong> сканы паспортов, удостоверений личности, паспортные номера и номера страховых полисов.
             Прикреплённые файлы билетов, полисов и ваучеров сохраняются <strong>исключительно локально в браузере на этом устройстве</strong> (IndexedDB) и не передаются по сети на сервер.
           </p>
         </div>
@@ -806,9 +806,9 @@ async function confirmDeleteDocument() {
                 </button>
               </div>
 
-              <!-- Booking / Order Reference Code (Hidden for VISA_PASSPORT) -->
+              <!-- Booking / Order Reference Code (Hidden for VISA_PASSPORT and INSURANCE) -->
               <div
-                v-if="doc.category !== 'VISA_PASSPORT' && doc.referenceCode"
+                v-if="doc.category !== 'VISA_PASSPORT' && doc.category !== 'INSURANCE' && doc.referenceCode"
                 class="rounded-xl bg-slate-50 border border-slate-200/80 px-3.5 py-2.5 flex items-center justify-between gap-3"
               >
                 <div class="min-w-0">

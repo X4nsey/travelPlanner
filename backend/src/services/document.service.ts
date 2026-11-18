@@ -66,7 +66,8 @@ const DEFAULT_CHECKLIST_TEMPLATES: ReadonlyArray<{
     title: 'Медицинская страховка',
     category: DocumentCategory.INSURANCE,
     status: DocumentStatus.REQUIRED,
-    notes: 'Укажите номер страхового полиса, телефон ассистанса и прикрепите файл полиса.',
+    notes:
+      'Укажите страховую компанию, телефон ассистанса и при необходимости прикрепите файл полиса локально на устройстве.',
   },
   {
     title: 'Загранпаспорт и виза',
@@ -208,10 +209,18 @@ function resolveAttachmentMetadata(input: {
   };
 }
 
+function isReferenceCodeForbidden(category: DocumentCategory): boolean {
+  return (
+    category === DocumentCategory.VISA_PASSPORT ||
+    category === DocumentCategory.INSURANCE
+  );
+}
+
 export function serializeTripDocument(doc: DocumentMetadataRow): TripDocumentDto {
   const categoryMeta = DOCUMENT_CATEGORY_META[doc.category] || DOCUMENT_CATEGORY_META.OTHER;
   const statusMeta = DOCUMENT_STATUS_META[doc.status] || DOCUMENT_STATUS_META.READY;
   const isVisaPassport = doc.category === DocumentCategory.VISA_PASSPORT;
+  const hideReferenceCode = isReferenceCodeForbidden(doc.category);
   const hasAttachment =
     !isVisaPassport && Boolean(doc.fileMimeType && doc.fileSize !== null && doc.fileSize > 0);
 
@@ -224,7 +233,7 @@ export function serializeTripDocument(doc: DocumentMetadataRow): TripDocumentDto
     status: doc.status,
     statusNameRu: statusMeta.nameRu,
     provider: doc.provider || '',
-    referenceCode: isVisaPassport ? '' : doc.referenceCode || '',
+    referenceCode: hideReferenceCode ? '' : doc.referenceCode || '',
     eventDate: doc.eventDate ? formatDateOnly(doc.eventDate) : null,
     endDate: doc.endDate ? formatDateOnly(doc.endDate) : null,
     externalUrl: doc.externalUrl || '',
@@ -376,7 +385,9 @@ export class DocumentService {
   ): Promise<TripDocumentDto> {
     await TripService.getTripAndVerifyOwner(userId, tripId, false);
 
-    const isVisaPassport = (payload.category as DocumentCategory) === DocumentCategory.VISA_PASSPORT;
+    const category = payload.category as DocumentCategory;
+    const isVisaPassport = category === DocumentCategory.VISA_PASSPORT;
+    const hideReferenceCode = isReferenceCodeForbidden(category);
 
     let attachmentMeta: {
       fileName: string | null;
@@ -407,10 +418,10 @@ export class DocumentService {
       data: {
         tripId,
         title: payload.title,
-        category: payload.category as DocumentCategory,
+        category,
         status: payload.status as DocumentStatus,
         provider: payload.provider ?? '',
-        referenceCode: isVisaPassport ? '' : (payload.referenceCode ?? ''),
+        referenceCode: hideReferenceCode ? '' : (payload.referenceCode ?? ''),
         eventDate: payload.eventDate ? parseDateOnly(payload.eventDate) : null,
         endDate: payload.endDate ? parseDateOnly(payload.endDate) : null,
         externalUrl: payload.externalUrl ?? '',
@@ -458,6 +469,7 @@ export class DocumentService {
 
     const effectiveCategory = (payload.category ?? existing.category) as DocumentCategory;
     const isVisaPassport = effectiveCategory === DocumentCategory.VISA_PASSPORT;
+    const hideReferenceCode = isReferenceCodeForbidden(effectiveCategory);
 
     const dataToUpdate: Prisma.TripDocumentUpdateInput = {
       // Privacy-by-Design: бинарное содержимое файлов никогда не сохраняется в БД
@@ -477,17 +489,19 @@ export class DocumentService {
     if (payload.externalUrl !== undefined) dataToUpdate.externalUrl = payload.externalUrl;
     if (payload.notes !== undefined) dataToUpdate.notes = payload.notes;
 
-    if (isVisaPassport) {
-      // Privacy-by-Design: для категории VISA_PASSPORT принудительно очищаем номер и метаданные файлов
+    if (hideReferenceCode) {
+      // Privacy-by-Design: для категорий VISA_PASSPORT и INSURANCE номер документа/полиса никогда не сохраняется
       dataToUpdate.referenceCode = '';
+    } else if (payload.referenceCode !== undefined) {
+      dataToUpdate.referenceCode = payload.referenceCode;
+    }
+
+    if (isVisaPassport) {
+      // Privacy-by-Design: для категории VISA_PASSPORT принудительно очищаем метаданные файлов
       dataToUpdate.fileName = null;
       dataToUpdate.fileMimeType = null;
       dataToUpdate.fileSize = null;
     } else {
-      if (payload.referenceCode !== undefined) {
-        dataToUpdate.referenceCode = payload.referenceCode;
-      }
-
       if (
         payload.removeAttachment === true ||
         payload.fileMimeType === null ||

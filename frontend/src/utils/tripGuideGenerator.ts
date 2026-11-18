@@ -967,7 +967,11 @@ function renderDocumentsSection(payload: TripGuideDataPayload, preset: GuidePres
             : 'tp-pill-rose';
       const datesLabel = formatGuideDocumentDates(doc);
       const safeRefCode =
-        doc.category !== 'VISA_PASSPORT' && doc.referenceCode ? doc.referenceCode.trim() : '';
+        doc.category !== 'VISA_PASSPORT' &&
+        doc.category !== 'INSURANCE' &&
+        doc.referenceCode
+          ? doc.referenceCode.trim()
+          : '';
 
       return `
         <article class="tp-doc-card avoid-break ${isCompact ? 'is-compact' : ''}">
