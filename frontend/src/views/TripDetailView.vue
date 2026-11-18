@@ -33,9 +33,11 @@ import {
   BookOpen,
   Globe2,
   FileDown,
+  FileCheck2,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
+import { useDocumentStore } from '@/stores/document.store';
 import { useWeatherStore } from '@/stores/weather.store';
 import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
@@ -84,6 +86,10 @@ const PackingListSection = defineAsyncComponent(
   () => import('@/components/packing/PackingListSection.vue')
 );
 
+const TripDocumentsSection = defineAsyncComponent(
+  () => import('@/components/documents/TripDocumentsSection.vue')
+);
+
 const TripWeatherSection = defineAsyncComponent(
   () => import('@/components/weather/TripWeatherSection.vue')
 );
@@ -100,11 +106,19 @@ const route = useRoute();
 const router = useRouter();
 const tripStore = useTripStore();
 const packingStore = usePackingStore();
+const documentStore = useDocumentStore();
 const weatherStore = useWeatherStore();
 const countryStore = useCountryStore();
 const toastStore = useToastStore();
 
-type TripDetailTab = 'overview' | 'itinerary' | 'expenses' | 'packing' | 'weather' | 'travel-info';
+type TripDetailTab =
+  | 'overview'
+  | 'itinerary'
+  | 'expenses'
+  | 'packing'
+  | 'documents'
+  | 'weather'
+  | 'travel-info';
 
 const tripId = computed(() => route.params.id as string);
 const activeTab = ref<TripDetailTab>('overview');
@@ -166,6 +180,14 @@ const resolvedTravelInfo = computed<CountryTravelInfo | null>(() => {
 
 const currentTripWeather = computed(
   () => weatherStore.weatherByTripId[tripId.value] ?? null
+);
+
+const currentTripDocuments = computed(
+  () => documentStore.getDocuments(tripId.value)
+);
+
+const currentTripDocumentsSummary = computed(
+  () => documentStore.getSummary(tripId.value)
 );
 
 const weatherTabTempRange = computed(() => {
@@ -253,6 +275,9 @@ function loadTrip() {
     packingStore.fetchPackingList(tripId.value).catch(() => {
       // Handled via packingStore.error
     });
+    documentStore.fetchTripDocuments(tripId.value).catch(() => {
+      // Handled via documentStore.errorByTripId
+    });
     weatherStore.fetchTripWeather(tripId.value).catch(() => {
       // Handled via weatherStore.errorByTripId
     });
@@ -271,6 +296,7 @@ function syncTabFromQuery(tabQuery: unknown) {
     tabQuery === 'itinerary' ||
     tabQuery === 'expenses' ||
     tabQuery === 'packing' ||
+    tabQuery === 'documents' ||
     tabQuery === 'weather' ||
     tabQuery === 'travel-info'
   ) {
@@ -332,9 +358,11 @@ watch(
 
 async function handleDeleteTrip() {
   if (!trip.value) return;
+  const deletedTripId = trip.value.id;
   isDeletingTrip.value = true;
   try {
-    await tripStore.deleteTrip(trip.value.id);
+    await tripStore.deleteTrip(deletedTripId);
+    await documentStore.clearTripLocalFiles(deletedTripId).catch(() => {});
     toastStore.success('Поездка удалена');
     showDeleteTripConfirm.value = false;
     router.push('/trips');
@@ -459,6 +487,7 @@ const guideExportModalOpen = ref(false);
 const guideLoadingStates = computed(() => ({
   expenses: isLoadingExpenses.value,
   packing: packingStore.isLoading,
+  documents: documentStore.isLoading(tripId.value),
   weather: Boolean(weatherStore.loadingByTripId[tripId.value]),
   travelInfo:
     (countryStore.isLoadingCatalog && !countryStore.isCatalogLoaded) ||
@@ -468,6 +497,7 @@ const guideLoadingStates = computed(() => ({
 const guideErrorStates = computed(() => ({
   expenses: expensesError.value,
   packing: packingStore.error,
+  documents: documentStore.getError(tripId.value),
   weather: weatherStore.errorByTripId[tripId.value] ?? null,
   travelInfo:
     travelInfoError.value ||
@@ -482,6 +512,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
     loadTripExpenses();
   } else if (section === 'packing') {
     packingStore.fetchPackingList(tripId.value, { force: true }).catch(() => {});
+  } else if (section === 'documents') {
+    documentStore.fetchTripDocuments(tripId.value, { force: true }).catch(() => {});
   } else if (section === 'weather') {
     weatherStore.fetchTripWeather(tripId.value, { force: true }).catch(() => {});
   } else if (section === 'travelInfo') {
@@ -726,6 +758,31 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             ]"
           >
             {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          @click="activeTab = 'documents'"
+          :class="[
+            'inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
+            activeTab === 'documents'
+              ? 'border-teal-600 text-teal-700'
+              : 'border-transparent text-slate-500 hover:text-slate-800',
+          ]"
+        >
+          <FileCheck2 class="w-4 h-4" />
+          <span>Брони и чек-лист</span>
+          <span
+            v-if="currentTripDocumentsSummary.totalCount > 0"
+            :class="[
+              'ml-1 px-2 py-0.5 text-xs rounded-full font-bold',
+              currentTripDocumentsSummary.readyCount === currentTripDocumentsSummary.totalCount
+                ? 'bg-emerald-50 text-emerald-700'
+                : 'bg-teal-50 text-teal-700',
+            ]"
+          >
+            {{ currentTripDocumentsSummary.readyCount }}/{{ currentTripDocumentsSummary.totalCount }}
           </span>
         </button>
 
@@ -1373,7 +1430,16 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         />
       </div>
 
-      <!-- TAB 5: WEATHER -->
+      <!-- TAB 5: DOCUMENTS & BOOKINGS -->
+      <div v-else-if="activeTab === 'documents'">
+        <TripDocumentsSection
+          :tripId="trip.id"
+          :tripStartDate="trip.startDate"
+          :tripEndDate="trip.endDate"
+        />
+      </div>
+
+      <!-- TAB 6: WEATHER -->
       <div v-else-if="activeTab === 'weather'">
         <TripWeatherSection
           :tripId="trip.id"
@@ -1529,6 +1595,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       :expenseSummary="expenseSummary"
       :packingItems="packingStore.items"
       :packingSummary="packingStore.summary"
+      :documents="currentTripDocuments"
+      :documentsSummary="currentTripDocumentsSummary"
       :weather="currentTripWeather"
       :matchedCountry="matchedCountry || null"
       :travelInfo="resolvedTravelInfo"

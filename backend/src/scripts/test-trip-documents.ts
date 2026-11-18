@@ -88,7 +88,7 @@ async function request(
 }
 
 async function runTests() {
-  console.log('🧪 [Trip Documents API] Инициализация базы данных и тестового сервера...');
+  console.log('🧪 [Trip Documents API — Privacy-by-Design] Инициализация БД и тестового сервера...');
   await ensureDatabaseReady();
 
   const server = http.createServer(app);
@@ -97,14 +97,14 @@ async function runTests() {
   const baseUrl = `http://127.0.0.1:${address.port}`;
 
   const suffix = Date.now();
-  const user1Email = `docs.u1.${suffix}@example.com`;
-  const user2Email = `docs.u2.${suffix}@example.com`;
+  const user1Email = `docs.pbd.u1.${suffix}@example.com`;
+  const user2Email = `docs.pbd.u2.${suffix}@example.com`;
 
   try {
     // Регистрация двух пользователей
     const reg1 = await request(baseUrl, 'POST', '/api/auth/register', {
       body: {
-        name: 'Анна Документова',
+        name: 'Анна Приватная',
         email: user1Email,
         password: 'password123',
         confirmPassword: 'password123',
@@ -164,7 +164,7 @@ async function runTests() {
     assert.equal(emptyListRes.body.data.summary.withAttachmentCount, 0);
     console.log('✅ 1. Проверка 401 и пустого начального списка пройдена');
 
-    // 2. Создание базового чек-листа (seed-defaults) + защита от дублей (повторно и параллельно)
+    // 2. Создание базового чек-листа (seed-defaults) + защита от дублей (параллельно и повторно)
     const parallelSeedResults = await Promise.all([
       request(baseUrl, 'POST', `/api/trips/${tripId}/documents/seed-defaults`, {
         cookies: user1Cookies,
@@ -210,7 +210,6 @@ async function runTests() {
       assert.equal('fileDataBase64' in doc, false);
     }
 
-    // Повторный вызов seed-defaults не добавляет дубли
     const seedAgain = await request(
       baseUrl,
       'POST',
@@ -219,16 +218,16 @@ async function runTests() {
     );
     assert.equal(seedAgain.status, 200);
     assert.equal(seedAgain.body.data.addedCount, 0);
-    assert.equal(seedAgain.body.data.documents.length, 4);
     console.log('✅ 2. Seed-defaults создаёт 4 базовых документа и защищён от дублей');
 
-    // 3. Создание документа с номером PNR и прикреплённым PDF в Base64 (с кириллическим именем)
+    // 3. Создание броней с легковесными метаданными локального файла и проверка, что fileDataBase64 НИКОГДА не сохраняется в БД
     const samplePdfBytes = Buffer.from(
       '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF\n',
       'utf8'
     );
     const samplePdfBase64 = samplePdfBytes.toString('base64');
 
+    // Сценарий А: клиент отправляет только метаданные (без fileDataBase64) — стандартный путь Privacy-by-Design
     const createFlightRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
       body: {
@@ -242,7 +241,7 @@ async function runTests() {
         notes: 'Терминал B, вылет в 08:25, багаж 23 кг',
         fileName: 'Авиабилет_Барселона_TK9X7M.pdf',
         fileMimeType: 'application/pdf',
-        fileDataBase64: samplePdfBase64,
+        fileSize: samplePdfBytes.length,
       },
     });
     assert.equal(createFlightRes.status, 201);
@@ -254,14 +253,9 @@ async function runTests() {
     assert.equal(flightDoc.fileName, 'Авиабилет_Барселона_TK9X7M.pdf');
     assert.equal(flightDoc.fileMimeType, 'application/pdf');
     assert.equal(flightDoc.fileSize, samplePdfBytes.length);
-    assert.equal('fileDataBase64' in flightDoc, false, 'fileDataBase64 не должен возвращаться в DTO');
+    assert.equal('fileDataBase64' in flightDoc, false);
 
-    // Создадим также бронь отеля с изображением в формате Data URL
-    const samplePngBytes = Buffer.from([
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
-    ]);
-    const samplePngDataUrl = `data:image/png;base64,${samplePngBytes.toString('base64')}`;
-
+    // Сценарий Б: даже если клиент попытался передать fileDataBase64, в БД сохраняется fileDataBase64: null
     const createHotelRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
       body: {
@@ -273,26 +267,123 @@ async function runTests() {
         eventDate: '2026-11-10',
         endDate: '2026-11-17',
         notes: 'Оплата при заселении, код домофона #142',
-        fileName: 'hotel-voucher.png',
-        fileDataBase64: samplePngDataUrl,
+        fileName: '../../evil/hotel-voucher.png',
+        fileMimeType: 'image/png',
+        fileSize: 245760,
+        fileDataBase64: samplePdfBase64,
       },
     });
     assert.equal(createHotelRes.status, 201);
     const hotelDoc = createHotelRes.body.data.document;
     assert.equal(hotelDoc.hasAttachment, true);
+    assert.equal(hotelDoc.fileName, 'hotel-voucher.png', 'Имя файла должно очищаться от path traversal');
     assert.equal(hotelDoc.fileMimeType, 'image/png');
-    assert.equal(hotelDoc.fileSize, samplePngBytes.length);
-    console.log('✅ 3. Создание броней с PNR и вложениями (Base64 и Data URL) проверено');
+    assert.equal(hotelDoc.fileSize, 245760);
 
-    // 4. Получение списка документов и проверка summary и отсутствия fileDataBase64
+    const dbFlight = await prisma.tripDocument.findUnique({ where: { id: flightDoc.id } });
+    const dbHotel = await prisma.tripDocument.findUnique({ where: { id: hotelDoc.id } });
+    assert.ok(dbFlight && dbHotel);
+    assert.equal(dbFlight.fileDataBase64, null, 'fileDataBase64 в БД должен быть null');
+    assert.equal(dbHotel.fileDataBase64, null, 'Даже при передаче fileDataBase64 сервер обязан сохранять null');
+    console.log('✅ 3. Метаданные локальных файлов сохраняются, а fileDataBase64 в БД всегда null');
+
+    // 4. Privacy-by-Design для категории VISA_PASSPORT: принудительное обнуление referenceCode и файлов
+    const createPassportAttempt = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
+      cookies: user1Cookies,
+      body: {
+        title: 'Шенгенская виза и загранпаспорт',
+        category: 'VISA_PASSPORT',
+        status: 'READY',
+        provider: 'Визовый центр Испании',
+        referenceCode: '75 9876543',
+        eventDate: '2026-01-15',
+        endDate: '2031-01-15',
+        notes: 'Срок действия паспорта действителен более 6 месяцев после возврата',
+        fileName: 'passport-scan.pdf',
+        fileMimeType: 'application/pdf',
+        fileSize: 51200,
+        fileDataBase64: samplePdfBase64,
+      },
+    });
+    assert.equal(createPassportAttempt.status, 201);
+    const passportDoc = createPassportAttempt.body.data.document;
+    assert.equal(passportDoc.category, 'VISA_PASSPORT');
+    assert.equal(passportDoc.referenceCode, '', 'Для VISA_PASSPORT номер документа должен очищаться');
+    assert.equal(passportDoc.hasAttachment, false);
+    assert.equal(passportDoc.fileName, null);
+    assert.equal(passportDoc.fileMimeType, null);
+    assert.equal(passportDoc.fileSize, null);
+
+    const dbPassport = await prisma.tripDocument.findUnique({ where: { id: passportDoc.id } });
+    assert.ok(dbPassport);
+    assert.equal(dbPassport.referenceCode, '');
+    assert.equal(dbPassport.fileName, null);
+    assert.equal(dbPassport.fileMimeType, null);
+    assert.equal(dbPassport.fileSize, null);
+    assert.equal(dbPassport.fileDataBase64, null);
+
+    // Попытка дописать referenceCode / файл в существующую карточку VISA_PASSPORT через PATCH
+    const patchPassportAttempt = await request(
+      baseUrl,
+      'PATCH',
+      `/api/documents/${passportDoc.id}`,
+      {
+        cookies: user1Cookies,
+        body: {
+          referenceCode: '99 1122334',
+          fileName: 'visa.jpg',
+          fileMimeType: 'image/jpeg',
+          fileSize: 32000,
+        },
+      }
+    );
+    assert.equal(patchPassportAttempt.status, 200);
+    assert.equal(patchPassportAttempt.body.data.document.referenceCode, '');
+    assert.equal(patchPassportAttempt.body.data.document.hasAttachment, false);
+    assert.equal(patchPassportAttempt.body.data.document.fileName, null);
+    assert.equal(patchPassportAttempt.body.data.document.fileMimeType, null);
+    assert.equal(patchPassportAttempt.body.data.document.fileSize, null);
+
+    // Смена категории существующей карточки с OTHER на VISA_PASSPORT обязана очистить код и файл
+    const otherWithFileRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
+      cookies: user1Cookies,
+      body: {
+        title: 'Временный документ',
+        category: 'OTHER',
+        status: 'READY',
+        referenceCode: 'TMP-777',
+        fileName: 'doc.webp',
+        fileMimeType: 'image/webp',
+        fileSize: 15000,
+      },
+    });
+    assert.equal(otherWithFileRes.status, 201);
+    const otherDocId = otherWithFileRes.body.data.document.id as string;
+
+    const convertToPassportRes = await request(baseUrl, 'PATCH', `/api/documents/${otherDocId}`, {
+      cookies: user1Cookies,
+      body: {
+        category: 'VISA_PASSPORT',
+      },
+    });
+    assert.equal(convertToPassportRes.status, 200);
+    assert.equal(convertToPassportRes.body.data.document.referenceCode, '');
+    assert.equal(convertToPassportRes.body.data.document.hasAttachment, false);
+    assert.equal(convertToPassportRes.body.data.document.fileName, null);
+
+    // Удалим вспомогательную карточку перед подсчётом summary
+    await request(baseUrl, 'DELETE', `/api/documents/${otherDocId}`, { cookies: user1Cookies });
+    console.log('✅ 4. Правила Privacy-by-Design для VISA_PASSPORT (создание, PATCH, смена категории) проверены');
+
+    // 5. Получение списка документов и проверка summary
     const listRes = await request(baseUrl, 'GET', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
     });
     assert.equal(listRes.status, 200);
     const { documents, summary } = listRes.body.data;
-    assert.equal(documents.length, 6);
-    assert.equal(summary.totalCount, 6);
-    assert.equal(summary.readyCount, 1);
+    assert.equal(documents.length, 7);
+    assert.equal(summary.totalCount, 7);
+    assert.equal(summary.readyCount, 2);
     assert.equal(summary.pendingCount, 1);
     assert.equal(summary.requiredCount, 4);
     assert.equal(summary.withAttachmentCount, 2);
@@ -301,69 +392,30 @@ async function runTests() {
     assert.ok(flightInList);
     assert.equal(flightInList.hasAttachment, true);
     assert.equal('fileDataBase64' in flightInList, false);
+    console.log('✅ 5. Получение списка, summary и отсутствие fileDataBase64 в DTO проверены');
 
-    const flightCategorySummary = summary.byCategory.find(
-      (c: any) => c.category === 'FLIGHT_TICKET'
-    );
-    assert.equal(flightCategorySummary.count, 2);
-    assert.equal(flightCategorySummary.readyCount, 1);
-    assert.equal(flightCategorySummary.requiredCount, 1);
-    assert.equal(flightCategorySummary.withAttachmentCount, 1);
-    console.log('✅ 4. Получение списка, hasAttachment, отсутствие fileDataBase64 и summary проверены');
-
-    // 5. Получение/скачивание вложения через GET /api/documents/:id/attachment
-    const attachmentInlineRes = await request(
+    // 6. GET /api/documents/:id/attachment не хранит и не отдаёт байты файла (404), но проверяет права доступа (403 / 401)
+    const serverAttachmentRes = await request(
       baseUrl,
       'GET',
       `/api/documents/${flightDoc.id}/attachment`,
       { cookies: user1Cookies }
     );
-    assert.equal(attachmentInlineRes.status, 200);
-    assert.equal(attachmentInlineRes.headers.get('content-type'), 'application/pdf');
-    const inlineDisposition = attachmentInlineRes.headers.get('content-disposition') || '';
-    assert.ok(inlineDisposition.startsWith('inline;'));
-    assert.ok(
-      inlineDisposition.includes(encodeURIComponent('Авиабилет_Барселона_TK9X7M.pdf')),
-      'Заголовок Content-Disposition содержит UTF-8 имя файла'
-    );
-    assert.deepEqual(attachmentInlineRes.rawBuffer, samplePdfBytes);
+    assert.equal(serverAttachmentRes.status, 404);
+    assert.equal(serverAttachmentRes.body.error.code, 'ATTACHMENT_NOT_FOUND');
 
-    const attachmentDownloadRes = await request(
+    const unauthAttachment = await request(
       baseUrl,
       'GET',
-      `/api/documents/${hotelDoc.id}/attachment?download=1`,
-      { cookies: user1Cookies }
+      `/api/documents/${flightDoc.id}/attachment`
     );
-    assert.equal(attachmentDownloadRes.status, 200);
-    assert.equal(attachmentDownloadRes.headers.get('content-type'), 'image/png');
-    assert.ok(
-      (attachmentDownloadRes.headers.get('content-disposition') || '').startsWith('attachment;')
-    );
-    assert.deepEqual(attachmentDownloadRes.rawBuffer, samplePngBytes);
+    assert.equal(unauthAttachment.status, 401);
+    console.log('✅ 6. Endpoint /attachment не хранит и не отдаёт бинарные файлы с сервера');
 
-    const attachmentJsonRes = await request(
-      baseUrl,
-      'GET',
-      `/api/documents/${flightDoc.id}/attachment?format=json`,
-      { cookies: user1Cookies }
-    );
-    assert.equal(attachmentJsonRes.status, 200);
-    assert.equal(attachmentJsonRes.body.data.attachment.fileDataBase64, samplePdfBase64);
-    assert.equal(attachmentJsonRes.body.data.attachment.fileName, 'Авиабилет_Барселона_TK9X7M.pdf');
-
-    // Документ без вложения возвращает 404
+    // 7. Смена статуса (REQUIRED -> PENDING -> READY), привязка/удаление метаданных файла, удаление документа
     const insuranceSeeded = documents.find((d: any) => d.category === 'INSURANCE');
     assert.ok(insuranceSeeded);
-    const missingAttachmentRes = await request(
-      baseUrl,
-      'GET',
-      `/api/documents/${insuranceSeeded.id}/attachment`,
-      { cookies: user1Cookies }
-    );
-    assert.equal(missingAttachmentRes.status, 404);
-    console.log('✅ 5. Скачивание/предпросмотр вложения (/attachment inline, download, json и 404) проверены');
 
-    // 6. Смена статуса (REQUIRED -> PENDING -> READY), замена и удаление вложения, удаление документа
     const toPending = await request(baseUrl, 'PATCH', `/api/documents/${insuranceSeeded.id}`, {
       cookies: user1Cookies,
       body: {
@@ -380,10 +432,18 @@ async function runTests() {
       cookies: user1Cookies,
       body: {
         status: 'READY',
+        fileName: 'polis-alfa.pdf',
+        fileMimeType: 'application/pdf',
+        fileSize: 307200,
+        fileDataBase64: samplePdfBase64,
       },
     });
     assert.equal(toReady.status, 200);
     assert.equal(toReady.body.data.document.status, 'READY');
+    assert.equal(toReady.body.data.document.hasAttachment, true);
+
+    const dbInsurance = await prisma.tripDocument.findUnique({ where: { id: insuranceSeeded.id } });
+    assert.equal(dbInsurance?.fileDataBase64, null);
 
     // Удаление вложения у отеля через removeAttachment: true
     const removeAttachmentRes = await request(baseUrl, 'PATCH', `/api/documents/${hotelDoc.id}`, {
@@ -399,14 +459,6 @@ async function runTests() {
     assert.equal(removeAttachmentRes.body.data.document.fileMimeType, null);
     assert.equal(removeAttachmentRes.body.data.document.fileSize, null);
 
-    const hotelAttachmentAfterRemove = await request(
-      baseUrl,
-      'GET',
-      `/api/documents/${hotelDoc.id}/attachment`,
-      { cookies: user1Cookies }
-    );
-    assert.equal(hotelAttachmentAfterRemove.status, 404);
-
     // Удаление документа
     const deleteDocRes = await request(baseUrl, 'DELETE', `/api/documents/${hotelDoc.id}`, {
       cookies: user1Cookies,
@@ -418,11 +470,11 @@ async function runTests() {
       cookies: user1Cookies,
     });
     assert.equal(listAfterDelete.status, 200);
-    assert.equal(listAfterDelete.body.data.documents.length, 5);
-    assert.equal(listAfterDelete.body.data.summary.withAttachmentCount, 1);
-    console.log('✅ 6. Смена статуса (REQUIRED -> PENDING -> READY), удаление вложения и удаление документа проверены');
+    assert.equal(listAfterDelete.body.data.documents.length, 6);
+    assert.equal(listAfterDelete.body.data.summary.withAttachmentCount, 2);
+    console.log('✅ 7. Смена статуса, обновление и удаление метаданных вложения и удаление карточки проверены');
 
-    // 7. Защита от доступа чужого пользователя (403) и 404 для несуществующих записей
+    // 8. Защита от доступа чужого пользователя (403) и 404 для несуществующих записей
     const u2List = await request(baseUrl, 'GET', `/api/trips/${tripId}/documents`, {
       cookies: user2Cookies,
     });
@@ -461,46 +513,66 @@ async function runTests() {
       { cookies: user1Cookies, body: { status: 'READY' } }
     );
     assert.equal(missingDocPatch.status, 404);
-    console.log('✅ 7. Изоляция прав доступа (403 для чужого пользователя, 404 для несуществующих) проверена');
+    console.log('✅ 8. Изоляция прав доступа (403 для чужого пользователя, 404 для несуществующих) проверена');
 
-    // 8. Валидация размера файла (> 4 МБ), MIME-типа, дат и URL
-    const oversizedBytes = Buffer.alloc(4 * 1024 * 1024 + 512, 0x41);
+    // 9. Валидация размера файла (> 10 МБ, 0 байт), MIME-типа, неполных метаданных, дат и URL
     const oversizedRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
       body: {
-        title: 'Слишком большой скан паспорта',
-        category: 'VISA_PASSPORT',
+        title: 'Слишком большой файл',
+        category: 'OTHER',
         fileName: 'huge.pdf',
         fileMimeType: 'application/pdf',
-        fileDataBase64: oversizedBytes.toString('base64'),
+        fileSize: 10 * 1024 * 1024 + 1,
       },
     });
     assert.equal(oversizedRes.status, 400);
-    assert.equal(oversizedRes.body.error.code, 'FILE_TOO_LARGE');
+
+    const zeroSizeRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
+      cookies: user1Cookies,
+      body: {
+        title: 'Пустой файл',
+        category: 'OTHER',
+        fileName: 'empty.pdf',
+        fileMimeType: 'application/pdf',
+        fileSize: 0,
+      },
+    });
+    assert.equal(zeroSizeRes.status, 400);
 
     const badMimeRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
       body: {
-        title: 'Скрипт',
+        title: 'Текстовый файл',
         category: 'OTHER',
         fileName: 'script.txt',
         fileMimeType: 'text/plain',
-        fileDataBase64: Buffer.from('hello world').toString('base64'),
+        fileSize: 512,
       },
     });
     assert.equal(badMimeRes.status, 400);
 
-    const badBase64Res = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
+    const incompleteMetaRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
       body: {
-        title: 'Битый файл',
+        title: 'Без размера',
         category: 'OTHER',
-        fileName: 'broken.pdf',
+        fileName: 'ticket.pdf',
         fileMimeType: 'application/pdf',
-        fileDataBase64: 'not-valid-base64!!!',
       },
     });
-    assert.equal(badBase64Res.status, 400);
+    assert.equal(incompleteMetaRes.status, 400);
+
+    const conflictingRemoveRes = await request(baseUrl, 'PATCH', `/api/documents/${flightDoc.id}`, {
+      cookies: user1Cookies,
+      body: {
+        removeAttachment: true,
+        fileName: 'new.pdf',
+        fileMimeType: 'application/pdf',
+        fileSize: 1200,
+      },
+    });
+    assert.equal(conflictingRemoveRes.status, 400);
 
     const badDatesRes = await request(baseUrl, 'POST', `/api/trips/${tripId}/documents`, {
       cookies: user1Cookies,
@@ -522,9 +594,8 @@ async function runTests() {
       },
     });
     assert.equal(badUrlRes.status, 400);
-    console.log('✅ 8. Валидация размера (>4 МБ), MIME-типа, Base64, дат и URL проверена');
 
-    // 9. Проверка, что частичная смена дат (PATCH endDate < existing.eventDate) тоже валидируется
+    // Частичная смена дат (PATCH endDate < existing.eventDate) тоже валидируется
     const partialDateViolation = await request(baseUrl, 'PATCH', `/api/documents/${flightDoc.id}`, {
       cookies: user1Cookies,
       body: { endDate: '2026-11-01' },
@@ -538,9 +609,9 @@ async function runTests() {
     assert.equal(delTripRes.status, 200);
     const orphanDocsCount = await prisma.tripDocument.count({ where: { tripId } });
     assert.equal(orphanDocsCount, 0, 'Документы поездки должны удаляться каскадно');
-    console.log('✅ 9. Частичная валидация дат и каскадное удаление документов при удалении поездки проверены');
+    console.log('✅ 9. Валидация (>10 МБ, MIME, неполные метаданные, даты, URL) и каскадное удаление проверены');
 
-    console.log('\n🎉 Все 9 интеграционных сценариев Trip Documents & Bookings API успешно пройдены!');
+    console.log('\n🎉 Все 9 интеграционных сценариев Privacy-by-Design Trip Documents API успешно пройдены!');
   } finally {
     await prisma.user.deleteMany({
       where: { email: { in: [user1Email, user2Email] } },

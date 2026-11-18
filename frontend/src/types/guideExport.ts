@@ -5,6 +5,8 @@ import type {
   PackingItem,
   PackingSummary,
   Trip,
+  TripDocumentDto,
+  TripDocumentsSummaryDto,
   TripExpense,
   TripExpenseSummary,
   TripWeatherResponseDto,
@@ -22,6 +24,7 @@ export interface GuideSectionsConfig {
   includeExpensesTable: boolean;
   includePackingList: boolean;
   onlyUnpackedItems: boolean;
+  includeDocuments: boolean;
   includeCountryInfo: boolean;
 }
 
@@ -46,6 +49,8 @@ export interface TripGuideDataPayload {
   expenseSummary: TripExpenseSummary | null;
   packingItems: PackingItem[];
   packingSummary: PackingSummary | null;
+  documents?: TripDocumentDto[];
+  documentsSummary?: TripDocumentsSummaryDto | null;
   weather: TripWeatherResponseDto | null;
   matchedCountry: CountryData | null;
   travelInfo: CountryTravelInfo | null;
@@ -64,7 +69,7 @@ export const GUIDE_PRESET_CONFIGS: Record<GuidePreset, GuidePresetMeta> = {
     id: 'guidebook',
     title: 'Красивый путеводитель',
     description:
-      'Обложка с фото, паспорт поездки, погода, маршрут по дням с событиями, бюджет, вещи и ключевая памятка.',
+      'Обложка с фото, паспорт поездки, погода, маршрут по дням с событиями, бюджет, вещи, брони и ключевая памятка.',
     badge: 'Рекомендуем',
     defaultSections: {
       includeCoverPhoto: true,
@@ -76,6 +81,7 @@ export const GUIDE_PRESET_CONFIGS: Record<GuidePreset, GuidePresetMeta> = {
       includeExpensesTable: false,
       includePackingList: true,
       onlyUnpackedItems: false,
+      includeDocuments: true,
       includeCountryInfo: true,
     },
   },
@@ -83,7 +89,7 @@ export const GUIDE_PRESET_CONFIGS: Record<GuidePreset, GuidePresetMeta> = {
     id: 'compact',
     title: 'Компактный маршрут',
     description:
-      'Минимум страниц: компактная шапка без обложки, события по дням, краткий бюджет и чек-лист вещей в 3 колонки.',
+      'Минимум страниц: компактная шапка без обложки, события по дням, краткий бюджет, чек-лист вещей и броней.',
     badge: 'Экономно',
     defaultSections: {
       includeCoverPhoto: false,
@@ -95,6 +101,7 @@ export const GUIDE_PRESET_CONFIGS: Record<GuidePreset, GuidePresetMeta> = {
       includeExpensesTable: false,
       includePackingList: true,
       onlyUnpackedItems: false,
+      includeDocuments: true,
       includeCountryInfo: false,
     },
   },
@@ -102,7 +109,7 @@ export const GUIDE_PRESET_CONFIGS: Record<GuidePreset, GuidePresetMeta> = {
     id: 'detailed',
     title: 'Подробный план поездки',
     description:
-      'Полный отчёт: все календарные дни, посуточная погода, таблица всех расходов, причины вещей и 7 секций памятки со ссылками.',
+      'Полный отчёт: все календарные дни, посуточная погода, таблица всех расходов, вещи, брони и 7 секций памятки со ссылками.',
     badge: 'Максимум',
     defaultSections: {
       includeCoverPhoto: true,
@@ -114,6 +121,7 @@ export const GUIDE_PRESET_CONFIGS: Record<GuidePreset, GuidePresetMeta> = {
       includeExpensesTable: true,
       includePackingList: true,
       onlyUnpackedItems: false,
+      includeDocuments: true,
       includeCountryInfo: true,
     },
   },

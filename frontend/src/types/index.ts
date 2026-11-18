@@ -469,5 +469,6 @@ export interface CountryData {
 }
 
 export * from './weather';
+export * from './document';
 export * from './guideExport';
 

@@ -72,7 +72,8 @@ const DEFAULT_CHECKLIST_TEMPLATES: ReadonlyArray<{
     title: 'Загранпаспорт и виза',
     category: DocumentCategory.VISA_PASSPORT,
     status: DocumentStatus.REQUIRED,
-    notes: 'Проверьте срок действия паспорта и при необходимости прикрепите копию визы.',
+    notes:
+      'Проверьте срок действия паспорта и наличие визы. В целях приватности сервис не сохраняет номера паспортов и сканы документов.',
   },
 ];
 
@@ -141,15 +142,6 @@ export interface TripDocumentsSummaryDto {
   byCategory: TripDocumentCategorySummary[];
 }
 
-export interface TripDocumentAttachmentDto {
-  id: string;
-  tripId: string;
-  fileName: string;
-  fileMimeType: string;
-  fileSize: number;
-  fileDataBase64: string;
-}
-
 function isAllowedMimeType(val: string): val is AllowedDocumentMimeType {
   return (ALLOWED_DOCUMENT_MIME_TYPES as readonly string[]).includes(val);
 }
@@ -173,52 +165,16 @@ export function sanitizeFileName(
   return cleaned || fallback;
 }
 
-function parseAndValidateAttachment(input: {
+function resolveAttachmentMetadata(input: {
   fileName?: string | null;
   fileMimeType?: string | null;
-  fileDataBase64: string;
+  fileSize?: number | null;
 }): {
   fileName: string;
   fileMimeType: AllowedDocumentMimeType;
   fileSize: number;
-  fileDataBase64: string;
 } {
-  let effectiveMime = input.fileMimeType ? input.fileMimeType.trim().toLowerCase() : null;
-  let rawBase64 = input.fileDataBase64.trim();
-
-  if (/^data:/i.test(rawBase64)) {
-    const match = /^data:([^;,]+)(?:;[^,]*)*;base64,([\s\S]*)$/i.exec(rawBase64);
-    if (!match) {
-      throw new AppError(
-        'Некорректный формат Data URL для вложения',
-        400,
-        'VALIDATION_ERROR',
-        { fileDataBase64: ['Ожидается корректный Base64 или Data URL с ;base64,'] }
-      );
-    }
-
-    const dataUrlMime = match[1].trim().toLowerCase();
-    if (!isAllowedMimeType(dataUrlMime)) {
-      throw new AppError(
-        'Поддерживаются только файлы форматов PDF, JPEG, PNG и WEBP',
-        400,
-        'INVALID_FILE_TYPE',
-        { fileMimeType: ['Допустимые форматы: application/pdf, image/jpeg, image/png, image/webp'] }
-      );
-    }
-
-    if (effectiveMime && effectiveMime !== dataUrlMime) {
-      throw new AppError(
-        'Указанный MIME-тип не совпадает с типом данных в Data URL',
-        400,
-        'VALIDATION_ERROR',
-        { fileMimeType: ['MIME-тип файла не соответствует Data URL'] }
-      );
-    }
-
-    effectiveMime = dataUrlMime;
-    rawBase64 = match[2];
-  }
+  const effectiveMime = input.fileMimeType ? input.fileMimeType.trim().toLowerCase() : null;
 
   if (!effectiveMime || !isAllowedMimeType(effectiveMime)) {
     throw new AppError(
@@ -229,67 +185,35 @@ function parseAndValidateAttachment(input: {
     );
   }
 
-  const cleanBase64 = rawBase64.replace(/\s+/g, '');
-  const maxBase64Chars = Math.ceil(MAX_DOCUMENT_ATTACHMENT_BYTES / 3) * 4;
-
-  if (cleanBase64.length > maxBase64Chars) {
-    throw new AppError(
-      'Размер прикреплённого файла не должен превышать 4 МБ',
-      400,
-      'FILE_TOO_LARGE',
-      { fileDataBase64: ['Максимально допустимый размер файла — 4 МБ'] }
-    );
-  }
-
+  const size = input.fileSize;
   if (
-    !cleanBase64 ||
-    cleanBase64.length % 4 !== 0 ||
-    !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$/.test(
-      cleanBase64
-    )
+    size === null ||
+    size === undefined ||
+    !Number.isInteger(size) ||
+    size <= 0 ||
+    size > MAX_DOCUMENT_ATTACHMENT_BYTES
   ) {
     throw new AppError(
-      'Некорректный формат содержимого файла (ожидается корректная строка Base64)',
+      'Размер локального файла должен быть целым числом от 1 байта до 10 МБ',
       400,
       'VALIDATION_ERROR',
-      { fileDataBase64: ['Содержимое файла должно быть в корректном формате Base64'] }
+      { fileSize: ['Укажите размер файла в байтах (от 1 до 10485760)'] }
     );
   }
-
-  const buffer = Buffer.from(cleanBase64, 'base64');
-
-  if (buffer.length === 0) {
-    throw new AppError(
-      'Прикреплённый файл не может быть пустым',
-      400,
-      'VALIDATION_ERROR',
-      { fileDataBase64: ['Файл не содержит данных'] }
-    );
-  }
-
-  if (buffer.length > MAX_DOCUMENT_ATTACHMENT_BYTES) {
-    throw new AppError(
-      'Размер прикреплённого файла не должен превышать 4 МБ',
-      400,
-      'FILE_TOO_LARGE',
-      { fileDataBase64: ['Максимально допустимый размер файла — 4 МБ'] }
-    );
-  }
-
-  const fileName = sanitizeFileName(input.fileName, effectiveMime);
 
   return {
-    fileName,
+    fileName: sanitizeFileName(input.fileName, effectiveMime),
     fileMimeType: effectiveMime,
-    fileSize: buffer.length,
-    fileDataBase64: cleanBase64,
+    fileSize: size,
   };
 }
 
 export function serializeTripDocument(doc: DocumentMetadataRow): TripDocumentDto {
   const categoryMeta = DOCUMENT_CATEGORY_META[doc.category] || DOCUMENT_CATEGORY_META.OTHER;
   const statusMeta = DOCUMENT_STATUS_META[doc.status] || DOCUMENT_STATUS_META.READY;
-  const hasAttachment = Boolean(doc.fileMimeType && doc.fileSize !== null && doc.fileSize > 0);
+  const isVisaPassport = doc.category === DocumentCategory.VISA_PASSPORT;
+  const hasAttachment =
+    !isVisaPassport && Boolean(doc.fileMimeType && doc.fileSize !== null && doc.fileSize > 0);
 
   return {
     id: doc.id,
@@ -300,7 +224,7 @@ export function serializeTripDocument(doc: DocumentMetadataRow): TripDocumentDto
     status: doc.status,
     statusNameRu: statusMeta.nameRu,
     provider: doc.provider || '',
-    referenceCode: doc.referenceCode || '',
+    referenceCode: isVisaPassport ? '' : doc.referenceCode || '',
     eventDate: doc.eventDate ? formatDateOnly(doc.eventDate) : null,
     endDate: doc.endDate ? formatDateOnly(doc.endDate) : null,
     externalUrl: doc.externalUrl || '',
@@ -366,7 +290,9 @@ export function computeDocumentsSummary(docs: DocumentMetadataRow[]): TripDocume
   };
 
   for (const doc of docs) {
-    const hasAttachment = Boolean(doc.fileMimeType && doc.fileSize !== null && doc.fileSize > 0);
+    const isVisaPassport = doc.category === DocumentCategory.VISA_PASSPORT;
+    const hasAttachment =
+      !isVisaPassport && Boolean(doc.fileMimeType && doc.fileSize !== null && doc.fileSize > 0);
     if (hasAttachment) withAttachmentCount += 1;
 
     if (doc.status === DocumentStatus.READY) readyCount += 1;
@@ -450,31 +376,31 @@ export class DocumentService {
   ): Promise<TripDocumentDto> {
     await TripService.getTripAndVerifyOwner(userId, tripId, false);
 
-    let attachmentData: {
+    const isVisaPassport = (payload.category as DocumentCategory) === DocumentCategory.VISA_PASSPORT;
+
+    let attachmentMeta: {
       fileName: string | null;
       fileMimeType: string | null;
       fileSize: number | null;
-      fileDataBase64: string | null;
     } = {
       fileName: null,
       fileMimeType: null,
       fileSize: null,
-      fileDataBase64: null,
     };
 
-    if (payload.fileDataBase64) {
-      attachmentData = parseAndValidateAttachment({
-        fileName: payload.fileName,
-        fileMimeType: payload.fileMimeType,
-        fileDataBase64: payload.fileDataBase64,
-      });
-    } else if (payload.fileMimeType || payload.fileName) {
-      throw new AppError(
-        'Для прикрепления файла необходимо передать его содержимое в Base64',
-        400,
-        'VALIDATION_ERROR',
-        { fileDataBase64: ['Передайте содержимое файла в поле fileDataBase64'] }
-      );
+    if (!isVisaPassport) {
+      const hasAnyAttachmentMeta =
+        Boolean(payload.fileName) ||
+        Boolean(payload.fileMimeType) ||
+        (payload.fileSize !== undefined && payload.fileSize !== null);
+
+      if (hasAnyAttachmentMeta) {
+        attachmentMeta = resolveAttachmentMetadata({
+          fileName: payload.fileName,
+          fileMimeType: payload.fileMimeType,
+          fileSize: payload.fileSize,
+        });
+      }
     }
 
     const created = await prisma.tripDocument.create({
@@ -484,15 +410,16 @@ export class DocumentService {
         category: payload.category as DocumentCategory,
         status: payload.status as DocumentStatus,
         provider: payload.provider ?? '',
-        referenceCode: payload.referenceCode ?? '',
+        referenceCode: isVisaPassport ? '' : (payload.referenceCode ?? ''),
         eventDate: payload.eventDate ? parseDateOnly(payload.eventDate) : null,
         endDate: payload.endDate ? parseDateOnly(payload.endDate) : null,
         externalUrl: payload.externalUrl ?? '',
         notes: payload.notes ?? '',
-        fileName: attachmentData.fileName,
-        fileMimeType: attachmentData.fileMimeType,
-        fileSize: attachmentData.fileSize,
-        fileDataBase64: attachmentData.fileDataBase64,
+        fileName: attachmentMeta.fileName,
+        fileMimeType: attachmentMeta.fileMimeType,
+        fileSize: attachmentMeta.fileSize,
+        // Privacy-by-Design: бинарное содержимое файлов никогда не сохраняется в БД
+        fileDataBase64: null,
       },
       select: DOCUMENT_METADATA_SELECT,
     });
@@ -529,13 +456,18 @@ export class DocumentService {
       );
     }
 
-    const dataToUpdate: Prisma.TripDocumentUpdateInput = {};
+    const effectiveCategory = (payload.category ?? existing.category) as DocumentCategory;
+    const isVisaPassport = effectiveCategory === DocumentCategory.VISA_PASSPORT;
+
+    const dataToUpdate: Prisma.TripDocumentUpdateInput = {
+      // Privacy-by-Design: бинарное содержимое файлов никогда не сохраняется в БД
+      fileDataBase64: null,
+    };
 
     if (payload.title !== undefined) dataToUpdate.title = payload.title;
     if (payload.category !== undefined) dataToUpdate.category = payload.category as DocumentCategory;
     if (payload.status !== undefined) dataToUpdate.status = payload.status as DocumentStatus;
     if (payload.provider !== undefined) dataToUpdate.provider = payload.provider;
-    if (payload.referenceCode !== undefined) dataToUpdate.referenceCode = payload.referenceCode;
     if (payload.eventDate !== undefined) {
       dataToUpdate.eventDate = payload.eventDate ? parseDateOnly(payload.eventDate) : null;
     }
@@ -545,38 +477,41 @@ export class DocumentService {
     if (payload.externalUrl !== undefined) dataToUpdate.externalUrl = payload.externalUrl;
     if (payload.notes !== undefined) dataToUpdate.notes = payload.notes;
 
-    if (payload.removeAttachment === true || payload.fileDataBase64 === null) {
+    if (isVisaPassport) {
+      // Privacy-by-Design: для категории VISA_PASSPORT принудительно очищаем номер и метаданные файлов
+      dataToUpdate.referenceCode = '';
       dataToUpdate.fileName = null;
       dataToUpdate.fileMimeType = null;
       dataToUpdate.fileSize = null;
-      dataToUpdate.fileDataBase64 = null;
-    } else if (typeof payload.fileDataBase64 === 'string' && payload.fileDataBase64.length > 0) {
-      const parsedFile = parseAndValidateAttachment({
-        fileName: payload.fileName,
-        fileMimeType: payload.fileMimeType,
-        fileDataBase64: payload.fileDataBase64,
-      });
-      dataToUpdate.fileName = parsedFile.fileName;
-      dataToUpdate.fileMimeType = parsedFile.fileMimeType;
-      dataToUpdate.fileSize = parsedFile.fileSize;
-      dataToUpdate.fileDataBase64 = parsedFile.fileDataBase64;
     } else {
-      if (payload.fileMimeType !== undefined && payload.fileMimeType !== null) {
-        throw new AppError(
-          'Для замены файла необходимо передать его содержимое в Base64',
-          400,
-          'VALIDATION_ERROR',
-          { fileDataBase64: ['Передайте содержимое нового файла в поле fileDataBase64'] }
-        );
+      if (payload.referenceCode !== undefined) {
+        dataToUpdate.referenceCode = payload.referenceCode;
       }
 
-      if (payload.fileName !== undefined) {
-        if (!existing.fileMimeType) {
+      if (
+        payload.removeAttachment === true ||
+        payload.fileMimeType === null ||
+        payload.fileSize === null
+      ) {
+        dataToUpdate.fileName = null;
+        dataToUpdate.fileMimeType = null;
+        dataToUpdate.fileSize = null;
+      } else if (payload.fileMimeType !== undefined || payload.fileSize !== undefined) {
+        const resolved = resolveAttachmentMetadata({
+          fileName: payload.fileName ?? existing.fileName,
+          fileMimeType: payload.fileMimeType ?? existing.fileMimeType,
+          fileSize: payload.fileSize ?? existing.fileSize,
+        });
+        dataToUpdate.fileName = resolved.fileName;
+        dataToUpdate.fileMimeType = resolved.fileMimeType;
+        dataToUpdate.fileSize = resolved.fileSize;
+      } else if (payload.fileName !== undefined) {
+        if (!existing.fileMimeType || !existing.fileSize || existing.fileSize <= 0) {
           throw new AppError(
             'Невозможно задать имя файла без прикреплённого вложения',
             400,
             'VALIDATION_ERROR',
-            { fileName: ['Сначала прикрепите файл'] }
+            { fileName: ['Сначала привяжите локальный файл'] }
           );
         }
         if (payload.fileName === null) {
@@ -612,52 +547,26 @@ export class DocumentService {
     return { deleted: true, id: documentId };
   }
 
-  static async getDocumentAttachment(
-    documentId: string,
-    userId: string
-  ): Promise<TripDocumentAttachmentDto> {
-    const doc = await prisma.tripDocument.findUnique({
-      where: { id: documentId },
-      select: {
-        id: true,
-        tripId: true,
-        fileName: true,
-        fileMimeType: true,
-        fileSize: true,
-        fileDataBase64: true,
-        trip: {
-          select: {
-            id: true,
-            userId: true,
-          },
-        },
-      },
-    });
+  static async getDocumentAttachment(documentId: string, userId: string): Promise<never> {
+    const doc = await this.getOwnedDocumentMetadata(documentId, userId);
 
-    if (!doc) {
-      throw new AppError('Документ или бронь не найдены', 404, 'DOCUMENT_NOT_FOUND');
+    if (doc.category === DocumentCategory.VISA_PASSPORT) {
+      throw new AppError(
+        'Для категории «Паспорт и виза» хранение файлов запрещено политикой Privacy-by-Design',
+        404,
+        'ATTACHMENT_NOT_FOUND'
+      );
     }
 
-    if (doc.trip.userId !== userId) {
-      throw new AppError('У вас нет прав доступа к этому документу', 403, 'FORBIDDEN');
+    if (doc.fileMimeType) {
+      throw new AppError(
+        'Содержимое файла хранится локально в браузере пользователя (IndexedDB) и не загружается на сервер',
+        404,
+        'ATTACHMENT_NOT_FOUND'
+      );
     }
 
-    if (!doc.fileDataBase64 || !doc.fileMimeType) {
-      throw new AppError('У этого документа нет прикреплённого файла', 404, 'ATTACHMENT_NOT_FOUND');
-    }
-
-    const safeFileName = isAllowedMimeType(doc.fileMimeType)
-      ? sanitizeFileName(doc.fileName, doc.fileMimeType)
-      : doc.fileName || 'attachment';
-
-    return {
-      id: doc.id,
-      tripId: doc.tripId,
-      fileName: safeFileName,
-      fileMimeType: doc.fileMimeType,
-      fileSize: doc.fileSize ?? Buffer.byteLength(doc.fileDataBase64, 'base64'),
-      fileDataBase64: doc.fileDataBase64,
-    };
+    throw new AppError('У этого документа нет прикреплённого файла', 404, 'ATTACHMENT_NOT_FOUND');
   }
 
   static async seedDefaultChecklist(tripId: string, userId: string) {

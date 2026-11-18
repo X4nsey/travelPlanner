@@ -9,7 +9,7 @@ export const ALLOWED_DOCUMENT_MIME_TYPES = [
 
 export type AllowedDocumentMimeType = (typeof ALLOWED_DOCUMENT_MIME_TYPES)[number];
 
-export const MAX_DOCUMENT_ATTACHMENT_BYTES = 4 * 1024 * 1024; // 4 МБ
+export const MAX_DOCUMENT_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10 МБ (локальное хранилище IndexedDB)
 
 const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -133,9 +133,9 @@ const optionalFileSizeSchema = z
     (val) =>
       val === undefined ||
       val === null ||
-      (Number.isFinite(val) && val >= 0 && val <= MAX_DOCUMENT_ATTACHMENT_BYTES),
+      (Number.isInteger(val) && val > 0 && val <= MAX_DOCUMENT_ATTACHMENT_BYTES),
     {
-      message: 'Размер прикреплённого файла не должен превышать 4 МБ',
+      message: 'Размер прикреплённого файла должен быть целым числом от 1 байта до 10 МБ',
     }
   );
 
@@ -226,9 +226,15 @@ export const updateDocumentSchema = z
   )
   .refine(
     (data) =>
-      !(data.removeAttachment === true && typeof data.fileDataBase64 === 'string' && data.fileDataBase64.length > 0),
+      !(
+        data.removeAttachment === true &&
+        ((typeof data.fileDataBase64 === 'string' && data.fileDataBase64.length > 0) ||
+          Boolean(data.fileName) ||
+          Boolean(data.fileMimeType) ||
+          (typeof data.fileSize === 'number' && data.fileSize > 0))
+      ),
     {
-      message: 'Нельзя одновременно удалить и загрузить вложение',
+      message: 'Нельзя одновременно удалить и прикрепить вложение',
       path: ['removeAttachment'],
     }
   )
@@ -246,7 +252,6 @@ export const updateDocumentSchema = z
       data.fileName !== undefined ||
       data.fileMimeType !== undefined ||
       data.fileSize !== undefined ||
-      data.fileDataBase64 !== undefined ||
       data.removeAttachment !== undefined,
     {
       message: 'Необходимо указать хотя бы одно поле для обновления',

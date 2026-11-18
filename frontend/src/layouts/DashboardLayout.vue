@@ -20,6 +20,7 @@ import { useTripStore } from '@/stores/trip.store';
 import { useCountryStore } from '@/stores/country.store';
 import { usePackingStore } from '@/stores/packing.store';
 import { useWeatherStore } from '@/stores/weather.store';
+import { useDocumentStore } from '@/stores/document.store';
 import { useToastStore } from '@/stores/toast.store';
 
 const authStore = useAuthStore();
@@ -27,6 +28,7 @@ const tripStore = useTripStore();
 const countryStore = useCountryStore();
 const packingStore = usePackingStore();
 const weatherStore = useWeatherStore();
+const documentStore = useDocumentStore();
 const toastStore = useToastStore();
 const route = useRoute();
 const router = useRouter();
@@ -113,6 +115,7 @@ async function handleLogout() {
   countryStore.clearFavoritesState();
   packingStore.clearState();
   weatherStore.clearState();
+  documentStore.clearState();
   toastStore.info('Вы вышли из аккаунта');
   router.push('/login');
 }

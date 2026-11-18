@@ -26,6 +26,8 @@ import {
   type PackingItem,
   type PackingSummary,
   type Trip,
+  type TripDocumentDto,
+  type TripDocumentsSummaryDto,
   type TripExpense,
   type TripExpenseSummary,
   type TripGuideDataPayload,
@@ -41,7 +43,7 @@ import {
 } from '@/utils/tripGuideGenerator';
 import BaseButton from '@/components/ui/BaseButton.vue';
 
-export type GuideReloadableSection = 'expenses' | 'packing' | 'weather' | 'travelInfo';
+export type GuideReloadableSection = 'expenses' | 'packing' | 'documents' | 'weather' | 'travelInfo';
 
 interface Props {
   open: boolean;
@@ -53,24 +55,30 @@ interface Props {
   expenseSummary: TripExpenseSummary | null;
   packingItems: PackingItem[];
   packingSummary: PackingSummary | null;
+  documents?: TripDocumentDto[];
+  documentsSummary?: TripDocumentsSummaryDto | null;
   weather: TripWeatherResponseDto | null;
   matchedCountry: CountryData | null;
   travelInfo: CountryTravelInfo | null;
   loadingStates?: {
     expenses?: boolean;
     packing?: boolean;
+    documents?: boolean;
     weather?: boolean;
     travelInfo?: boolean;
   };
   errorStates?: {
     expenses?: string | null;
     packing?: string | null;
+    documents?: string | null;
     weather?: string | null;
     travelInfo?: string | null;
   };
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  documents: () => [],
+  documentsSummary: null,
   loadingStates: () => ({}),
   errorStates: () => ({}),
 });
@@ -94,6 +102,7 @@ const SECTION_KEYS: readonly (keyof GuideSectionsConfig)[] = [
   'includeExpensesTable',
   'includePackingList',
   'onlyUnpackedItems',
+  'includeDocuments',
   'includeCountryInfo',
 ];
 
@@ -266,10 +275,23 @@ const packingTotals = computed(() => {
   return { total, packed, unpacked: total - packed };
 });
 
+const documentsTotals = computed(() => {
+  if (props.documentsSummary && (props.documentsSummary.totalCount > 0 || props.documents.length === 0)) {
+    return {
+      totalCount: props.documentsSummary.totalCount,
+      readyCount: props.documentsSummary.readyCount,
+    };
+  }
+  const totalCount = props.documents.length;
+  const readyCount = props.documents.filter((d) => d.status === 'READY').length;
+  return { totalCount, readyCount };
+});
+
 const anySectionLoading = computed(() =>
   Boolean(
     props.loadingStates.weather ||
       props.loadingStates.packing ||
+      props.loadingStates.documents ||
       props.loadingStates.expenses ||
       props.loadingStates.travelInfo
   )
@@ -279,6 +301,7 @@ const loadingLabels = computed(() => {
   const labels: string[] = [];
   if (props.loadingStates.weather) labels.push('погода');
   if (props.loadingStates.packing) labels.push('список вещей');
+  if (props.loadingStates.documents) labels.push('брони и документы');
   if (props.loadingStates.expenses) labels.push('расходы');
   if (props.loadingStates.travelInfo) labels.push('памятка о стране');
   return labels.join(', ');
@@ -293,6 +316,7 @@ const activeSectionsCount = computed(() => {
   if (current.includeItinerary) count += 1;
   if (current.includeBudgetSummary || current.includeExpensesTable) count += 1;
   if (current.includePackingList) count += 1;
+  if (current.includeDocuments) count += 1;
   if (current.includeCountryInfo) count += 1;
   return count;
 });
@@ -306,6 +330,8 @@ const guidePayload = computed<TripGuideDataPayload>(() => ({
   expenseSummary: props.expenseSummary,
   packingItems: props.packingItems,
   packingSummary: props.packingSummary,
+  documents: props.documents,
+  documentsSummary: props.documentsSummary,
   weather: props.weather,
   matchedCountry: props.matchedCountry,
   travelInfo: props.travelInfo,
@@ -722,6 +748,50 @@ function handleDownloadHtml() {
                       <button
                         type="button"
                         @click.prevent="emit('reload-section', 'packing')"
+                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
+                      >
+                        <RefreshCw class="w-3 h-3" />
+                        Повторить
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Documents & Bookings -->
+                  <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                      <input
+                        v-model="activeSections.includeDocuments"
+                        type="checkbox"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                      />
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                          <span class="text-sm font-semibold text-slate-800">Брони и чек-лист документов</span>
+                          <span
+                            v-if="loadingStates.documents"
+                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium"
+                          >
+                            <Loader2 class="w-3 h-3 animate-spin" />
+                            Загрузка
+                          </span>
+                          <span
+                            v-else
+                            class="text-[11px] font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full"
+                          >
+                            {{ documentsTotals.readyCount }}/{{ documentsTotals.totalCount }}
+                          </span>
+                        </div>
+                      </div>
+                    </label>
+
+                    <div
+                      v-if="!loadingStates.documents && errorStates.documents"
+                      class="pl-7 flex items-center justify-between gap-2"
+                    >
+                      <span class="text-[11px] text-rose-600 truncate">{{ errorStates.documents }}</span>
+                      <button
+                        type="button"
+                        @click.prevent="emit('reload-section', 'documents')"
                         class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
                       >
                         <RefreshCw class="w-3 h-3" />

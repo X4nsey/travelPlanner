@@ -4,6 +4,10 @@ import {
   getTripTypeLabelRu,
 } from '@/constants/packing';
 import {
+  getDocumentCategoryMeta,
+  getDocumentStatusMeta,
+} from '@/constants/documents';
+import {
   formatCurrency,
   formatDateRange,
   formatDaysLabel,
@@ -29,6 +33,8 @@ import type {
   PackingSummary,
   TravelInfoSection,
   Trip,
+  TripDocumentDto,
+  TripDocumentsSummaryDto,
   TripExpense,
   TripExpenseSummary,
   TripGuideDataPayload,
@@ -890,6 +896,130 @@ function renderPackingSection(
           : ''
       }
       ${contentMarkup}
+    </section>
+  `;
+}
+
+function computeDocumentTotals(
+  docs: TripDocumentDto[],
+  summary?: TripDocumentsSummaryDto | null
+) {
+  if (summary && (summary.totalCount > 0 || docs.length === 0)) {
+    return {
+      totalCount: summary.totalCount,
+      readyCount: summary.readyCount,
+      readinessPercentage: summary.readinessPercentage,
+    };
+  }
+  const totalCount = docs.length;
+  const readyCount = docs.filter((d) => d.status === 'READY').length;
+  return {
+    totalCount,
+    readyCount,
+    readinessPercentage: totalCount > 0 ? Math.round((readyCount / totalCount) * 1000) / 10 : 0,
+  };
+}
+
+function formatGuideDocumentDates(doc: TripDocumentDto): string {
+  if (doc.eventDate && doc.endDate) {
+    return doc.eventDate === doc.endDate
+      ? formatRussianDate(doc.eventDate)
+      : formatDateRange(doc.eventDate, doc.endDate);
+  }
+  if (doc.eventDate) {
+    return formatRussianDate(doc.eventDate);
+  }
+  if (doc.endDate) {
+    return `до ${formatRussianDate(doc.endDate)}`;
+  }
+  return '';
+}
+
+function renderDocumentsSection(payload: TripGuideDataPayload, preset: GuidePreset): string {
+  const docs = payload.documents || [];
+  const totals = computeDocumentTotals(docs, payload.documentsSummary);
+
+  if (docs.length === 0) {
+    return `
+      <section class="tp-section avoid-break">
+        <div class="tp-section-header">
+          <h2 class="tp-section-title">Брони и чек-лист документов</h2>
+          <span class="tp-section-pill">0/0</span>
+        </div>
+        <div class="tp-empty-card">
+          Брони и чек-лист документов для этой поездки пока не заполнены.
+        </div>
+      </section>
+    `;
+  }
+
+  const isCompact = preset === 'compact';
+
+  const cardsMarkup = docs
+    .map((doc) => {
+      const catMeta = getDocumentCategoryMeta(doc.category);
+      const statusMeta = getDocumentStatusMeta(doc.status);
+      const statusPillClass =
+        doc.status === 'READY'
+          ? 'tp-pill-emerald'
+          : doc.status === 'PENDING'
+            ? 'tp-pill-amber'
+            : 'tp-pill-rose';
+      const datesLabel = formatGuideDocumentDates(doc);
+      const safeRefCode =
+        doc.category !== 'VISA_PASSPORT' && doc.referenceCode ? doc.referenceCode.trim() : '';
+
+      return `
+        <article class="tp-doc-card avoid-break ${isCompact ? 'is-compact' : ''}">
+          <div class="tp-doc-card-top">
+            <span class="tp-doc-cat">${escapeHtml(doc.categoryNameRu || catMeta.nameRu)}</span>
+            <span class="tp-section-pill ${statusPillClass}">${escapeHtml(statusMeta.nameRu)}</span>
+          </div>
+          <h3 class="tp-doc-title">${escapeHtml(doc.title)}</h3>
+          ${doc.provider ? `<div class="tp-doc-provider">${escapeHtml(doc.provider)}</div>` : ''}
+          ${
+            safeRefCode || datesLabel
+              ? `
+                <div class="tp-doc-meta-row">
+                  ${
+                    safeRefCode
+                      ? `<span class="tp-doc-code">Код: <code>${escapeHtml(safeRefCode)}</code></span>`
+                      : ''
+                  }
+                  ${
+                    datesLabel
+                      ? `<span class="tp-doc-dates">${
+                          doc.category === 'VISA_PASSPORT' ? 'Срок: ' : 'Даты: '
+                        }${escapeHtml(datesLabel)}</span>`
+                      : ''
+                  }
+                </div>
+              `
+              : ''
+          }
+          ${doc.notes ? `<div class="tp-doc-notes">${escapeHtml(doc.notes)}</div>` : ''}
+        </article>
+      `;
+    })
+    .join('');
+
+  return `
+    <section class="tp-section">
+      <div class="tp-section-header avoid-break">
+        <div>
+          <h2 class="tp-section-title">Брони и чек-лист документов</h2>
+          <p class="tp-section-sub">
+            Готово ${totals.readyCount} из ${totals.totalCount} (${totals.readinessPercentage}%)
+          </p>
+        </div>
+        <span class="tp-section-pill">${totals.readyCount}/${totals.totalCount}</span>
+      </div>
+      <div class="tp-progress-track tp-pack-progress avoid-break">
+        <div class="tp-progress-fill" style="width:${Math.min(100, Math.max(0, totals.readinessPercentage))}%;background:#0d9488;"></div>
+      </div>
+      <div class="tp-docs-grid ${isCompact ? 'is-compact' : ''}">
+        ${cardsMarkup}
+      </div>
     </section>
   `;
 }
@@ -2095,6 +2225,113 @@ function getGuideStyles(preset: GuidePreset): string {
       color: #0f766e;
     }
 
+    /* Documents & Bookings */
+    .tp-docs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .tp-docs-grid.is-compact {
+      gap: 8px;
+    }
+
+    .tp-doc-card {
+      height: 100%;
+      box-sizing: border-box;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .tp-doc-card.is-compact {
+      padding: 8px 10px;
+      gap: 4px;
+    }
+
+    .tp-docs-grid > .tp-doc-card:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
+
+    .tp-doc-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tp-doc-cat {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #0f766e;
+    }
+
+    .tp-doc-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.3;
+    }
+
+    .tp-doc-provider {
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .tp-doc-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .tp-doc-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10.5px;
+      color: #334155;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+
+    .tp-doc-code code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .tp-doc-dates {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #475569;
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 2px 7px;
+    }
+
+    .tp-doc-notes {
+      font-size: 11px;
+      color: #475569;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 5px 8px;
+      white-space: pre-line;
+      margin-top: 2px;
+    }
+
     /* Country Travel Info */
     .tp-country-facts {
       display: grid;
@@ -2228,12 +2465,14 @@ function getGuideStyles(preset: GuidePreset): string {
       .tp-weather-grid.is-compact,
       .tp-pack-grid,
       .tp-pack-compact-grid,
+      .tp-docs-grid,
       .tp-country-grid,
       .tp-pack-grid > .tp-pack-card:last-child:nth-child(odd) .tp-pack-list {
         grid-template-columns: 1fr;
       }
 
       .tp-pack-grid > .tp-pack-card:last-child:nth-child(odd),
+      .tp-docs-grid > .tp-doc-card:last-child:nth-child(odd),
       .tp-country-grid:not(.is-detailed) > .tp-country-card:last-child:nth-child(odd) {
         grid-column: auto;
       }
@@ -2333,6 +2572,10 @@ export function buildTripGuideHtml(
 
   if (sections.includePackingList) {
     blocks.push(renderPackingSection(payload, sections.onlyUnpackedItems, preset));
+  }
+
+  if (sections.includeDocuments) {
+    blocks.push(renderDocumentsSection(payload, preset));
   }
 
   if (sections.includeCountryInfo) {
