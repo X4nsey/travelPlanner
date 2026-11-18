@@ -92,6 +92,8 @@ export interface TripExpense {
   categoryColor: string;
   amount: number;
   currency: Currency;
+  convertedAmount: number;
+  exchangeRateUsed: number;
   expenseDate: string; // YYYY-MM-DD
   description: string;
   createdAt: string;
@@ -108,6 +110,20 @@ export interface ExpenseCategoryStat {
   count: number;
 }
 
+export interface ExpenseDayStat {
+  date: string;
+  totalAmount: number;
+  count: number;
+}
+
+export interface ExpenseExchangeRatesInfo {
+  baseCurrency: Currency;
+  rates: Record<Currency, number>;
+  updatedAt: string;
+  source?: string;
+  isFallback: boolean;
+}
+
 export interface TripExpenseSummary {
   plannedBudget: number;
   totalSpent: number;
@@ -116,6 +132,10 @@ export interface TripExpenseSummary {
   status: 'under_budget' | 'near_budget' | 'over_budget';
   currency: Currency;
   byCategory: ExpenseCategoryStat[];
+  dailyAverage: number;
+  perTravelerAverage: number;
+  byDay: ExpenseDayStat[];
+  exchangeRates: ExpenseExchangeRatesInfo;
 }
 
 export interface ExpenseFormPayload {

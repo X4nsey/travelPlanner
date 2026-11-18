@@ -223,6 +223,15 @@ export async function ensureDatabaseReady(): Promise<void> {
     await applyMigrationFile('../../prisma/migrations/20261118000000_add_trip_documents/migration.sql');
     console.log('[Database] Миграция TripDocument успешно применена.');
   }
+
+  const exchangeRateCacheRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."ExchangeRateCache"')::text as reg`;
+  const exchangeRateCacheTableExists = Boolean(exchangeRateCacheRegResult?.[0]?.reg);
+
+  if (!exchangeRateCacheTableExists) {
+    console.log('[Database] Применяем миграцию кэша курсов валют (ExchangeRateCache)...');
+    await applyMigrationFile('../../prisma/migrations/20261119000000_add_exchange_rate_cache/migration.sql');
+    console.log('[Database] Миграция ExchangeRateCache успешно применена.');
+  }
 }
 
 export async function shutdownDatabase(): Promise<void> {

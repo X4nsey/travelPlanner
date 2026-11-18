@@ -36,6 +36,8 @@ import {
   Globe2,
   FileDown,
   FileCheck2,
+  ArrowRightLeft,
+  BarChart3,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
@@ -277,6 +279,47 @@ const filteredExpenses = computed(() => {
     return tripExpenses.value;
   }
   return tripExpenses.value.filter((e) => e.category === selectedCategoryFilter.value);
+});
+
+const hasForeignCurrencyExpenses = computed(() => {
+  if (!trip.value) return false;
+  return tripExpenses.value.some((exp) => exp.currency !== trip.value!.currency);
+});
+
+function formatRateNumber(val: number): string {
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: val >= 1 ? 2 : 4,
+  }).format(val);
+}
+
+const formattedExchangeRatesLine = computed(() => {
+  const ratesInfo = expenseSummary.value?.exchangeRates;
+  if (!ratesInfo || !trip.value) return '';
+  const base = trip.value.currency;
+  const rates = ratesInfo.rates;
+  const otherCurrencies = (['USD', 'EUR', 'RUB'] as const).filter((c) => c !== base);
+
+  return otherCurrencies
+    .map((curr) => {
+      const fromRate = rates[curr];
+      const baseRate = rates[base];
+      if (!fromRate || !baseRate) return '';
+      const direct = baseRate / fromRate;
+      if (direct < 0.1) {
+        const inverse = fromRate / baseRate;
+        return `1 ${base} = ${formatRateNumber(inverse)} ${curr}`;
+      }
+      return `1 ${curr} = ${formatRateNumber(direct)} ${base}`;
+    })
+    .filter(Boolean)
+    .join(' · ');
+});
+
+const maxDailyExpenseAmount = computed(() => {
+  const days = expenseSummary.value?.byDay || [];
+  if (days.length === 0) return 1;
+  return Math.max(1, ...days.map((d) => d.totalAmount));
 });
 
 async function loadCountryTravelInfo(force = false) {
@@ -1338,6 +1381,74 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           </div>
         </div>
 
+        <!-- Analytical Mini-Cards: Daily Average & Per Traveler Average -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                <CalendarDays class="w-5 h-5" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">В среднем в день</p>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">
+                  За {{ formatDaysLabel(trip.durationDays) }} поездки
+                </p>
+              </div>
+            </div>
+            <p class="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums shrink-0">
+              {{ formatCurrency(expenseSummary?.dailyAverage || 0, trip.currency) }}
+            </p>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <Users class="w-5 h-5" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">На 1 путешественника</p>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">
+                  Участников: {{ trip.travelersCount }}
+                </p>
+              </div>
+            </div>
+            <p class="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums shrink-0">
+              {{ formatCurrency(expenseSummary?.perTravelerAverage || 0, trip.currency) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Compact Exchange Rate Info Bar -->
+        <div
+          v-if="expenseSummary?.exchangeRates && formattedExchangeRatesLine"
+          class="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600"
+        >
+          <div class="flex flex-wrap items-center gap-2">
+            <ArrowRightLeft class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+            <span class="font-semibold text-slate-700">Курс пересчёта:</span>
+            <span class="font-medium text-slate-800 tabular-nums">{{ formattedExchangeRatesLine }}</span>
+            <span v-if="hasForeignCurrencyExpenses" class="text-slate-400">
+              (траты в других валютах пересчитаны в {{ trip.currency }})
+            </span>
+          </div>
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
+            :class="
+              expenseSummary.exchangeRates.isFallback
+                ? 'bg-amber-50 text-amber-800 border-amber-200/80'
+                : 'bg-teal-50 text-teal-800 border-teal-200/80'
+            "
+          >
+            {{
+              expenseSummary.exchangeRates.isFallback
+                ? 'Резервный курс'
+                : expenseSummary.exchangeRates.source === 'cbr'
+                  ? 'Курс ЦБ РФ'
+                  : 'Кэш курсов'
+            }}
+          </span>
+        </div>
+
         <!-- Over-budget warning banner if budget exceeded -->
         <div
           v-if="expenseSummary?.status === 'over_budget'"
@@ -1350,15 +1461,66 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           </div>
         </div>
 
-        <!-- Expenses Grid: Donut Chart on Left, Expenses History on Right -->
+        <!-- Expenses Grid: Donut Chart + Daily Dynamics on Left, Expenses History on Right -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <!-- Category Breakdown Chart Component -->
-          <div class="lg:col-span-5">
+          <!-- Category Breakdown Chart & Daily Dynamics Column -->
+          <div class="lg:col-span-5 space-y-6">
             <ExpenseCategoryChart
               :summary="expenseSummary"
               :selected-category="selectedCategoryFilter"
               @select-category="selectedCategoryFilter = $event"
             />
+
+            <!-- Daily Expenses Dynamics -->
+            <div
+              v-if="expenseSummary?.byDay && expenseSummary.byDay.length > 0"
+              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-4"
+            >
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <BarChart3 class="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-slate-900 text-base">Динамика расходов по дням</h3>
+                    <p class="text-xs text-slate-500">Все суммы приведены к {{ trip.currency }}</p>
+                  </div>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                  {{ formatDaysLabel(expenseSummary.byDay.length) }}
+                </span>
+              </div>
+
+              <div class="space-y-3">
+                <div
+                  v-for="day in expenseSummary.byDay"
+                  :key="day.date"
+                  class="space-y-1.5"
+                >
+                  <div class="flex items-center justify-between gap-2 text-xs sm:text-sm">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span class="font-semibold text-slate-800 truncate">
+                        {{ formatRussianDate(day.date) }}
+                      </span>
+                      <span class="text-[11px] font-medium text-slate-400 shrink-0">
+                        ({{ day.count }} опер.)
+                      </span>
+                    </div>
+                    <span class="font-extrabold text-slate-900 tabular-nums shrink-0">
+                      {{ formatCurrency(day.totalAmount, trip.currency) }}
+                    </span>
+                  </div>
+                  <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      class="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300"
+                      :style="{
+                        width: Math.max(4, Math.round((day.totalAmount / maxDailyExpenseAmount) * 100)) + '%',
+                      }"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- History of Expenses List -->
@@ -1508,9 +1670,18 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
                 <!-- Right: Amount and Action Buttons -->
                 <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0 sm:pl-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
-                  <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    {{ formatCurrency(exp.amount, exp.currency) }}
-                  </span>
+                  <div class="sm:text-right">
+                    <span class="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                      {{ formatCurrency(exp.amount, exp.currency) }}
+                    </span>
+                    <span
+                      v-if="exp.currency !== trip.currency"
+                      class="block text-xs font-semibold text-teal-700 mt-0.5 tabular-nums"
+                      :title="`Курс: 1 ${exp.currency} = ${exp.exchangeRateUsed} ${trip.currency}`"
+                    >
+                      ≈ {{ formatCurrency(exp.convertedAmount, trip.currency) }}
+                    </span>
+                  </div>
 
                   <!-- Actions -->
                   <div class="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity">

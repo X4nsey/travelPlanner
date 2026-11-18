@@ -152,11 +152,37 @@ function buildFallbackExpenseSummary(
   trip: Trip,
   expenses: TripExpense[]
 ): TripExpenseSummary {
-  const totalSpent = Math.round(expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0) * 100) / 100;
+  const dayMap = new Map<string, { total: number; count: number }>();
+  let rawTotal = 0;
+
+  for (const e of expenses) {
+    const val = typeof e.convertedAmount === 'number' ? e.convertedAmount : Number(e.amount || 0);
+    rawTotal += val;
+
+    const existing = dayMap.get(e.expenseDate) || { total: 0, count: 0 };
+    existing.total += val;
+    existing.count += 1;
+    dayMap.set(e.expenseDate, existing);
+  }
+
+  const totalSpent = Math.round(rawTotal * 100) / 100;
   const plannedBudget = Number(trip.budget || 0);
   const remainingBudget = Math.round((plannedBudget - totalSpent) * 100) / 100;
   const spentPercentage =
     plannedBudget > 0 ? Math.round((totalSpent / plannedBudget) * 1000) / 10 : 0;
+
+  const durationDays = Math.max(1, trip.durationDays || 1);
+  const travelersCount = Math.max(1, trip.travelersCount || 1);
+  const dailyAverage = Math.round((totalSpent / durationDays) * 100) / 100;
+  const perTravelerAverage = Math.round((totalSpent / travelersCount) * 100) / 100;
+
+  const byDay = Array.from(dayMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, stats]) => ({
+      date,
+      totalAmount: Math.round(stats.total * 100) / 100,
+      count: stats.count,
+    }));
 
   let status: TripExpenseSummary['status'] = 'under_budget';
   if (totalSpent > plannedBudget && plannedBudget > 0) {
@@ -173,6 +199,16 @@ function buildFallbackExpenseSummary(
     status,
     currency: trip.currency,
     byCategory: [],
+    dailyAverage,
+    perTravelerAverage,
+    byDay,
+    exchangeRates: {
+      baseCurrency: trip.currency,
+      rates: { RUB: 1, USD: 1, EUR: 1 },
+      updatedAt: new Date().toISOString(),
+      source: 'fallback',
+      isFallback: true,
+    },
   };
 }
 
@@ -626,6 +662,8 @@ function renderBudgetSummaryBlock(
           <span><strong>План:</strong> ${escapeHtml(formatCurrency(summary.plannedBudget, summary.currency))}</span>
           <span><strong>Потрачено:</strong> ${escapeHtml(formatCurrency(summary.totalSpent, summary.currency))}</span>
           <span><strong>Остаток:</strong> <span class="${summary.remainingBudget < 0 ? 'tp-text-rose' : 'tp-text-emerald'}">${escapeHtml(formatCurrency(summary.remainingBudget, summary.currency))}</span></span>
+          <span><strong>В день:</strong> ${escapeHtml(formatCurrency(summary.dailyAverage ?? 0, summary.currency))}</span>
+          <span><strong>На человека:</strong> ${escapeHtml(formatCurrency(summary.perTravelerAverage ?? 0, summary.currency))}</span>
           <span><strong>Освоено:</strong> ${summary.spentPercentage}%</span>
           <span class="tp-section-pill ${statusMeta.badgeClass}">${escapeHtml(statusMeta.label)}</span>
         </div>
@@ -684,6 +722,19 @@ function renderBudgetSummaryBlock(
       </div>
     </div>
 
+    <div class="tp-budget-analytics avoid-break">
+      <div class="tp-kpi-box">
+        <span class="tp-meta-label">В среднем в день</span>
+        <strong>${escapeHtml(formatCurrency(summary.dailyAverage ?? 0, summary.currency))}</strong>
+        <small>За ${escapeHtml(formatDaysLabel(trip.durationDays))}</small>
+      </div>
+      <div class="tp-kpi-box">
+        <span class="tp-meta-label">На 1 путешественника</span>
+        <strong>${escapeHtml(formatCurrency(summary.perTravelerAverage ?? 0, summary.currency))}</strong>
+        <small>${escapeHtml(formatTravelersLabel(trip.travelersCount))}</small>
+      </div>
+    </div>
+
     ${
       categoryRows
         ? `
@@ -712,8 +763,13 @@ function renderExpensesTableBlock(tripCurrency: Currency, expenses: TripExpense[
   const hasMixedCurrencies = sortedExpenses.some((e) => e.currency !== tripCurrency);
 
   const rows = sortedExpenses
-    .map(
-      (exp) => `
+    .map((exp) => {
+      const convertedMarkup =
+        exp.currency !== tripCurrency && typeof exp.convertedAmount === 'number'
+          ? `<div class="tp-col-amount-sub">≈ ${escapeHtml(formatCurrency(exp.convertedAmount, tripCurrency))}</div>`
+          : '';
+
+      return `
         <tr>
           <td class="tp-col-date">${escapeHtml(formatRussianDate(exp.expenseDate))}</td>
           <td>
@@ -723,10 +779,13 @@ function renderExpensesTableBlock(tripCurrency: Currency, expenses: TripExpense[
             </span>
           </td>
           <td>${exp.description ? escapeHtml(exp.description) : '<span class="tp-muted-text">—</span>'}</td>
-          <td class="tp-col-amount">${escapeHtml(formatCurrency(exp.amount, exp.currency))}</td>
+          <td class="tp-col-amount">
+            <div>${escapeHtml(formatCurrency(exp.amount, exp.currency))}</div>
+            ${convertedMarkup}
+          </td>
         </tr>
-      `
-    )
+      `;
+    })
     .join('');
 
   return `
@@ -747,7 +806,7 @@ function renderExpensesTableBlock(tripCurrency: Currency, expenses: TripExpense[
       </table>
       ${
         hasMixedCurrencies
-          ? `<p class="tp-table-footnote">Примечание: суммы указаны в исходной валюте каждой операции.</p>`
+          ? `<p class="tp-table-footnote">Примечание: суммы указаны в исходной валюте операции с эквивалентом в валюте поездки (${escapeHtml(tripCurrency)}).</p>`
           : ''
       }
     </div>
@@ -1852,6 +1911,14 @@ function getGuideStyles(preset: GuidePreset): string {
       margin-bottom: 14px;
     }
 
+    .tp-budget-analytics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+      gap: ${isCompact ? '10px' : '14px'};
+      margin-bottom: 14px;
+    }
+
     .tp-kpi-box {
       height: 100%;
       box-sizing: border-box;
@@ -2016,6 +2083,13 @@ function getGuideStyles(preset: GuidePreset): string {
       text-align: right !important;
       white-space: nowrap;
       font-weight: 700;
+    }
+
+    .tp-col-amount-sub {
+      font-size: 10px;
+      font-weight: 600;
+      color: #0f766e;
+      margin-top: 2px;
     }
 
     .tp-table-cat {

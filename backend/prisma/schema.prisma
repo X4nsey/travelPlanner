@@ -270,4 +270,12 @@ model TripDocument {
   @@index([tripId, status])
 }
 
+model ExchangeRateCache {
+  baseCurrency Currency @id
+  ratesJson    String   @db.Text
+  source       String   @default("cbr")
+  fetchedAt    DateTime @default(now())
+}
+
+
 
