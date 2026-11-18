@@ -1,4 +1,4 @@
-import { DocumentStatus, PackingItemSource, Prisma } from '@prisma/client';
+import { DocumentStatus, PackingItemSource, Prisma, TripType } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { AppError } from '../lib/errors';
 import { TRIP_TEMPLATES, findTripTemplateByIdOrSlug } from '../data/trip-templates';
@@ -14,6 +14,58 @@ import { DocumentService } from './document.service';
 
 export function formatDateOnly(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+export function getTodayDateOnlyStr(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export interface TravelCountryStatDto {
+  country: string;
+  tripsCount: number;
+  isCompleted: boolean;
+}
+
+export interface FeaturedTripSummaryDto {
+  id: string;
+  title: string;
+  country: string;
+  city: string;
+  startDate: string;
+  endDate: string;
+  durationDays: number;
+  travelersCount: number;
+  tripType: TripType | null;
+  timingStatus: 'ongoing' | 'upcoming';
+  daysUntilStart: number;
+  eventsCount: number;
+  packing: {
+    totalCount: number;
+    packedCount: number;
+    percentage: number;
+  };
+  documents: {
+    totalCount: number;
+    readyCount: number;
+    percentage: number;
+  };
+}
+
+export interface UserTravelStatsDto {
+  totalTrips: number;
+  upcomingTripsCount: number;
+  ongoingTripsCount: number;
+  completedTripsCount: number;
+  uniqueCountriesCount: number;
+  uniqueCitiesCount: number;
+  totalTravelDays: number;
+  totalEventsCount: number;
+  countries: TravelCountryStatDto[];
+  featuredTrip: FeaturedTripSummaryDto | null;
 }
 
 export function parseDateOnly(dateStr: string): Date {
@@ -481,5 +533,185 @@ export class TripService {
     });
 
     return serializeTrip(duplicatedTrip);
+  }
+
+  static async getUserTravelStats(userId: string): Promise<UserTravelStatsDto> {
+    const trips = await prisma.trip.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        title: true,
+        country: true,
+        city: true,
+        startDate: true,
+        endDate: true,
+        travelersCount: true,
+        tripType: true,
+        _count: {
+          select: {
+            events: true,
+          },
+        },
+        packingList: {
+          select: {
+            items: {
+              where: {
+                isDismissed: false,
+              },
+              select: {
+                isPacked: true,
+              },
+            },
+          },
+        },
+        documents: {
+          select: {
+            status: true,
+          },
+        },
+      },
+      orderBy: [{ startDate: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    const todayStr = getTodayDateOnlyStr();
+    const todayMs = parseDateOnly(todayStr).getTime();
+
+    let upcomingTripsCount = 0;
+    let ongoingTripsCount = 0;
+    let completedTripsCount = 0;
+    let totalTravelDays = 0;
+    let totalEventsCount = 0;
+
+    const countryMap = new Map<
+      string,
+      { country: string; tripsCount: number; isCompleted: boolean }
+    >();
+    const citySet = new Set<string>();
+
+    let firstOngoing: (typeof trips)[number] | null = null;
+    let firstUpcoming: (typeof trips)[number] | null = null;
+
+    for (const trip of trips) {
+      const startDateStr = formatDateOnly(trip.startDate);
+      const endDateStr = formatDateOnly(trip.endDate);
+      const durationDays = calculateDurationDays(startDateStr, endDateStr);
+
+      totalTravelDays += durationDays;
+      totalEventsCount += trip._count.events;
+
+      const isCompleted = endDateStr < todayStr;
+      const isOngoing = startDateStr <= todayStr && endDateStr >= todayStr;
+      const isUpcoming = startDateStr > todayStr;
+
+      if (isCompleted) {
+        completedTripsCount += 1;
+      } else if (isOngoing) {
+        ongoingTripsCount += 1;
+        if (!firstOngoing) {
+          firstOngoing = trip;
+        }
+      } else if (isUpcoming) {
+        upcomingTripsCount += 1;
+        if (!firstUpcoming) {
+          firstUpcoming = trip;
+        }
+      }
+
+      const trimmedCountry = trip.country.trim();
+      const countryKey = trimmedCountry.toLowerCase();
+      if (countryKey) {
+        const existingCountry = countryMap.get(countryKey);
+        if (existingCountry) {
+          existingCountry.tripsCount += 1;
+          if (isCompleted) {
+            existingCountry.isCompleted = true;
+          }
+        } else {
+          countryMap.set(countryKey, {
+            country: trimmedCountry,
+            tripsCount: 1,
+            isCompleted,
+          });
+        }
+      }
+
+      const trimmedCity = trip.city.trim();
+      const cityKey = trimmedCity.toLowerCase();
+      if (cityKey) {
+        citySet.add(`${countryKey}::${cityKey}`);
+      }
+    }
+
+    const countries: TravelCountryStatDto[] = Array.from(countryMap.values()).sort((a, b) => {
+      if (b.tripsCount !== a.tripsCount) return b.tripsCount - a.tripsCount;
+      if (a.isCompleted !== b.isCompleted) return a.isCompleted ? -1 : 1;
+      return a.country.localeCompare(b.country, 'ru');
+    });
+
+    const selectedFeatured = firstOngoing ?? firstUpcoming;
+    let featuredTrip: FeaturedTripSummaryDto | null = null;
+
+    if (selectedFeatured) {
+      const startDateStr = formatDateOnly(selectedFeatured.startDate);
+      const endDateStr = formatDateOnly(selectedFeatured.endDate);
+      const durationDays = calculateDurationDays(startDateStr, endDateStr);
+      const timingStatus: 'ongoing' | 'upcoming' = firstOngoing ? 'ongoing' : 'upcoming';
+      const daysUntilStart =
+        timingStatus === 'ongoing'
+          ? 0
+          : Math.max(
+              1,
+              Math.round((parseDateOnly(startDateStr).getTime() - todayMs) / (24 * 60 * 60 * 1000))
+            );
+
+      const packingItems = selectedFeatured.packingList?.items ?? [];
+      const packingTotal = packingItems.length;
+      const packingPacked = packingItems.filter((item) => item.isPacked).length;
+      const packingPercentage =
+        packingTotal > 0 ? Math.round((packingPacked / packingTotal) * 100) : 0;
+
+      const docs = selectedFeatured.documents;
+      const docsTotal = docs.length;
+      const docsReady = docs.filter((doc) => doc.status === DocumentStatus.READY).length;
+      const docsPercentage = docsTotal > 0 ? Math.round((docsReady / docsTotal) * 100) : 0;
+
+      featuredTrip = {
+        id: selectedFeatured.id,
+        title: selectedFeatured.title,
+        country: selectedFeatured.country,
+        city: selectedFeatured.city,
+        startDate: startDateStr,
+        endDate: endDateStr,
+        durationDays,
+        travelersCount: selectedFeatured.travelersCount,
+        tripType: selectedFeatured.tripType ?? null,
+        timingStatus,
+        daysUntilStart,
+        eventsCount: selectedFeatured._count.events,
+        packing: {
+          totalCount: packingTotal,
+          packedCount: packingPacked,
+          percentage: packingPercentage,
+        },
+        documents: {
+          totalCount: docsTotal,
+          readyCount: docsReady,
+          percentage: docsPercentage,
+        },
+      };
+    }
+
+    return {
+      totalTrips: trips.length,
+      upcomingTripsCount,
+      ongoingTripsCount,
+      completedTripsCount,
+      uniqueCountriesCount: countryMap.size,
+      uniqueCitiesCount: citySet.size,
+      totalTravelDays,
+      totalEventsCount,
+      countries,
+      featuredTrip,
+    };
   }
 }

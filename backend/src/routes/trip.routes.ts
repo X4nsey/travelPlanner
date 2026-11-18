@@ -13,6 +13,9 @@ router.get('/templates', TripController.listTemplates);
 
 router.use(requireAuth);
 
+// Агрегированная статистика путешественника (до /:id)
+router.get('/stats', TripController.getStats);
+
 // Создание поездки по шаблону (до /:id)
 router.post('/from-template', TripController.createFromTemplate);
 

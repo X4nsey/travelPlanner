@@ -9,6 +9,15 @@ import { TripService } from '../services/trip.service';
 import { sendSuccess } from '../lib/errors';
 
 export class TripController {
+  static async getStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const stats = await TripService.getUserTravelStats(req.user!.id);
+      return sendSuccess(res, { stats }, 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async listTemplates(_req: Request, res: Response, next: NextFunction) {
     try {
       const templates = TripService.listTemplates();

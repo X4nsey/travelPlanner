@@ -543,6 +543,50 @@ export interface CreateTripFromTemplatePayload {
   autoSeedDocuments?: boolean;
 }
 
+export interface TravelCountryStat {
+  country: string;
+  tripsCount: number;
+  isCompleted: boolean;
+}
+
+export interface FeaturedTripSummary {
+  id: string;
+  title: string;
+  country: string;
+  city: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  durationDays: number;
+  travelersCount: number;
+  tripType: TripType | null;
+  timingStatus: 'ongoing' | 'upcoming';
+  daysUntilStart: number;
+  eventsCount: number;
+  packing: {
+    totalCount: number;
+    packedCount: number;
+    percentage: number;
+  };
+  documents: {
+    totalCount: number;
+    readyCount: number;
+    percentage: number;
+  };
+}
+
+export interface UserTravelStats {
+  totalTrips: number;
+  upcomingTripsCount: number;
+  ongoingTripsCount: number;
+  completedTripsCount: number;
+  uniqueCountriesCount: number;
+  uniqueCitiesCount: number;
+  totalTravelDays: number;
+  totalEventsCount: number;
+  countries: TravelCountryStat[];
+  featuredTrip: FeaturedTripSummary | null;
+}
+
 export * from './weather';
 export * from './document';
 export * from './guideExport';

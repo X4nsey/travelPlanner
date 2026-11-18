@@ -8,6 +8,7 @@ import type {
   Trip,
   TripFormPayload,
   TripTemplate,
+  UserTravelStats,
 } from '@/types';
 import { tripService } from '@/services/trip.service';
 import { eventService } from '@/services/event.service';
@@ -23,6 +24,9 @@ export const useTripStore = defineStore('trips', () => {
   const templates = ref<TripTemplate[]>([]);
   const isLoadingTemplates = ref(false);
   const templatesError = ref<string | null>(null);
+  const stats = ref<UserTravelStats | null>(null);
+  const isLoadingStats = ref(false);
+  const statsError = ref<string | null>(null);
 
   const totalTripsCount = computed(() => trips.value.length);
 
@@ -72,10 +76,31 @@ export const useTripStore = defineStore('trips', () => {
     }
   }
 
+  async function fetchStats() {
+    isLoadingStats.value = true;
+    statsError.value = null;
+    try {
+      stats.value = await tripService.getStats();
+      return stats.value;
+    } catch (err: any) {
+      statsError.value = err?.message || 'Не удалось загрузить статистику путешественника';
+      throw err;
+    } finally {
+      isLoadingStats.value = false;
+    }
+  }
+
+  function refreshStatsInBackground() {
+    fetchStats().catch(() => {
+      // Non-blocking background refresh
+    });
+  }
+
   async function createTrip(payload: TripFormPayload) {
     const res = await tripService.createTrip(payload);
     trips.value.push(res.trip);
     trips.value.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    refreshStatsInBackground();
     return res;
   }
 
@@ -89,6 +114,7 @@ export const useTripStore = defineStore('trips', () => {
     if (currentTrip.value?.id === id) {
       currentTrip.value = res.trip;
     }
+    refreshStatsInBackground();
     return res;
   }
 
@@ -98,6 +124,7 @@ export const useTripStore = defineStore('trips', () => {
     if (currentTrip.value?.id === id) {
       currentTrip.value = null;
     }
+    refreshStatsInBackground();
     return res;
   }
 
@@ -123,6 +150,7 @@ export const useTripStore = defineStore('trips', () => {
       currentTrip.value.events = sortEventsList([...existing, res.event]);
       currentTrip.value.eventsCount = currentTrip.value.events.length;
     }
+    refreshStatsInBackground();
     return res;
   }
 
@@ -141,6 +169,7 @@ export const useTripStore = defineStore('trips', () => {
       currentTrip.value.events = currentTrip.value.events.filter((ev) => ev.id !== eventId);
       currentTrip.value.eventsCount = currentTrip.value.events.length;
     }
+    refreshStatsInBackground();
     return res;
   }
 
@@ -166,6 +195,7 @@ export const useTripStore = defineStore('trips', () => {
     trips.value.push(res.trip);
     trips.value.sort((a, b) => a.startDate.localeCompare(b.startDate));
     currentTrip.value = res.trip;
+    refreshStatsInBackground();
     return res;
   }
 
@@ -173,6 +203,7 @@ export const useTripStore = defineStore('trips', () => {
     const res = await tripService.duplicateTrip(tripId, payload);
     trips.value.push(res.trip);
     trips.value.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    refreshStatsInBackground();
     return res;
   }
 
@@ -181,6 +212,9 @@ export const useTripStore = defineStore('trips', () => {
     currentTrip.value = null;
     listError.value = null;
     detailError.value = null;
+    stats.value = null;
+    statsError.value = null;
+    isLoadingStats.value = false;
   }
 
   return {
@@ -193,11 +227,15 @@ export const useTripStore = defineStore('trips', () => {
     templates,
     isLoadingTemplates,
     templatesError,
+    stats,
+    isLoadingStats,
+    statsError,
     totalTripsCount,
     upcomingTripsCount,
     recentTrips,
     fetchTrips,
     fetchTripById,
+    fetchStats,
     createTrip,
     updateTrip,
     deleteTrip,

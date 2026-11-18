@@ -4,13 +4,11 @@ import { RouterLink, useRouter } from 'vue-router';
 import {
   Plus,
   Compass,
-  CalendarClock,
-  Map,
-  Heart,
   Globe2,
   BookOpen,
   ArrowRight,
   RefreshCw,
+  Sparkles,
 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth.store';
 import { useTripStore } from '@/stores/trip.store';
@@ -19,6 +17,7 @@ import { useToastStore } from '@/stores/toast.store';
 import type { DuplicateTripPayload, Trip } from '@/types';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import TripCard from '@/components/trips/TripCard.vue';
+import TravelerDashboardStats from '@/components/trips/TravelerDashboardStats.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
@@ -27,6 +26,10 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
 
 const DuplicateTripModal = defineAsyncComponent(
   () => import('@/components/trips/DuplicateTripModal.vue')
+);
+
+const TripTemplatesModal = defineAsyncComponent(
+  () => import('@/components/trips/TripTemplatesModal.vue')
 );
 
 const authStore = useAuthStore();
@@ -40,11 +43,16 @@ const isDeleting = ref(false);
 const tripToDuplicate = ref<Trip | null>(null);
 const isDuplicating = ref(false);
 const duplicateModalRef = ref<{ setError: (msg: string | null) => void } | null>(null);
+const templatesModalOpen = ref(false);
 
 onMounted(() => {
   tripStore.fetchTrips().catch(() => {
     // Error handled in tripStore.listError
   });
+  tripStore.fetchStats().catch(() => {
+    // Error handled in tripStore.statsError
+  });
+  countryStore.ensureCountriesLoaded().catch(() => {});
   countryStore.fetchFavorites().catch(() => {});
 });
 
@@ -77,6 +85,11 @@ async function handleDuplicateSubmit(payload: DuplicateTripPayload) {
   } finally {
     isDuplicating.value = false;
   }
+}
+
+function handleTemplateCreated(trip: Trip) {
+  templatesModalOpen.value = false;
+  router.push(`/trips/${trip.id}`);
 }
 
 async function confirmDeleteTrip() {
@@ -130,54 +143,8 @@ async function confirmDeleteTrip() {
         </div>
       </div>
 
-      <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div
-          class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-soft flex items-center gap-4"
-        >
-          <div class="w-13 h-13 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 p-3.5">
-            <Map class="w-6 h-6" />
-          </div>
-          <div>
-            <p class="text-sm font-medium text-slate-500">Всего созданных поездок</p>
-            <p class="text-3xl font-extrabold text-slate-900 mt-0.5">
-              {{ tripStore.totalTripsCount }}
-            </p>
-          </div>
-        </div>
-
-        <div
-          class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-soft flex items-center gap-4"
-        >
-          <div class="w-13 h-13 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 p-3.5">
-            <CalendarClock class="w-6 h-6" />
-          </div>
-          <div>
-            <p class="text-sm font-medium text-slate-500">Предстоящих и текущих</p>
-            <p class="text-3xl font-extrabold text-slate-900 mt-0.5">
-              {{ tripStore.upcomingTripsCount }}
-            </p>
-          </div>
-        </div>
-
-        <RouterLink
-          to="/favorites"
-          class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-soft flex items-center justify-between gap-4 hover:border-teal-200 hover:shadow-card transition-all group"
-        >
-          <div class="flex items-center gap-4">
-            <div class="w-13 h-13 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 p-3.5">
-              <Heart class="w-6 h-6" />
-            </div>
-            <div>
-              <p class="text-sm font-medium text-slate-500">Избранных стран</p>
-              <p class="text-3xl font-extrabold text-slate-900 mt-0.5">
-                {{ countryStore.favoriteSlugs.length }}
-              </p>
-            </div>
-          </div>
-          <ArrowRight class="w-5 h-5 text-slate-300 group-hover:text-teal-600 transition-colors" />
-        </RouterLink>
-      </div>
+      <!-- Traveler Aggregated Stats & Featured Trip Command Center -->
+      <TravelerDashboardStats @open-templates="templatesModalOpen = true" />
 
       <!-- Interactive World Banner -->
       <div
@@ -257,6 +224,10 @@ async function confirmDeleteTrip() {
                 <span>Создать первую поездку</span>
               </BaseButton>
             </RouterLink>
+            <BaseButton variant="secondary" size="lg" @click="templatesModalOpen = true">
+              <Sparkles class="w-5 h-5" />
+              <span>Готовые маршруты</span>
+            </BaseButton>
             <RouterLink to="/explore">
               <BaseButton variant="outline" size="lg">
                 <Globe2 class="w-5 h-5 text-teal-600" />
@@ -316,6 +287,12 @@ async function confirmDeleteTrip() {
       :loading="isDuplicating"
       @close="tripToDuplicate = null"
       @submit="handleDuplicateSubmit"
+    />
+
+    <TripTemplatesModal
+      :open="templatesModalOpen"
+      @close="templatesModalOpen = false"
+      @created="handleTemplateCreated"
     />
   </DashboardLayout>
 </template>

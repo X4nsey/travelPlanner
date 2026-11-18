@@ -6,9 +6,15 @@ import type {
   Trip,
   TripFormPayload,
   TripTemplate,
+  UserTravelStats,
 } from '@/types';
 
 export const tripService = {
+  async getStats(): Promise<UserTravelStats> {
+    const { data } = await apiClient.get<ApiSuccessResponse<{ stats: UserTravelStats }>>('/trips/stats');
+    return data.data.stats;
+  },
+
   async getTemplates(): Promise<TripTemplate[]> {
     const { data } = await apiClient.get<ApiSuccessResponse<{ templates: TripTemplate[] }>>('/trips/templates');
     return data.data.templates;

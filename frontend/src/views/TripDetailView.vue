@@ -378,20 +378,21 @@ function loadTrip() {
 }
 
 function syncTabFromQuery(tabQuery: unknown) {
-  if (tabQuery === 'country') {
+  const normalized = Array.isArray(tabQuery) ? tabQuery[0] : tabQuery;
+  if (normalized === 'country') {
     activeTab.value = 'travel-info';
     return;
   }
   if (
-    tabQuery === 'overview' ||
-    tabQuery === 'itinerary' ||
-    tabQuery === 'expenses' ||
-    tabQuery === 'packing' ||
-    tabQuery === 'documents' ||
-    tabQuery === 'weather' ||
-    tabQuery === 'travel-info'
+    normalized === 'overview' ||
+    normalized === 'itinerary' ||
+    normalized === 'expenses' ||
+    normalized === 'packing' ||
+    normalized === 'documents' ||
+    normalized === 'weather' ||
+    normalized === 'travel-info'
   ) {
-    activeTab.value = tabQuery;
+    activeTab.value = normalized;
   }
 }
 
