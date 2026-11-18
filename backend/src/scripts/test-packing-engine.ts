@@ -5,6 +5,7 @@ import {
   PackingGenerationResult,
 } from '../services/packing-engine.service';
 import { PACKING_RULES_CATALOG } from '../data/packing-rules.data';
+import { TRIP_TEMPLATES } from '../data/trip-templates';
 
 function findByKey(res: PackingGenerationResult, ruleKey: string) {
   return res.items.find((item) => item.ruleKey === ruleKey);
@@ -589,7 +590,132 @@ function runTests() {
     console.log('✅ Сценарий 10: Отсутствие ложных срабатываний + зимний спорт и кемпинг — пройдено.');
   }
 
-  console.log('\n🎉 Все 11 тестовых сценариев движка Smart Packing List успешно пройдены!');
+  // 12. Точность правил деловой и вечерней одежды (защита от ложных срабатываний на ресторанах/ужинах и шаблонных маршрутах)
+  {
+    // 12a. Все 7 кураторских шаблонов не должны ложно добавлять деловой костюм или smart casual
+    for (const tpl of TRIP_TEMPLATES) {
+      const start = new Date('2026-06-10T00:00:00.000Z');
+      const end = new Date(start.getTime() + (tpl.durationDays - 1) * 24 * 60 * 60 * 1000);
+      const res = PackingEngineService.generateRecommendations({
+        title: tpl.title,
+        country: tpl.country,
+        city: tpl.city,
+        startDate: start,
+        endDate: end,
+        travelersCount: 2,
+        tripType: tpl.tripType,
+        description: tpl.summary,
+        weatherContext: null,
+        events: tpl.events.map((ev) => ({
+          title: ev.title,
+          description: ev.description,
+          location: ev.location,
+        })),
+      });
+      assertNoDuplicatesOrMedicalViolations(res);
+      assert.ok(
+        !hasActivity(res, 'business'),
+        `Шаблон «${tpl.id}» не должен ложно распознаваться как деловая поездка`
+      );
+      assert.ok(
+        !hasActivity(res, 'evening_out'),
+        `Шаблон «${tpl.id}» не должен ложно требовать вечерний дресс-код`
+      );
+      assert.ok(
+        !findByKey(res, 'cloth:business_attire'),
+        `Шаблон «${tpl.id}» не должен добавлять деловой костюм`
+      );
+      assert.ok(
+        !findByKey(res, 'cloth:smart_casual'),
+        `Шаблон «${tpl.id}» не должен добавлять smart casual`
+      );
+      assert.ok(
+        !findByKey(res, 'foot:business_shoes'),
+        `Шаблон «${tpl.id}» не должен добавлять классическую деловую обувь`
+      );
+    }
+
+    // 12b. Обычные рестораны, кафе, вечерние ужины, бизнес-ланчи и исторические форумы не добавляют деловую/вечернюю одежду
+    const casualDining = PackingEngineService.generateRecommendations({
+      title: 'Прогулки по Риму и гастрономия',
+      country: 'Италия',
+      city: 'Рим',
+      startDate: '2026-07-01',
+      endDate: '2026-07-04',
+      travelersCount: 2,
+      tripType: TripType.SIGHTSEEING,
+      description: 'Римский форум, античные форумы, прогулка по деловому центру и уютные кафе.',
+      events: [
+        { title: 'Колизей и Римский форум', description: 'Экскурсия по древнему форуму' },
+        { title: 'Ужин в ресторане на набережной', description: 'Вечерний ужин в семейном ресторане и кафе' },
+        { title: 'Бизнес-ланч и перелёт бизнес-классом', description: 'Ожидание в business lounge перед вылетом' },
+      ],
+    });
+    assertNoDuplicatesOrMedicalViolations(casualDining);
+    assert.ok(!hasActivity(casualDining, 'business'), 'Обычные ужины, бизнес-ланч и Римский форум не включают business');
+    assert.ok(!hasActivity(casualDining, 'evening_out'), 'Обычный ресторан и вечерний ужин не включают evening_out');
+    assert.ok(!findByKey(casualDining, 'cloth:business_attire'));
+    assert.ok(!findByKey(casualDining, 'cloth:smart_casual'));
+
+    // 12c. Явные триггеры деловых мероприятий и строгого/вечернего дресс-кода работают корректно
+    const businessTriggers = [
+      'Бизнес-встреча с клиентом',
+      'Переговоры в головном офисе',
+      'Международная конференция',
+      'Экономический форум',
+      'Технологический саммит',
+      'Деловой ужин с партнёрами',
+      'Business meeting downtown',
+      'Annual conference keynote',
+    ];
+    for (const evTitle of businessTriggers) {
+      const res = PackingEngineService.generateRecommendations({
+        title: 'Поездка',
+        country: 'Германия',
+        city: 'Мюнхен',
+        startDate: '2026-09-01',
+        endDate: '2026-09-03',
+        travelersCount: 1,
+        tripType: TripType.SIGHTSEEING,
+        events: [{ title: evTitle }],
+      });
+      assert.ok(
+        hasActivity(res, 'business') && Boolean(findByKey(res, 'cloth:business_attire')),
+        `Событие «${evTitle}» должно рекомендовать деловую одежду`
+      );
+    }
+
+    const formalEveningTriggers = [
+      'Поход в театр на премьеру',
+      'Посещение Венской оперы',
+      'Концерт в филармонии',
+      'Торжественный гала-ужин',
+      'Вечерний приём (дресс-код: black tie)',
+      'Charity dinner with dress code',
+      'Broadway theater show',
+      'Milan opera evening',
+    ];
+    for (const evTitle of formalEveningTriggers) {
+      const res = PackingEngineService.generateRecommendations({
+        title: 'Выходные в Европе',
+        country: 'Австрия',
+        city: 'Вена',
+        startDate: '2026-09-10',
+        endDate: '2026-09-12',
+        travelersCount: 1,
+        tripType: TripType.SIGHTSEEING,
+        events: [{ title: evTitle }],
+      });
+      assert.ok(
+        hasActivity(res, 'evening_out') && Boolean(findByKey(res, 'cloth:smart_casual')),
+        `Событие «${evTitle}» должно рекомендовать комплект для вечернего выхода`
+      );
+    }
+
+    console.log('✅ Сценарий 12: Точность правил деловой/вечерней одежды и отсутствие ложных срабатываний на шаблонах — пройдено.');
+  }
+
+  console.log('\n🎉 Все 12 тестовых сценариев движка Smart Packing List успешно пройдены!');
 }
 
 runTests();

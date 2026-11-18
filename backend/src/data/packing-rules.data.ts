@@ -415,7 +415,8 @@ export const PACKING_RULES_CATALOG: PackingRuleDefinition[] = [
     computeBaseQuantity: () => 1,
     buildReason: (ctx) =>
       joinReasons([
-        ctx.activityReasons.evening_out || 'Запланирован вечерний выход / театр / ресторан',
+        ctx.activityReasons.evening_out ||
+          'Запланирован вечерний выход, театр или мероприятие с дресс-кодом',
         formatPeopleNote(ctx),
       ]),
   },
