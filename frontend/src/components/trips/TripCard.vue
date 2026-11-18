@@ -9,6 +9,7 @@ import {
   Pencil,
   Trash2,
   Clock,
+  Copy,
 } from 'lucide-vue-next';
 import type { Trip } from '@/types';
 import {
@@ -32,6 +33,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'open', id: string): void;
   (e: 'edit', id: string): void;
+  (e: 'duplicate', trip: Trip): void;
   (e: 'delete', trip: Trip): void;
 }>();
 
@@ -115,6 +117,15 @@ const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.tr
       </BaseButton>
 
       <div v-if="!compact" class="flex items-center gap-1">
+        <button
+          type="button"
+          @click="emit('duplicate', trip)"
+          class="p-2 rounded-xl text-slate-500 hover:text-teal-700 hover:bg-teal-50 border border-transparent hover:border-teal-200 transition-colors"
+          title="Дублировать поездку"
+        >
+          <Copy class="w-4 h-4" />
+        </button>
+
         <button
           type="button"
           @click="emit('edit', trip.id)"

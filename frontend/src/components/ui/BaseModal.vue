@@ -5,7 +5,7 @@ import { X } from 'lucide-vue-next';
 interface Props {
   open: boolean;
   title: string;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -35,6 +35,9 @@ const maxWidthClass: Record<string, string> = {
   md: 'max-w-lg',
   lg: 'max-w-xl',
   xl: 'max-w-2xl',
+  '2xl': 'max-w-3xl',
+  '3xl': 'max-w-4xl',
+  '4xl': 'max-w-5xl',
 };
 </script>
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, defineAsyncComponent } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { Plus, Search, Compass, RefreshCw } from 'lucide-vue-next';
+import { Plus, Search, Compass, RefreshCw, Sparkles } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { useToastStore } from '@/stores/toast.store';
-import type { Trip } from '@/types';
+import type { DuplicateTripPayload, Trip } from '@/types';
 import { getTodayIso } from '@/composables/useFormatters';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import TripCard from '@/components/trips/TripCard.vue';
@@ -14,6 +14,14 @@ import BaseAlert from '@/components/ui/BaseAlert.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
 
+const DuplicateTripModal = defineAsyncComponent(
+  () => import('@/components/trips/DuplicateTripModal.vue')
+);
+
+const TripTemplatesModal = defineAsyncComponent(
+  () => import('@/components/trips/TripTemplatesModal.vue')
+);
+
 const tripStore = useTripStore();
 const toastStore = useToastStore();
 const router = useRouter();
@@ -22,6 +30,12 @@ const searchQuery = ref('');
 const statusFilter = ref<'all' | 'upcoming' | 'past'>('all');
 const tripToDelete = ref<Trip | null>(null);
 const isDeleting = ref(false);
+
+const tripToDuplicate = ref<Trip | null>(null);
+const isDuplicating = ref(false);
+const duplicateModalRef = ref<{ setError: (msg: string | null) => void } | null>(null);
+
+const templatesModalOpen = ref(false);
 
 onMounted(() => {
   tripStore.fetchTrips().catch(() => {
@@ -61,6 +75,30 @@ function promptDeleteTrip(trip: Trip) {
   tripToDelete.value = trip;
 }
 
+function promptDuplicateTrip(trip: Trip) {
+  tripToDuplicate.value = trip;
+}
+
+async function handleDuplicateSubmit(payload: DuplicateTripPayload) {
+  if (!tripToDuplicate.value) return;
+  isDuplicating.value = true;
+  try {
+    const res = await tripStore.duplicateTrip(tripToDuplicate.value.id, payload);
+    toastStore.success('Копия поездки успешно создана');
+    tripToDuplicate.value = null;
+    router.push(`/trips/${res.trip.id}`);
+  } catch (err: any) {
+    duplicateModalRef.value?.setError(err?.message || 'Не удалось дублировать поездку');
+  } finally {
+    isDuplicating.value = false;
+  }
+}
+
+function handleTemplateCreated(trip: Trip) {
+  templatesModalOpen.value = false;
+  router.push(`/trips/${trip.id}`);
+}
+
 async function confirmDeleteTrip() {
   if (!tripToDelete.value) return;
   isDeleting.value = true;
@@ -88,12 +126,19 @@ async function confirmDeleteTrip() {
           </p>
         </div>
 
-        <RouterLink to="/trips/new" class="shrink-0">
-          <BaseButton variant="primary" size="md">
-            <Plus class="w-4 h-4" />
-            <span>Создать поездку</span>
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+          <BaseButton variant="secondary" size="md" @click="templatesModalOpen = true">
+            <Sparkles class="w-4 h-4" />
+            <span>Готовые маршруты</span>
           </BaseButton>
-        </RouterLink>
+
+          <RouterLink to="/trips/new">
+            <BaseButton variant="primary" size="md">
+              <Plus class="w-4 h-4" />
+              <span>Создать поездку</span>
+            </BaseButton>
+          </RouterLink>
+        </div>
       </div>
 
       <!-- Filters Bar (only shown if user has at least 1 trip) -->
@@ -180,12 +225,18 @@ async function confirmDeleteTrip() {
           <Compass class="w-7 h-7" />
         </template>
         <template #action>
-          <RouterLink to="/trips/new">
-            <BaseButton variant="primary" size="lg">
-              <Plus class="w-5 h-5" />
-              <span>Создать новую поездку</span>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <RouterLink to="/trips/new">
+              <BaseButton variant="primary" size="lg">
+                <Plus class="w-5 h-5" />
+                <span>Создать новую поездку</span>
+              </BaseButton>
+            </RouterLink>
+            <BaseButton variant="secondary" size="lg" @click="templatesModalOpen = true">
+              <Sparkles class="w-5 h-5" />
+              <span>Готовые маршруты</span>
             </BaseButton>
-          </RouterLink>
+          </div>
         </template>
       </EmptyState>
 
@@ -216,6 +267,7 @@ async function confirmDeleteTrip() {
           :trip="trip"
           @open="handleOpenTrip"
           @edit="handleEditTrip"
+          @duplicate="promptDuplicateTrip"
           @delete="promptDeleteTrip"
         />
       </div>
@@ -229,6 +281,21 @@ async function confirmDeleteTrip() {
       :loading="isDeleting"
       @confirm="confirmDeleteTrip"
       @cancel="tripToDelete = null"
+    />
+
+    <DuplicateTripModal
+      ref="duplicateModalRef"
+      :open="Boolean(tripToDuplicate)"
+      :trip="tripToDuplicate"
+      :loading="isDuplicating"
+      @close="tripToDuplicate = null"
+      @submit="handleDuplicateSubmit"
+    />
+
+    <TripTemplatesModal
+      :open="templatesModalOpen"
+      @close="templatesModalOpen = false"
+      @created="handleTemplateCreated"
     />
   </DashboardLayout>
 </template>

@@ -8,10 +8,17 @@ import { requireAuth } from '../middleware/auth.middleware';
 
 const router = Router();
 
+// Публичный каталог готовых кураторских маршрутов (до requireAuth и /:id)
+router.get('/templates', TripController.listTemplates);
+
 router.use(requireAuth);
+
+// Создание поездки по шаблону (до /:id)
+router.post('/from-template', TripController.createFromTemplate);
 
 router.get('/', TripController.list);
 router.post('/', TripController.create);
+router.post('/:id/duplicate', TripController.duplicate);
 router.get('/:id', TripController.getById);
 router.patch('/:id', TripController.update);
 router.delete('/:id', TripController.remove);

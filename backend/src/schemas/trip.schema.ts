@@ -106,5 +106,34 @@ export const updateTripSchema = z
     }
   );
 
+const optionalTitleSchema = z.preprocess(
+  (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
+  baseTripFields.title.optional()
+);
+
+export const createTripFromTemplateSchema = z.object({
+  templateId: z
+    .string({ required_error: 'ID шаблона маршрута обязателен' })
+    .trim()
+    .min(1, 'Укажите ID шаблона маршрута'),
+  startDate: baseTripFields.startDate,
+  title: optionalTitleSchema,
+  travelersCount: baseTripFields.travelersCount.optional(),
+  budget: baseTripFields.budget.optional(),
+  currency: baseTripFields.currency.optional(),
+  autoGeneratePacking: z.boolean().optional().default(true),
+  autoSeedDocuments: z.boolean().optional().default(true),
+});
+
+export const duplicateTripSchema = z.object({
+  startDate: baseTripFields.startDate,
+  title: optionalTitleSchema,
+  includeEvents: z.boolean().optional().default(true),
+  includePackingList: z.boolean().optional().default(true),
+  includeDocumentsChecklist: z.boolean().optional().default(true),
+});
+
 export type CreateTripInput = z.infer<typeof createTripSchema>;
 export type UpdateTripInput = z.infer<typeof updateTripSchema>;
+export type CreateTripFromTemplateInput = z.infer<typeof createTripFromTemplateSchema>;
+export type DuplicateTripInput = z.infer<typeof duplicateTripSchema>;

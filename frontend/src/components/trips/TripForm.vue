@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, defineAsyncComponent, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
-import { CalendarDays, MapPin } from 'lucide-vue-next';
+import { CalendarDays, MapPin, Sparkles } from 'lucide-vue-next';
 import { tripValidationSchema } from '@/schemas/validation';
-import type { TripFormPayload, Currency, CountryData, TripType } from '@/types';
+import type { Trip, TripFormPayload, Currency, CountryData, TripType } from '@/types';
 import { TRIP_TYPE_OPTIONS, normalizeTripType } from '@/constants/packing';
 import { calculateInclusiveDays, formatDaysLabel, getTodayIso } from '@/composables/useFormatters';
 import { useCountryStore } from '@/stores/country.store';
@@ -15,6 +16,10 @@ import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseSelect from '@/components/ui/BaseSelect.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
+
+const TripTemplatesModal = defineAsyncComponent(
+  () => import('@/components/trips/TripTemplatesModal.vue')
+);
 
 interface Props {
   initialValues?: Partial<TripFormPayload>;
@@ -35,8 +40,15 @@ const emit = defineEmits<{
   (e: 'open-globe', currentDraft: Partial<TripFormPayload>): void;
 }>();
 
+const router = useRouter();
 const countryStore = useCountryStore();
 const defaultStart = getTodayIso();
+const templatesModalOpen = ref(false);
+
+function handleTemplateCreated(trip: Trip) {
+  templatesModalOpen.value = false;
+  router.push(`/trips/${trip.id}`);
+}
 
 const { handleSubmit, errors, setValues, setFieldError } = useForm({
   validationSchema: toTypedSchema(tripValidationSchema),
@@ -171,6 +183,34 @@ defineExpose({
 
 <template>
   <form @submit.prevent="onSubmit" class="space-y-6" novalidate>
+    <div class="rounded-2xl bg-gradient-to-r from-teal-50/90 via-sky-50/70 to-indigo-50/60 border border-teal-200/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+          <Sparkles class="w-4 h-4" />
+        </div>
+        <div>
+          <p class="text-sm font-bold text-slate-900">
+            Не знаете, с чего начать? Выберите готовый маршрут
+          </p>
+          <p class="text-xs text-slate-600 mt-0.5">
+            Готовые кураторские программы по дням с умным списком вещей и чек-листом документов.
+          </p>
+        </div>
+      </div>
+
+      <BaseButton
+        type="button"
+        variant="secondary"
+        size="sm"
+        class="shrink-0"
+        :disabled="loading"
+        @click="templatesModalOpen = true"
+      >
+        <Sparkles class="w-4 h-4" />
+        <span>Готовые маршруты</span>
+      </BaseButton>
+    </div>
+
     <BaseAlert v-if="serverError" type="error" :message="serverError" />
 
     <div class="grid grid-cols-1 gap-5">
@@ -353,4 +393,10 @@ defineExpose({
       </BaseButton>
     </div>
   </form>
+
+  <TripTemplatesModal
+    :open="templatesModalOpen"
+    @close="templatesModalOpen = false"
+    @created="handleTemplateCreated"
+  />
 </template>

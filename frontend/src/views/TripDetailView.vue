@@ -38,6 +38,7 @@ import {
   FileCheck2,
   ArrowRightLeft,
   BarChart3,
+  Copy,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
@@ -57,6 +58,7 @@ import type {
   TripExpenseSummary,
   ExpenseCategory,
   CountryTravelInfo,
+  DuplicateTripPayload,
 } from '@/types';
 import {
   formatDateRange,
@@ -104,6 +106,10 @@ const CountryTravelInfoSection = defineAsyncComponent(
 
 const TripGuideExportModal = defineAsyncComponent(
   () => import('@/components/trips/TripGuideExportModal.vue')
+);
+
+const DuplicateTripModal = defineAsyncComponent(
+  () => import('@/components/trips/DuplicateTripModal.vue')
 );
 
 const route = useRoute();
@@ -611,6 +617,26 @@ function getCategoryIcon(cat: ExpenseCategory) {
 // Guide PDF / HTML export modal state
 const guideExportModalOpen = ref(false);
 
+// Duplicate trip modal state
+const duplicateModalOpen = ref(false);
+const isDuplicatingTrip = ref(false);
+const duplicateModalRef = ref<{ setError: (msg: string | null) => void } | null>(null);
+
+async function handleDuplicateTrip(payload: DuplicateTripPayload) {
+  if (!trip.value) return;
+  isDuplicatingTrip.value = true;
+  try {
+    const res = await tripStore.duplicateTrip(trip.value.id, payload);
+    toastStore.success('Копия поездки успешно создана');
+    duplicateModalOpen.value = false;
+    router.push(`/trips/${res.trip.id}`);
+  } catch (err: any) {
+    duplicateModalRef.value?.setError(err?.message || 'Не удалось создать копию поездки');
+  } finally {
+    isDuplicatingTrip.value = false;
+  }
+}
+
 const guideLoadingStates = computed(() => ({
   expenses: isLoadingExpenses.value,
   packing: packingStore.isLoading,
@@ -732,6 +758,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             >
               <FileDown class="w-4 h-4" />
               <span>Путеводитель / PDF</span>
+            </BaseButton>
+
+            <BaseButton
+              variant="outline"
+              size="sm"
+              @click="duplicateModalOpen = true"
+            >
+              <Copy class="w-4 h-4" />
+              <span>Дублировать</span>
             </BaseButton>
 
             <BaseButton
@@ -1891,6 +1926,17 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       :errorStates="guideErrorStates"
       @close="guideExportModalOpen = false"
       @reload-section="handleReloadGuideSection"
+    />
+
+    <!-- Duplicate Trip Modal -->
+    <DuplicateTripModal
+      v-if="trip"
+      ref="duplicateModalRef"
+      :open="duplicateModalOpen"
+      :trip="trip"
+      :loading="isDuplicatingTrip"
+      @close="duplicateModalOpen = false"
+      @submit="handleDuplicateTrip"
     />
   </DashboardLayout>
 </template>

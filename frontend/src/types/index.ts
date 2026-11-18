@@ -488,6 +488,61 @@ export interface CountryData {
   favoritedAt?: string;
 }
 
+export interface DuplicateTripPayload {
+  startDate: string;
+  title?: string;
+  includeEvents?: boolean;
+  includePackingList?: boolean;
+  includeDocumentsChecklist?: boolean;
+}
+
+export type EventCategory =
+  | 'SIGHTSEEING'
+  | 'CULTURE'
+  | 'FOOD'
+  | 'NATURE'
+  | 'TRANSPORT'
+  | 'LEISURE';
+
+export interface TripTemplateEvent {
+  dayOffset: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  category: EventCategory;
+  estimatedCost: number;
+  description: string;
+}
+
+export interface TripTemplate {
+  id: string;
+  slug: string;
+  title: string;
+  country: string;
+  city: string;
+  durationDays: number;
+  tripType: TripType;
+  recommendedBudget: number;
+  currency: Currency;
+  paceLabel: string;
+  tags: string[];
+  summary: string;
+  highlights: string[];
+  events: TripTemplateEvent[];
+}
+
+export interface CreateTripFromTemplatePayload {
+  templateId: string;
+  startDate: string;
+  title?: string;
+  travelersCount?: number;
+  budget?: number;
+  currency?: Currency;
+  autoGeneratePacking?: boolean;
+  autoSeedDocuments?: boolean;
+}
+
 export * from './weather';
 export * from './document';
 export * from './guideExport';

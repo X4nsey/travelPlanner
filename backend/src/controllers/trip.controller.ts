@@ -1,9 +1,43 @@
 import { Request, Response, NextFunction } from 'express';
-import { createTripSchema, updateTripSchema } from '../schemas/trip.schema';
+import {
+  createTripFromTemplateSchema,
+  createTripSchema,
+  duplicateTripSchema,
+  updateTripSchema,
+} from '../schemas/trip.schema';
 import { TripService } from '../services/trip.service';
 import { sendSuccess } from '../lib/errors';
 
 export class TripController {
+  static async listTemplates(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const templates = TripService.listTemplates();
+      return sendSuccess(res, { templates }, 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async createFromTemplate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = createTripFromTemplateSchema.parse(req.body);
+      const trip = await TripService.createTripFromTemplate(req.user!.id, parsed);
+      return sendSuccess(res, { trip }, 201, 'Поездка успешно создана по шаблону');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async duplicate(req: Request, res: Response, next: NextFunction) {
+    try {
+      const parsed = duplicateTripSchema.parse(req.body);
+      const trip = await TripService.duplicateTrip(req.user!.id, req.params.id, parsed);
+      return sendSuccess(res, { trip }, 201, 'Копия поездки успешно создана');
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async list(req: Request, res: Response, next: NextFunction) {
     try {
       const trips = await TripService.listUserTrips(req.user!.id);

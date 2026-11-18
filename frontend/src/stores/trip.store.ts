@@ -1,6 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { Trip, TripFormPayload, EventFormPayload, ItineraryEvent } from '@/types';
+import type {
+  CreateTripFromTemplatePayload,
+  DuplicateTripPayload,
+  EventFormPayload,
+  ItineraryEvent,
+  Trip,
+  TripFormPayload,
+  TripTemplate,
+} from '@/types';
 import { tripService } from '@/services/trip.service';
 import { eventService } from '@/services/event.service';
 import { getTodayIso } from '@/composables/useFormatters';
@@ -12,6 +20,9 @@ export const useTripStore = defineStore('trips', () => {
   const isLoadingDetail = ref(false);
   const listError = ref<string | null>(null);
   const detailError = ref<string | null>(null);
+  const templates = ref<TripTemplate[]>([]);
+  const isLoadingTemplates = ref(false);
+  const templatesError = ref<string | null>(null);
 
   const totalTripsCount = computed(() => trips.value.length);
 
@@ -133,6 +144,38 @@ export const useTripStore = defineStore('trips', () => {
     return res;
   }
 
+  async function fetchTemplates(force = false) {
+    if (templates.value.length > 0 && !force) {
+      return templates.value;
+    }
+    isLoadingTemplates.value = true;
+    templatesError.value = null;
+    try {
+      templates.value = await tripService.getTemplates();
+      return templates.value;
+    } catch (err: any) {
+      templatesError.value = err?.message || 'Не удалось загрузить каталог готовых маршрутов';
+      throw err;
+    } finally {
+      isLoadingTemplates.value = false;
+    }
+  }
+
+  async function createTripFromTemplate(payload: CreateTripFromTemplatePayload) {
+    const res = await tripService.createTripFromTemplate(payload);
+    trips.value.push(res.trip);
+    trips.value.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    currentTrip.value = res.trip;
+    return res;
+  }
+
+  async function duplicateTrip(tripId: string, payload: DuplicateTripPayload) {
+    const res = await tripService.duplicateTrip(tripId, payload);
+    trips.value.push(res.trip);
+    trips.value.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    return res;
+  }
+
   function clearState() {
     trips.value = [];
     currentTrip.value = null;
@@ -147,6 +190,9 @@ export const useTripStore = defineStore('trips', () => {
     isLoadingDetail,
     listError,
     detailError,
+    templates,
+    isLoadingTemplates,
+    templatesError,
     totalTripsCount,
     upcomingTripsCount,
     recentTrips,
@@ -155,6 +201,9 @@ export const useTripStore = defineStore('trips', () => {
     createTrip,
     updateTrip,
     deleteTrip,
+    fetchTemplates,
+    createTripFromTemplate,
+    duplicateTrip,
     addEventToCurrentTrip,
     updateEventInCurrentTrip,
     deleteEventFromCurrentTrip,

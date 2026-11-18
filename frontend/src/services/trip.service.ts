@@ -1,7 +1,40 @@
 import { apiClient } from './api';
-import type { ApiSuccessResponse, Trip, TripFormPayload } from '@/types';
+import type {
+  ApiSuccessResponse,
+  CreateTripFromTemplatePayload,
+  DuplicateTripPayload,
+  Trip,
+  TripFormPayload,
+  TripTemplate,
+} from '@/types';
 
 export const tripService = {
+  async getTemplates(): Promise<TripTemplate[]> {
+    const { data } = await apiClient.get<ApiSuccessResponse<{ templates: TripTemplate[] }>>('/trips/templates');
+    return data.data.templates;
+  },
+
+  async createTripFromTemplate(
+    payload: CreateTripFromTemplatePayload
+  ): Promise<{ trip: Trip; message?: string }> {
+    const { data } = await apiClient.post<ApiSuccessResponse<{ trip: Trip }>>(
+      '/trips/from-template',
+      payload
+    );
+    return { trip: data.data.trip, message: data.message };
+  },
+
+  async duplicateTrip(
+    tripId: string,
+    payload: DuplicateTripPayload
+  ): Promise<{ trip: Trip; message?: string }> {
+    const { data } = await apiClient.post<ApiSuccessResponse<{ trip: Trip }>>(
+      `/trips/${tripId}/duplicate`,
+      payload
+    );
+    return { trip: data.data.trip, message: data.message };
+  },
+
   async getTrips(): Promise<Trip[]> {
     const { data } = await apiClient.get<ApiSuccessResponse<{ trips: Trip[] }>>('/trips');
     return data.data.trips;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineAsyncComponent } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import {
   Plus,
@@ -16,7 +16,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useTripStore } from '@/stores/trip.store';
 import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
-import type { Trip } from '@/types';
+import type { DuplicateTripPayload, Trip } from '@/types';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import TripCard from '@/components/trips/TripCard.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
@@ -24,6 +24,10 @@ import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+
+const DuplicateTripModal = defineAsyncComponent(
+  () => import('@/components/trips/DuplicateTripModal.vue')
+);
 
 const authStore = useAuthStore();
 const tripStore = useTripStore();
@@ -33,6 +37,9 @@ const router = useRouter();
 
 const tripToDelete = ref<Trip | null>(null);
 const isDeleting = ref(false);
+const tripToDuplicate = ref<Trip | null>(null);
+const isDuplicating = ref(false);
+const duplicateModalRef = ref<{ setError: (msg: string | null) => void } | null>(null);
 
 onMounted(() => {
   tripStore.fetchTrips().catch(() => {
@@ -51,6 +58,25 @@ function handleEditTrip(id: string) {
 
 function promptDeleteTrip(trip: Trip) {
   tripToDelete.value = trip;
+}
+
+function promptDuplicateTrip(trip: Trip) {
+  tripToDuplicate.value = trip;
+}
+
+async function handleDuplicateSubmit(payload: DuplicateTripPayload) {
+  if (!tripToDuplicate.value) return;
+  isDuplicating.value = true;
+  try {
+    const res = await tripStore.duplicateTrip(tripToDuplicate.value.id, payload);
+    toastStore.success('Копия поездки успешно создана');
+    tripToDuplicate.value = null;
+    router.push(`/trips/${res.trip.id}`);
+  } catch (err: any) {
+    duplicateModalRef.value?.setError(err?.message || 'Не удалось дублировать поездку');
+  } finally {
+    isDuplicating.value = false;
+  }
 }
 
 async function confirmDeleteTrip() {
@@ -266,6 +292,7 @@ async function confirmDeleteTrip() {
             :trip="trip"
             @open="handleOpenTrip"
             @edit="handleEditTrip"
+            @duplicate="promptDuplicateTrip"
             @delete="promptDeleteTrip"
           />
         </div>
@@ -280,6 +307,15 @@ async function confirmDeleteTrip() {
       :loading="isDeleting"
       @confirm="confirmDeleteTrip"
       @cancel="tripToDelete = null"
+    />
+
+    <DuplicateTripModal
+      ref="duplicateModalRef"
+      :open="Boolean(tripToDuplicate)"
+      :trip="tripToDuplicate"
+      :loading="isDuplicating"
+      @close="tripToDuplicate = null"
+      @submit="handleDuplicateSubmit"
     />
   </DashboardLayout>
 </template>
