@@ -19,26 +19,26 @@ const toastStore = useToastStore();
         <div
           v-for="toast in toastStore.toasts"
           :key="toast.id"
-          class="pointer-events-auto flex items-start gap-3 p-4 rounded-2xl bg-white border shadow-lg border-slate-200/90"
+          class="pointer-events-auto flex items-start gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border shadow-lg dark:shadow-black/50 border-slate-200/90 dark:border-slate-800"
         >
           <CheckCircle2
             v-if="toast.type === 'success'"
-            class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"
+            class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"
           />
           <AlertCircle
             v-else-if="toast.type === 'error'"
-            class="w-5 h-5 text-rose-600 shrink-0 mt-0.5"
+            class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5"
           />
           <Info
             v-else
-            class="w-5 h-5 text-teal-600 shrink-0 mt-0.5"
+            class="w-5 h-5 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5"
           />
 
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-slate-900">
+            <p class="text-sm font-semibold text-slate-900 dark:text-slate-100">
               {{ toast.title }}
             </p>
-            <p v-if="toast.message" class="text-xs text-slate-600 mt-0.5 leading-relaxed">
+            <p v-if="toast.message" class="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
               {{ toast.message }}
             </p>
           </div>
@@ -46,7 +46,7 @@ const toastStore = useToastStore();
           <button
             type="button"
             @click="toastStore.remove(toast.id)"
-            class="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors"
+            class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-200 p-1 rounded-lg transition-colors"
             aria-label="Закрыть уведомление"
           >
             <X class="w-4 h-4" />

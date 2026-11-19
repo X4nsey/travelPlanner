@@ -84,11 +84,11 @@ function toggleExpanded() {
 
 <template>
   <section
-    class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden transition-colors"
+    class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden transition-colors"
   >
     <!-- Category Header -->
     <div
-      class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 bg-slate-50/70 border-b border-slate-100"
+      class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 bg-slate-50/70 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800"
     >
       <button
         type="button"
@@ -100,8 +100,8 @@ function toggleExpanded() {
           :class="[
             'w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors',
             isCategoryComplete
-              ? 'bg-emerald-50 text-emerald-600'
-              : 'bg-teal-50 text-teal-700',
+              ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
+              : 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-400',
           ]"
         >
           <component :is="categoryIcon" class="w-4 h-4" />
@@ -109,15 +109,15 @@ function toggleExpanded() {
 
         <div class="min-w-0 flex-1">
           <div class="flex flex-wrap items-center gap-2">
-            <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate">
+            <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 truncate">
               {{ categoryMeta.nameRu }}
             </h3>
             <span
               :class="[
                 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold',
                 isCategoryComplete
-                  ? 'bg-emerald-100/80 text-emerald-700'
-                  : 'bg-slate-200/70 text-slate-700',
+                  ? 'bg-emerald-100/80 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                  : 'bg-slate-200/70 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
               ]"
             >
               {{ packedCount }} / {{ totalCount }}
@@ -126,16 +126,16 @@ function toggleExpanded() {
 
           <!-- Category mini progress bar -->
           <div class="mt-1.5 flex items-center gap-2 max-w-[180px]">
-            <div class="flex-1 bg-slate-200/70 rounded-full h-1.5 overflow-hidden">
+            <div class="flex-1 bg-slate-200/70 dark:bg-slate-700/80 rounded-full h-1.5 overflow-hidden">
               <div
                 :class="[
                   'h-full rounded-full transition-all duration-300',
-                  isCategoryComplete ? 'bg-emerald-500' : 'bg-teal-600',
+                  isCategoryComplete ? 'bg-emerald-500' : 'bg-teal-600 dark:bg-teal-500',
                 ]"
                 :style="{ width: `${progressPercent}%` }"
               />
             </div>
-            <span class="text-[11px] font-semibold text-slate-400 tabular-nums">
+            <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-400 tabular-nums">
               {{ progressPercent }}%
             </span>
           </div>
@@ -147,7 +147,7 @@ function toggleExpanded() {
         <button
           type="button"
           @click="emit('add-to-category', resolvedCategory)"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-teal-700 hover:bg-teal-50 transition-colors"
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/15 transition-colors"
           :title="`Добавить вещь в категорию «${categoryMeta.nameRu}»`"
           :aria-label="`Добавить вещь в категорию «${categoryMeta.nameRu}»`"
         >
@@ -158,7 +158,7 @@ function toggleExpanded() {
           type="button"
           @click="toggleExpanded"
           :aria-expanded="isExpanded"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 transition-colors"
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors"
           :title="isExpanded ? 'Свернуть категорию' : 'Развернуть категорию'"
           :aria-label="isExpanded ? 'Свернуть категорию' : 'Развернуть категорию'"
         >
@@ -169,7 +169,7 @@ function toggleExpanded() {
     </div>
 
     <!-- Category Items List -->
-    <div v-show="isExpanded" class="divide-y divide-slate-100">
+    <div v-show="isExpanded" class="divide-y divide-slate-100 dark:divide-slate-800">
       <PackingItemRow
         v-for="item in items"
         :key="item.id"

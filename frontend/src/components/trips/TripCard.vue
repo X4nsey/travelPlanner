@@ -42,7 +42,7 @@ const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.tr
 
 <template>
   <article
-    class="group bg-white rounded-2xl border border-slate-200/80 shadow-soft hover:shadow-card hover:border-teal-200/90 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+    class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card hover:border-teal-200/90 dark:hover:border-teal-500/40 transition-all duration-200 flex flex-col justify-between overflow-hidden"
   >
     <div class="p-5 sm:p-6">
       <div class="flex items-start justify-between gap-3 mb-3">
@@ -56,60 +56,60 @@ const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.tr
         </span>
 
         <span
-          class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full"
+          class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full"
         >
-          <Clock class="w-3.5 h-3.5 text-teal-600" />
+          <Clock class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
           {{ formatDaysLabel(trip.durationDays) }}
         </span>
       </div>
 
       <h3
         @click="emit('open', trip.id)"
-        class="text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors cursor-pointer line-clamp-1 mb-1.5"
+        class="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors cursor-pointer line-clamp-1 mb-1.5"
       >
         {{ trip.title }}
       </h3>
 
-      <div class="flex items-center gap-1.5 text-sm font-medium text-teal-700 mb-4">
-        <MapPin class="w-4 h-4 shrink-0 text-teal-600" />
+      <div class="flex items-center gap-1.5 text-sm font-medium text-teal-700 dark:text-teal-400 mb-4">
+        <MapPin class="w-4 h-4 shrink-0 text-teal-600 dark:text-teal-400" />
         <span class="truncate">{{ trip.country }}, {{ trip.city }}</span>
       </div>
 
-      <div class="space-y-2.5 text-sm text-slate-600 border-t border-slate-100 pt-4">
+      <div class="space-y-2.5 text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800 pt-4">
         <div class="flex items-center gap-2.5">
-          <Calendar class="w-4 h-4 text-slate-400 shrink-0" />
+          <Calendar class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
           <span>{{ formatDateRange(trip.startDate, trip.endDate) }}</span>
         </div>
 
         <div class="flex items-center gap-2.5">
-          <Users class="w-4 h-4 text-slate-400 shrink-0" />
+          <Users class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
           <span>{{ formatTravelersLabel(trip.travelersCount) }}</span>
         </div>
 
         <div class="flex items-center gap-2.5">
-          <Wallet class="w-4 h-4 text-slate-400 shrink-0" />
-          <span class="font-semibold text-slate-800">
+          <Wallet class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+          <span class="font-semibold text-slate-800 dark:text-slate-100">
             {{ formatCurrency(trip.budget, trip.currency) }}
           </span>
-          <span class="text-xs text-slate-400">({{ trip.currency }})</span>
+          <span class="text-xs text-slate-400 dark:text-slate-500">({{ trip.currency }})</span>
         </div>
       </div>
 
       <p
         v-if="!compact && trip.description"
-        class="mt-4 text-xs text-slate-500 line-clamp-2 leading-relaxed"
+        class="mt-4 text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed"
       >
         {{ trip.description }}
       </p>
     </div>
 
     <div
-      class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between gap-2"
+      class="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2"
     >
       <BaseButton
         variant="ghost"
         size="sm"
-        class="text-teal-700 hover:text-teal-800 hover:bg-teal-50/80 !px-2.5"
+        class="text-teal-700 hover:text-teal-800 hover:bg-teal-50/80 dark:text-teal-400 dark:hover:text-teal-300 dark:hover:bg-teal-500/15 !px-2.5"
         @click="emit('open', trip.id)"
       >
         <span>Подробнее</span>
@@ -120,7 +120,7 @@ const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.tr
         <button
           type="button"
           @click="emit('duplicate', trip)"
-          class="p-2 rounded-xl text-slate-500 hover:text-teal-700 hover:bg-teal-50 border border-transparent hover:border-teal-200 transition-colors"
+          class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/15 border border-transparent hover:border-teal-200 dark:hover:border-teal-500/30 transition-colors"
           title="Дублировать поездку"
         >
           <Copy class="w-4 h-4" />
@@ -129,7 +129,7 @@ const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.tr
         <button
           type="button"
           @click="emit('edit', trip.id)"
-          class="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-white border border-transparent hover:border-slate-200 transition-colors"
+          class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
           title="Редактировать поездку"
         >
           <Pencil class="w-4 h-4" />
@@ -138,7 +138,7 @@ const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.tr
         <button
           type="button"
           @click="emit('delete', trip)"
-          class="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+          class="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 transition-colors"
           title="Удалить поездку"
         >
           <Trash2 class="w-4 h-4" />

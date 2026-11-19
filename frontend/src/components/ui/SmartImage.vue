@@ -300,11 +300,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="rootRef" :class="['relative overflow-hidden bg-slate-100 select-none', aspectClass]">
+  <div ref="rootRef" :class="['relative overflow-hidden bg-slate-100 dark:bg-slate-800 select-none', aspectClass]">
     <!-- Shimmer skeleton while image loads -->
     <div
       v-if="!isLoaded && !hasError"
-      class="absolute inset-0 bg-gradient-to-r from-slate-100 via-slate-200/70 to-slate-100 animate-pulse"
+      class="absolute inset-0 bg-gradient-to-r from-slate-100 via-slate-200/70 to-slate-100 dark:from-slate-800 dark:via-slate-700/70 dark:to-slate-800 animate-pulse"
     />
 
     <!-- Actual Image (mounted lazily on viewport approach or eagerly for hero images) -->

@@ -416,24 +416,24 @@ function openTripDetails(trip: InspirationTrip) {
 <template>
   <PublicLayout>
     <!-- Hero Section -->
-    <section class="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-teal-50/60 via-white to-slate-50">
+    <section class="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-teal-50/60 via-white to-slate-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl mx-auto text-center">
           <div
-            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200/80 text-teal-700 text-xs font-semibold mb-6"
+            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 dark:bg-teal-500/15 border border-teal-200/80 dark:border-teal-500/30 text-teal-700 dark:text-teal-300 text-xs font-semibold mb-6"
           >
             <Sparkles class="w-3.5 h-3.5" />
             <span>Удобный органайзер ваших путешествий</span>
           </div>
 
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight mb-6">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight mb-6">
             Планируйте идеальные поездки с
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-sky-600">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-sky-600 dark:from-teal-400 dark:to-emerald-400">
               TravelPlanner
             </span>
           </h1>
 
-          <p class="text-base sm:text-lg text-slate-600 leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 max-w-2xl mx-auto">
             Создавайте маршруты, распределяйте мероприятия по дням, контролируйте бюджет и храните все заметки о предстоящих путешествиях в едином минималистичном пространстве.
           </p>
 
@@ -447,7 +447,7 @@ function openTripDetails(trip: InspirationTrip) {
 
             <RouterLink to="/explore" class="w-full sm:w-auto">
               <BaseButton variant="secondary" size="lg" fullWidth>
-                <Compass class="w-5 h-5" />
+                <Compass class="w-5 h-5 text-teal-600 dark:text-teal-400" />
                 <span>Исследовать 3D-глобус</span>
               </BaseButton>
             </RouterLink>
@@ -467,13 +467,13 @@ function openTripDetails(trip: InspirationTrip) {
     </section>
 
     <!-- Advantages Section -->
-    <section id="features" class="py-16 sm:py-20 bg-white border-y border-slate-200/70">
+    <section id="features" class="py-16 sm:py-20 bg-white dark:bg-slate-900/70 border-y border-slate-200/70 dark:border-slate-800 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-2xl mx-auto mb-12">
-          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
             Всё необходимое для продуманного маршрута
           </h2>
-          <p class="text-sm sm:text-base text-slate-500">
+          <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400">
             Никаких перегруженных таблиц и разрозненных заметок — только структурированный план вашей поездки.
           </p>
         </div>
@@ -482,15 +482,15 @@ function openTripDetails(trip: InspirationTrip) {
           <div
             v-for="item in features"
             :key="item.title"
-            class="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-teal-200 hover:bg-white hover:shadow-soft transition-all duration-200"
+            class="p-6 rounded-2xl bg-slate-50/70 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-white dark:hover:bg-slate-800/80 hover:shadow-soft dark:hover:shadow-none transition-all duration-200"
           >
-            <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
+            <div class="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-4">
               <component :is="item.icon" class="w-6 h-6" />
             </div>
-            <h3 class="text-base font-bold text-slate-900 mb-2">
+            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 mb-2">
               {{ item.title }}
             </h3>
-            <p class="text-sm text-slate-600 leading-relaxed">
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
               {{ item.description }}
             </p>
           </div>
@@ -499,25 +499,25 @@ function openTripDetails(trip: InspirationTrip) {
     </section>
 
     <!-- Popular Destinations Inspiration Section with Real Photos, Ruble Conversion & Click Modal -->
-    <section id="destinations" class="py-16 sm:py-20 bg-slate-50">
+    <section id="destinations" class="py-16 sm:py-20 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200/70 mb-2">
+            <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 px-2.5 py-1 rounded-full border border-teal-200/70 dark:border-teal-500/30 mb-2">
               <Sparkles class="w-3.5 h-3.5" />
               <span>Готовые идеи для путешествий</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">
+            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
               Вдохновение для следующих поездок
             </h2>
-            <p class="text-sm sm:text-base text-slate-500 mt-1">
+            <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">
               Нажмите на карточку любого города, чтобы открыть подробный план по дням, достопримечательности и бюджет.
             </p>
           </div>
 
           <RouterLink :to="authStore.isAuthenticated ? '/trips/new' : '/register'">
             <BaseButton variant="secondary" size="md">
-              <Compass class="w-4 h-4" />
+              <Compass class="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Создать свой маршрут</span>
             </BaseButton>
           </RouterLink>
@@ -532,7 +532,7 @@ function openTripDetails(trip: InspirationTrip) {
             role="button"
             tabindex="0"
             @keydown.enter.prevent="openTripDetails(dest)"
-            class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden flex flex-col justify-between hover:shadow-card hover:-translate-y-1 transition-all duration-200 cursor-pointer group text-left"
+            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:shadow-card dark:hover:border-teal-500/40 hover:-translate-y-1 transition-all duration-200 cursor-pointer group text-left"
           >
             <div>
               <!-- Real Photo Cover with Country & Duration Badges -->
@@ -553,7 +553,7 @@ function openTripDetails(trip: InspirationTrip) {
                 <!-- Badges on top of photo -->
                 <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
                   <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 text-slate-900 shadow-sm backdrop-blur-md"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 shadow-sm backdrop-blur-md border border-white/40 dark:border-slate-700/80"
                   >
                     <span>{{ dest.flag }}</span>
                     <span>{{ dest.country }}</span>
@@ -574,26 +574,26 @@ function openTripDetails(trip: InspirationTrip) {
 
               <!-- Content Body -->
               <div class="p-5">
-                <h3 class="text-base sm:text-lg font-bold text-slate-900 group-hover:text-teal-700 transition-colors mb-1.5 line-clamp-1">
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors mb-1.5 line-clamp-1">
                   {{ dest.title }}
                 </h3>
-                <p class="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
                   {{ dest.description }}
                 </p>
               </div>
             </div>
 
             <!-- Footer: Budget Line with Ruble conversion in brackets for foreign currency -->
-            <div class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span class="text-slate-500">Ориентир бюджета:</span>
+            <div class="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+              <span class="text-slate-500 dark:text-slate-400">Ориентир бюджета:</span>
               <div class="text-right">
-                <span class="font-extrabold text-slate-900">
+                <span class="font-extrabold text-slate-900 dark:text-slate-100">
                   {{ dest.budget.toLocaleString('ru-RU') }} {{ dest.currencySymbol }}
                 </span>
                 <!-- In brackets in rubles for foreign currency -->
                 <span
                   v-if="dest.currency !== 'RUB' && dest.rubApprox"
-                  class="font-semibold text-teal-700 ml-1"
+                  class="font-semibold text-teal-700 dark:text-teal-400 ml-1"
                 >
                   (~{{ dest.rubApprox.toLocaleString('ru-RU') }} ₽)
                 </span>
@@ -603,8 +603,8 @@ function openTripDetails(trip: InspirationTrip) {
         </div>
 
         <!-- Hint below cards -->
-        <div class="mt-6 text-center text-xs text-slate-400 flex items-center justify-center gap-1.5">
-          <Info class="w-3.5 h-3.5 text-slate-400" />
+        <div class="mt-6 text-center text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5">
+          <Info class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
           <span>Нажмите на любую карточку выше, чтобы посмотреть программу по дням и сразу создать поездку</span>
         </div>
       </div>

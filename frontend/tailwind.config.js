@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     fileURLToPath(new URL('./index.html', import.meta.url)),
     fileURLToPath(new URL('./src/**/*.{vue,js,ts,jsx,tsx}', import.meta.url)),

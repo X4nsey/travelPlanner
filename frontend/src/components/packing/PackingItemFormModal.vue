@@ -235,7 +235,7 @@ async function handleSubmit() {
         :disabled="isBusy"
       />
 
-      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
         <BaseButton
           type="button"
           variant="outline"

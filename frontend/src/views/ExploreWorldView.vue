@@ -222,40 +222,40 @@ function openAuthPrompt() {
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <div
-            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200/70 text-teal-700 text-xs font-semibold mb-2.5"
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-500/15 border border-teal-200/70 dark:border-teal-500/30 text-teal-700 dark:text-teal-300 text-xs font-semibold mb-2.5"
           >
             <Sparkles class="w-3.5 h-3.5" />
             <span>Интерактивный 3D-атлас путешественника</span>
           </div>
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Исследуй мир
           </h1>
-          <p class="text-sm sm:text-base text-slate-500 mt-1 max-w-2xl">
+          <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1 max-w-2xl">
             Вращайте трёхмерную модель Земли, выбирайте страны одним нажатием, изучайте ключевые факты и сразу создавайте маршруты путешествий.
           </p>
         </div>
 
         <RouterLink to="/countries" class="shrink-0">
           <BaseButton variant="outline" size="md">
-            <BookOpen class="w-4 h-4 text-teal-600" />
+            <BookOpen class="w-4 h-4 text-teal-600 dark:text-teal-400" />
             <span>Открыть каталог всех стран</span>
           </BaseButton>
         </RouterLink>
       </div>
 
       <!-- Quick Country Search & Jump Chips -->
-      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft space-y-3">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-soft dark:shadow-none space-y-3">
         <div class="flex flex-col sm:flex-row sm:items-center gap-3">
           <div class="relative flex-1 max-w-md">
-            <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               v-model="quickSearch"
               type="text"
               placeholder="Быстрый переход к стране на глобусе (например: Япония, Италия, Бразилия)..."
-              class="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20"
+              class="w-full pl-10 pr-4 py-2 text-sm rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-teal-600 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20 transition-colors"
             />
           </div>
-          <span class="text-xs text-slate-400">
+          <span class="text-xs text-slate-400 dark:text-slate-400">
             Или нажмите на любое государство прямо на 3D-глобусе:
           </span>
         </div>
@@ -271,10 +271,10 @@ function openAuthPrompt() {
               countryStore.selectedGlobeCountry?.slug === item.slug
                 ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
                 : hasPlannedTrip(item)
-                  ? 'bg-emerald-50 text-emerald-900 border-emerald-300/90 hover:bg-emerald-100/80'
+                  ? 'bg-emerald-50 text-emerald-900 border-emerald-300/90 hover:bg-emerald-100/80 dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-500/40 dark:hover:bg-emerald-500/25 dark:hover:border-emerald-400/60'
                   : countryStore.isFavorite(item.slug)
-                    ? 'bg-purple-50 text-purple-900 border-purple-200/90 hover:bg-purple-100/80'
-                    : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-900',
+                    ? 'bg-purple-50 text-purple-900 border-purple-200/90 hover:bg-purple-100/80 dark:bg-purple-500/15 dark:text-purple-200 dark:border-purple-500/40 dark:hover:bg-purple-500/25 dark:hover:border-purple-400/60'
+                    : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-900 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700/80 dark:hover:border-teal-500/60 dark:hover:text-white',
             ]"
           >
             <span>{{ item.flagEmoji }}</span>
@@ -283,7 +283,7 @@ function openAuthPrompt() {
               v-if="hasPlannedTrip(item)"
               :class="[
                 'w-3 h-3 shrink-0',
-                countryStore.selectedGlobeCountry?.slug === item.slug ? 'text-white' : 'text-emerald-600',
+                countryStore.selectedGlobeCountry?.slug === item.slug ? 'text-white' : 'text-emerald-600 dark:text-emerald-400',
               ]"
               title="Запланирована поездка"
             />
@@ -291,7 +291,7 @@ function openAuthPrompt() {
               v-if="countryStore.isFavorite(item.slug)"
               :class="[
                 'w-3 h-3 shrink-0 fill-current',
-                countryStore.selectedGlobeCountry?.slug === item.slug ? 'text-white' : 'text-purple-600',
+                countryStore.selectedGlobeCountry?.slug === item.slug ? 'text-white' : 'text-purple-600 dark:text-purple-400',
               ]"
               title="В избранном"
             />
@@ -342,16 +342,16 @@ function openAuthPrompt() {
       <section v-if="popularFeaturedCountries.length > 0" class="pt-4 space-y-5">
         <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
+            <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               Популярные страны для путешествий
             </h2>
-            <p class="text-sm text-slate-500">
+            <p class="text-sm text-slate-500 dark:text-slate-400">
               Нажмите на карточку, чтобы открыть подробный путеводитель по стране с фотогалереей и достопримечательностями
             </p>
           </div>
 
           <RouterLink to="/countries">
-            <BaseButton variant="ghost" size="sm" class="text-teal-700">
+            <BaseButton variant="ghost" size="sm" class="text-teal-700 dark:text-teal-400">
               <span>Смотреть весь каталог ({{ countryStore.countries.length }})</span>
             </BaseButton>
           </RouterLink>

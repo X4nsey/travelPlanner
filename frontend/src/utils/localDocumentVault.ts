@@ -334,3 +334,61 @@ export async function clearAllLocalAttachments(): Promise<void> {
     db.close();
   }
 }
+
+export interface LocalVaultStats {
+  supported: boolean;
+  filesCount: number;
+  totalBytes: number;
+  tripsCount: number;
+  latestUpdatedAt: string | null;
+}
+
+export async function getLocalVaultStats(): Promise<LocalVaultStats> {
+  if (!isIndexedDbSupported()) {
+    return {
+      supported: false,
+      filesCount: 0,
+      totalBytes: 0,
+      tripsCount: 0,
+      latestUpdatedAt: null,
+    };
+  }
+
+  const db = await openVaultDb();
+  try {
+    const tx = db.transaction(LOCAL_DOCUMENTS_STORE_NAME, 'readonly');
+    const store = tx.objectStore(LOCAL_DOCUMENTS_STORE_NAME);
+    const records = await promisifyRequest<LocalAttachmentRecord[]>(store.getAll());
+
+    let filesCount = 0;
+    let totalBytes = 0;
+    let latestUpdatedAt: string | null = null;
+    const tripIds = new Set<string>();
+
+    for (const rec of records) {
+      if (!rec || !rec.documentId || !rec.blob) continue;
+      filesCount += 1;
+      const bytes =
+        typeof rec.fileSize === 'number' && Number.isFinite(rec.fileSize) && rec.fileSize > 0
+          ? rec.fileSize
+          : rec.blob.size || 0;
+      totalBytes += bytes;
+      if (rec.tripId) {
+        tripIds.add(rec.tripId);
+      }
+      if (rec.updatedAt && (!latestUpdatedAt || rec.updatedAt > latestUpdatedAt)) {
+        latestUpdatedAt = rec.updatedAt;
+      }
+    }
+
+    return {
+      supported: true,
+      filesCount,
+      totalBytes,
+      tripsCount: tripIds.size,
+      latestUpdatedAt,
+    };
+  } finally {
+    db.close();
+  }
+}

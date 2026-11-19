@@ -155,15 +155,15 @@ onBeforeUnmount(() => {
         @click.self="emit('close')"
       >
         <div
-          class="relative w-full max-w-4xl h-[88vh] bg-white rounded-2xl shadow-2xl border border-slate-200/80 flex flex-col overflow-hidden animate-fade-in"
+          class="relative w-full max-w-4xl h-[88vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-fade-in"
           role="dialog"
           aria-modal="true"
           aria-labelledby="doc-preview-modal-title"
         >
           <!-- Header -->
-          <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-100 bg-white shrink-0">
+          <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
             <div class="min-w-0 flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 border border-teal-200/70 flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-200/70 dark:border-teal-500/30 flex items-center justify-center shrink-0">
                 <FileText v-if="isPdf" class="w-5 h-5" />
                 <ImageIcon v-else-if="isImage" class="w-5 h-5" />
                 <Eye v-else class="w-5 h-5" />
@@ -172,16 +172,16 @@ onBeforeUnmount(() => {
               <div class="min-w-0">
                 <h3
                   id="doc-preview-modal-title"
-                  class="text-base sm:text-lg font-bold text-slate-900 truncate"
+                  class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 truncate"
                 >
                   {{ displayTitle }}
                 </h3>
-                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-0.5">
-                  <span class="truncate max-w-[260px] sm:max-w-md font-medium text-slate-700">
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <span class="truncate max-w-[260px] sm:max-w-md font-medium text-slate-700 dark:text-slate-300">
                     {{ displayFileName }}
                   </span>
                   <span v-if="fileMeta">· {{ formatAttachmentFileSize(fileMeta.fileSize) }}</span>
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 font-semibold text-[11px]">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-500/30 font-semibold text-[11px]">
                     <HardDrive class="w-3 h-3" />
                     Локально (IndexedDB)
                   </span>
@@ -192,7 +192,7 @@ onBeforeUnmount(() => {
             <button
               type="button"
               @click="emit('close')"
-              class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors shrink-0"
+              class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
               aria-label="Закрыть предпросмотр"
             >
               <X class="w-5 h-5" />
@@ -200,21 +200,21 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Preview Viewport -->
-          <div class="flex-1 min-h-0 bg-slate-100/80 p-3 sm:p-5 flex items-center justify-center overflow-auto">
-            <div v-if="isLoading" class="flex flex-col items-center justify-center gap-3 text-slate-500">
-              <Loader2 class="w-8 h-8 animate-spin text-teal-600" />
+          <div class="flex-1 min-h-0 bg-slate-100/80 dark:bg-slate-950/90 p-3 sm:p-5 flex items-center justify-center overflow-auto">
+            <div v-if="isLoading" class="flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400">
+              <Loader2 class="w-8 h-8 animate-spin text-teal-600 dark:text-teal-400" />
               <p class="text-sm font-medium">Читаем файл из локального хранилища браузера...</p>
             </div>
 
             <div
               v-else-if="loadError"
-              class="max-w-md bg-white rounded-2xl border border-rose-200 p-6 text-center space-y-3 shadow-sm"
+              class="max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-500/40 p-6 text-center space-y-3 shadow-sm"
             >
-              <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+              <div class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto">
                 <AlertCircle class="w-6 h-6" />
               </div>
-              <h4 class="text-base font-bold text-slate-900">Файл недоступен для просмотра</h4>
-              <p class="text-sm text-slate-600 leading-relaxed">
+              <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">Файл недоступен для просмотра</h4>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                 {{ loadError }}
               </p>
             </div>
@@ -223,7 +223,7 @@ onBeforeUnmount(() => {
               v-else-if="objectUrl && isPdf"
               :src="objectUrl"
               :title="displayFileName"
-              class="w-full h-full rounded-xl border border-slate-200 bg-white shadow-sm"
+              class="w-full h-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white shadow-sm"
             />
 
             <div
@@ -233,23 +233,23 @@ onBeforeUnmount(() => {
               <img
                 :src="objectUrl"
                 :alt="displayFileName"
-                class="max-w-full max-h-full rounded-xl shadow-md object-contain bg-white"
+                class="max-w-full max-h-full rounded-xl shadow-md object-contain bg-white dark:bg-slate-900"
               />
             </div>
 
             <div
               v-else-if="objectUrl"
-              class="bg-white rounded-2xl border border-slate-200 p-6 text-center space-y-3"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-center space-y-3"
             >
-              <p class="text-sm text-slate-600">
+              <p class="text-sm text-slate-600 dark:text-slate-300">
                 Предпросмотр этого типа файла не поддерживается. Вы можете скачать его на устройство.
               </p>
             </div>
           </div>
 
           <!-- Footer -->
-          <div class="px-5 py-3.5 bg-white border-t border-slate-100 flex items-center justify-between gap-3 shrink-0">
-            <p class="text-xs text-slate-500 hidden sm:block">
+          <div class="px-5 py-3.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+            <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
               Файл открыт напрямую из памяти вашего браузера без передачи на сервер.
             </p>
             <div class="flex items-center gap-2.5 ml-auto">

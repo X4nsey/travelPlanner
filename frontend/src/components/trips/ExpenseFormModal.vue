@@ -149,7 +149,7 @@ defineExpose({
 
       <!-- Category Selector Grid -->
       <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
           Категория расхода <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -161,8 +161,8 @@ defineExpose({
             :class="[
               'flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all duration-150 text-left',
               category === cat.key
-                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50',
+                ? 'bg-slate-900 dark:bg-teal-600 text-white border-slate-900 dark:border-teal-600 shadow-sm'
+                : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/80',
             ]"
           >
             <div
@@ -177,7 +177,7 @@ defineExpose({
             <span class="truncate">{{ cat.label }}</span>
           </button>
         </div>
-        <p v-if="errors.category" class="text-xs text-rose-500 mt-1 font-medium">
+        <p v-if="errors.category" class="text-xs text-rose-500 dark:text-rose-400 mt-1 font-medium">
           {{ errors.category }}
         </p>
       </div>
@@ -185,7 +185,7 @@ defineExpose({
       <!-- Amount and Currency Row -->
       <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
         <div class="sm:col-span-8">
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             Сумма <span class="text-rose-500">*</span>
           </label>
           <div class="relative">
@@ -202,24 +202,25 @@ defineExpose({
         </div>
 
         <div class="sm:col-span-4">
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             Валюта
           </label>
           <div class="relative">
             <select
               v-model="currency"
-              class="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-colors"
+              class="w-full px-3.5 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 dark:focus:border-teal-400 transition-colors"
             >
               <option
                 v-for="curr in currencies"
                 :key="curr.value"
                 :value="curr.value"
+                class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
               >
                 {{ curr.label }}
               </option>
             </select>
           </div>
-          <p v-if="errors.currency" class="text-xs text-rose-500 mt-1 font-medium">
+          <p v-if="errors.currency" class="text-xs text-rose-500 dark:text-rose-400 mt-1 font-medium">
             {{ errors.currency }}
           </p>
         </div>
@@ -227,7 +228,7 @@ defineExpose({
 
       <!-- Expense Date -->
       <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
           Дата расхода <span class="text-rose-500">*</span>
         </label>
         <BaseInput
@@ -240,7 +241,7 @@ defineExpose({
 
       <!-- Description / Note -->
       <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
           Описание расхода
         </label>
         <BaseTextarea
@@ -252,7 +253,7 @@ defineExpose({
       </div>
 
       <!-- Form Actions -->
-      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
         <BaseButton
           variant="outline"
           type="button"

@@ -183,16 +183,16 @@ defineExpose({
 
 <template>
   <form @submit.prevent="onSubmit" class="space-y-6" novalidate>
-    <div class="rounded-2xl bg-gradient-to-r from-teal-50/90 via-sky-50/70 to-indigo-50/60 border border-teal-200/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="rounded-2xl bg-gradient-to-r from-teal-50/90 via-sky-50/70 to-indigo-50/60 dark:from-teal-950/50 dark:via-slate-800/80 dark:to-slate-900 border border-teal-200/70 dark:border-teal-500/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-start gap-3">
         <div class="w-9 h-9 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 mt-0.5">
           <Sparkles class="w-4 h-4" />
         </div>
         <div>
-          <p class="text-sm font-bold text-slate-900">
+          <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
             Не знаете, с чего начать? Выберите готовый маршрут
           </p>
-          <p class="text-xs text-slate-600 mt-0.5">
+          <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
             Готовые кураторские программы по дням с умным списком вещей и чек-листом документов.
           </p>
         </div>
@@ -206,7 +206,7 @@ defineExpose({
         :disabled="loading"
         @click="templatesModalOpen = true"
       >
-        <Sparkles class="w-4 h-4" />
+        <Sparkles class="w-4 h-4 text-teal-600 dark:text-teal-400" />
         <span>Готовые маршруты</span>
       </BaseButton>
     </div>
@@ -249,8 +249,8 @@ defineExpose({
 
         <!-- Quick-pick popular cities for selected country -->
         <div v-if="suggestedCities.length > 0" class="flex flex-wrap items-center gap-1.5 pt-0.5">
-          <span class="text-[11px] text-slate-400 inline-flex items-center gap-1 mr-0.5">
-            <MapPin class="w-3 h-3 text-teal-600" />
+          <span class="text-[11px] text-slate-400 dark:text-slate-500 inline-flex items-center gap-1 mr-0.5">
+            <MapPin class="w-3 h-3 text-teal-600 dark:text-teal-400" />
             Популярные:
           </span>
           <button
@@ -263,7 +263,7 @@ defineExpose({
               'px-2 py-0.5 rounded-lg text-xs font-medium border transition-colors',
               city === cityName
                 ? 'bg-teal-600 text-white border-teal-600'
-                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200',
+                : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-teal-50 dark:hover:bg-teal-500/15 hover:text-teal-700 dark:hover:text-teal-300 hover:border-teal-200 dark:hover:border-teal-500/30',
             ]"
           >
             {{ cityName }}
@@ -281,7 +281,7 @@ defineExpose({
         :error="errors.tripType"
         :disabled="loading"
       />
-      <p class="text-xs text-slate-500">
+      <p class="text-xs text-slate-500 dark:text-slate-400">
         Тип поездки помогает точнее сформировать список вещей. Если тип не указан, система попробует определить его автоматически.
       </p>
     </div>
@@ -311,9 +311,9 @@ defineExpose({
 
     <div
       v-if="previewDuration"
-      class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-teal-50/70 border border-teal-100 text-teal-800 text-sm"
+      class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-teal-50/70 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 text-sm"
     >
-      <CalendarDays class="w-4 h-4 text-teal-600 shrink-0" />
+      <CalendarDays class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
       <span>
         Продолжительность поездки: <strong>{{ formatDaysLabel(previewDuration) }}</strong> (включая день начала и окончания)
       </span>
@@ -374,7 +374,7 @@ defineExpose({
       :disabled="loading"
     />
 
-    <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-slate-100">
+    <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
       <BaseButton
         type="button"
         variant="outline"

@@ -37,10 +37,10 @@ function onChange(event: Event) {
     <label
       v-if="label"
       :for="id || name"
-      class="block text-sm font-medium text-slate-700 mb-1.5"
+      class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5"
     >
       {{ label }}
-      <span v-if="required" class="text-rose-500 ml-0.5">*</span>
+      <span v-if="required" class="text-rose-500 dark:text-rose-400 ml-0.5">*</span>
     </label>
 
     <select
@@ -51,22 +51,23 @@ function onChange(event: Event) {
       @change="onChange"
       @blur="emit('blur', $event)"
       :class="[
-        'block w-full rounded-xl border bg-white px-3.5 py-2.5 text-sm text-slate-900 transition-colors focus:outline-none focus:ring-2 disabled:bg-slate-100 disabled:text-slate-500',
+        'block w-full rounded-xl border bg-white dark:bg-slate-800/80 px-3.5 py-2.5 text-sm text-slate-900 dark:text-slate-100 transition-colors focus:outline-none focus:ring-2 disabled:bg-slate-100 disabled:text-slate-500 dark:disabled:bg-slate-900/70 dark:disabled:text-slate-500',
         error
-          ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/20'
-          : 'border-slate-200 hover:border-slate-300 focus:border-teal-600 focus:ring-teal-500/20',
+          ? 'border-rose-300 dark:border-rose-500/60 focus:border-rose-500 focus:ring-rose-500/20'
+          : 'border-slate-200 dark:border-slate-700/90 hover:border-slate-300 dark:hover:border-slate-600 focus:border-teal-600 dark:focus:border-teal-400 focus:ring-teal-500/20 dark:focus:ring-teal-400/20',
       ]"
     >
       <option
         v-for="opt in options"
         :key="opt.value"
         :value="opt.value"
+        class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
       >
         {{ opt.label }}
       </option>
     </select>
 
-    <p v-if="error" class="mt-1.5 text-xs font-medium text-rose-600">
+    <p v-if="error" class="mt-1.5 text-xs font-medium text-rose-600 dark:text-rose-400">
       {{ error }}
     </p>
   </div>

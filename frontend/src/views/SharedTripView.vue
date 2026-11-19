@@ -310,27 +310,27 @@ const eventsByDate = computed<Record<string, SharedItineraryEvent[]>>(() => {
 const EVENT_CATEGORY_META: Record<EventCategory, { label: string; badgeClass: string }> = {
   SIGHTSEEING: {
     label: 'Достопримечательность',
-    badgeClass: 'bg-teal-50 text-teal-700 border-teal-200/70',
+    badgeClass: 'bg-teal-50 text-teal-700 border-teal-200/70 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/30',
   },
   CULTURE: {
     label: 'Культура',
-    badgeClass: 'bg-violet-50 text-violet-700 border-violet-200/70',
+    badgeClass: 'bg-violet-50 text-violet-700 border-violet-200/70 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/30',
   },
   FOOD: {
     label: 'Питание',
-    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200/70',
+    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200/70 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',
   },
   NATURE: {
     label: 'Природа',
-    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/70',
+    badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/70 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30',
   },
   TRANSPORT: {
     label: 'Транспорт',
-    badgeClass: 'bg-sky-50 text-sky-700 border-sky-200/70',
+    badgeClass: 'bg-sky-50 text-sky-700 border-sky-200/70 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
   },
   LEISURE: {
     label: 'Отдых',
-    badgeClass: 'bg-rose-50 text-rose-700 border-rose-200/70',
+    badgeClass: 'bg-rose-50 text-rose-700 border-rose-200/70 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/30',
   },
 };
 
@@ -514,10 +514,10 @@ function goToLoginWithRedirect() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 flex flex-col">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
     <!-- Top Public Header Bar -->
     <header
-      class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm"
+      class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-sm dark:shadow-none"
     >
       <div
         class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4"
@@ -529,8 +529,8 @@ function goToLoginWithRedirect() {
             <Compass class="w-5 h-5" />
           </div>
           <div class="leading-tight">
-            <span class="block text-lg font-extrabold tracking-tight text-slate-900">
-              Travel<span class="text-teal-600">Planner</span>
+            <span class="block text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
+              Travel<span class="text-teal-600 dark:text-teal-400">Planner</span>
             </span>
           </div>
         </RouterLink>
@@ -562,7 +562,7 @@ function goToLoginWithRedirect() {
         <div v-else class="flex items-center gap-2.5">
           <RouterLink
             :to="authStore.isAuthenticated ? '/dashboard' : '/'"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 transition-colors"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 transition-colors"
           >
             <Home class="w-4 h-4" />
             <span>{{ authStore.isAuthenticated ? 'Личный кабинет' : 'На главную' }}</span>
@@ -581,24 +581,24 @@ function goToLoginWithRedirect() {
       <!-- 404 / Link Revoked or Disabled Screen -->
       <div
         v-else-if="isNotFound"
-        class="max-w-xl mx-auto my-10 bg-white rounded-3xl border border-slate-200/80 shadow-soft p-8 sm:p-12 text-center space-y-6 animate-fade-in"
+        class="max-w-xl mx-auto my-10 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-8 sm:p-12 text-center space-y-6 animate-fade-in"
       >
         <div
-          class="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center mx-auto"
+          class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 flex items-center justify-center mx-auto"
         >
           <Link2Off class="w-8 h-8" />
         </div>
 
         <div class="space-y-2">
           <span
-            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200/70"
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-200/70 dark:border-rose-500/30"
           >
             Ошибка 404 · Доступ недоступен
           </span>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 pt-1">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 pt-1">
             Публичный маршрут не найден
           </h1>
-          <p class="text-sm text-slate-500 leading-relaxed">
+          <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
             Ссылка недействительна, устарела или владелец поездки закрыл публичный доступ. Попросите организатора прислать актуальную ссылку.
           </p>
         </div>
@@ -632,7 +632,7 @@ function goToLoginWithRedirect() {
       <div v-else class="space-y-6 animate-fade-in">
         <!-- Trip Hero Card -->
         <section
-          class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 sm:p-8 space-y-6"
+          class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8 space-y-6"
         >
           <div class="flex flex-col md:flex-row md:items-start justify-between gap-5">
             <div class="flex items-start gap-4 min-w-0">
@@ -643,18 +643,18 @@ function goToLoginWithRedirect() {
                 :alt="trip.country"
                 loading="lazy"
                 decoding="async"
-                class="w-16 h-11 object-cover rounded-xl border border-slate-200/80 shadow-sm shrink-0 mt-1"
+                class="w-16 h-11 object-cover rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0 mt-1"
               />
               <div
                 v-else-if="headerFlagEmoji"
-                class="w-16 h-11 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-center text-3xl shrink-0 mt-1 shadow-sm"
+                class="w-16 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-3xl shrink-0 mt-1 shadow-sm"
                 aria-hidden="true"
               >
                 {{ headerFlagEmoji }}
               </div>
               <div
                 v-else
-                class="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100 text-teal-600 flex items-center justify-center shrink-0"
+                class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-500/15 border border-teal-100 dark:border-teal-500/30 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
               >
                 <Globe2 class="w-7 h-7" />
               </div>
@@ -663,7 +663,7 @@ function goToLoginWithRedirect() {
                 <!-- Badges -->
                 <div class="flex flex-wrap items-center gap-2">
                   <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/30"
                   >
                     <Users class="w-3.5 h-3.5" />
                     <span>Публичный маршрут для попутчиков</span>
@@ -681,20 +681,20 @@ function goToLoginWithRedirect() {
 
                   <span
                     v-if="trip.tripType"
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200/70"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700"
                   >
-                    <Compass class="w-3.5 h-3.5 text-teal-600" />
+                    <Compass class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                     <span>{{ getTripTypeLabelRu(trip.tripType) }}</span>
                   </span>
                 </div>
 
                 <!-- Title & Location -->
                 <div>
-                  <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                  <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
                     {{ trip.title }}
                   </h1>
                   <p
-                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 mt-1.5"
+                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 dark:text-teal-400 mt-1.5"
                   >
                     <MapPin class="w-4 h-4 shrink-0" />
                     <span>{{ trip.country }}, {{ trip.city }}</span>
@@ -704,7 +704,7 @@ function goToLoginWithRedirect() {
                 <!-- Optional Trip Description -->
                 <p
                   v-if="trip.description"
-                  class="text-sm text-slate-600 leading-relaxed whitespace-pre-line max-w-3xl"
+                  class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line max-w-3xl"
                 >
                   {{ trip.description }}
                 </p>
@@ -714,7 +714,7 @@ function goToLoginWithRedirect() {
 
           <!-- Key Metrics Grid -->
           <div
-            class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 border-t border-slate-100"
+            class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 border-t border-slate-100 dark:border-slate-800"
             :class="
               sharedData.permissions.showExpenses && expensesData
                 ? 'lg:grid-cols-4'
@@ -722,48 +722,48 @@ function goToLoginWithRedirect() {
             "
           >
             <div
-              class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5"
+              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
             >
               <div
-                class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"
+                class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
               >
                 <Calendar class="w-5 h-5" />
               </div>
               <div>
-                <p class="text-xs text-slate-500">Даты поездки</p>
-                <p class="text-sm font-bold text-slate-900">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Даты поездки</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {{ formatDateRange(trip.startDate, trip.endDate) }}
                 </p>
               </div>
             </div>
 
             <div
-              class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5"
+              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
             >
               <div
-                class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0"
+                class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"
               >
                 <Clock class="w-5 h-5" />
               </div>
               <div>
-                <p class="text-xs text-slate-500">Продолжительность</p>
-                <p class="text-sm font-bold text-slate-900">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Продолжительность</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {{ formatDaysLabel(trip.durationDays) }}
                 </p>
               </div>
             </div>
 
             <div
-              class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5"
+              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
             >
               <div
-                class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0"
+                class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"
               >
                 <Users class="w-5 h-5" />
               </div>
               <div>
-                <p class="text-xs text-slate-500">Участники</p>
-                <p class="text-sm font-bold text-slate-900">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Участники</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {{ formatTravelersLabel(trip.travelersCount) }}
                 </p>
               </div>
@@ -771,16 +771,16 @@ function goToLoginWithRedirect() {
 
             <div
               v-if="sharedData.permissions.showExpenses && expensesData"
-              class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5"
+              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
             >
               <div
-                class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"
+                class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
               >
                 <Wallet class="w-5 h-5" />
               </div>
               <div>
-                <p class="text-xs text-slate-500">Планируемый бюджет</p>
-                <p class="text-sm font-bold text-slate-900">
+                <p class="text-xs text-slate-500 dark:text-slate-400">Планируемый бюджет</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                   {{ formatCurrency(expensesData.summary.plannedBudget, expensesData.summary.currency) }}
                 </p>
               </div>
@@ -789,9 +789,9 @@ function goToLoginWithRedirect() {
 
           <!-- Compact Privacy Notice -->
           <div
-            class="flex items-center gap-2 text-xs text-slate-500 pt-1"
+            class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1"
           >
-            <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0" />
+            <ShieldCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <span>
               Режим «только чтение»: личные брони, документы и контакты организатора скрыты.
             </span>
@@ -801,12 +801,12 @@ function goToLoginWithRedirect() {
         <!-- Empty State if owner disabled all detail tabs -->
         <div
           v-if="availableTabs.length === 0"
-          class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-8 sm:p-12 text-center space-y-3"
+          class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-8 sm:p-12 text-center space-y-3"
         >
-          <p class="text-base font-bold text-slate-900">
+          <p class="text-base font-bold text-slate-900 dark:text-slate-100">
             Подробные разделы скрыты организатором
           </p>
-          <p class="text-sm text-slate-500 max-w-md mx-auto">
+          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
             Владелец маршрута открыл общую карточку поездки и ограничил отображение детальных вкладок.
           </p>
         </div>
@@ -814,7 +814,7 @@ function goToLoginWithRedirect() {
         <template v-else>
           <!-- Section Tabs Navigation -->
           <div
-            class="flex items-stretch gap-1 overflow-x-auto bg-[linear-gradient(to_top,#e2e8f0_1px,transparent_1px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            class="flex items-stretch gap-1 overflow-x-auto bg-[linear-gradient(to_top,#e2e8f0_1px,transparent_1px)] dark:bg-[linear-gradient(to_top,#1e293b_1px,transparent_1px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             <button
               v-for="tab in availableTabs"
@@ -824,8 +824,8 @@ function goToLoginWithRedirect() {
               :class="[
                 'inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
                 activeTab === tab.key
-                  ? 'border-teal-600 text-teal-700'
-                  : 'border-transparent text-slate-500 hover:text-slate-800',
+                  ? 'border-teal-600 dark:border-teal-400 text-teal-700 dark:text-teal-400'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200',
               ]"
             >
               <CalendarDays v-if="tab.key === 'itinerary'" class="w-4 h-4 shrink-0" />
@@ -840,8 +840,8 @@ function goToLoginWithRedirect() {
                 class="px-2 py-0.5 text-[11px] rounded-full font-bold"
                 :class="
                   activeTab === tab.key
-                    ? 'bg-teal-50 text-teal-700'
-                    : 'bg-slate-100 text-slate-600'
+                    ? 'bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                 "
               >
                 {{ tab.badge }}
@@ -853,11 +853,11 @@ function goToLoginWithRedirect() {
           <div v-if="activeTab === 'itinerary' && sharedData.permissions.showItinerary" class="space-y-5">
             <div
               v-if="sharedData.events.length === 0"
-              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-10 text-center space-y-2"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-10 text-center space-y-2"
             >
-              <CalendarDays class="w-8 h-8 text-slate-300 mx-auto" />
-              <p class="text-base font-bold text-slate-800">План по дням пока не заполнен</p>
-              <p class="text-sm text-slate-500">
+              <CalendarDays class="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+              <p class="text-base font-bold text-slate-800 dark:text-slate-100">План по дням пока не заполнен</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">
                 Организатор ещё не добавил мероприятия в расписание поездки.
               </p>
             </div>
@@ -866,11 +866,11 @@ function goToLoginWithRedirect() {
               <section
                 v-for="day in calendarDays"
                 :key="day.date"
-                class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden"
+                class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden"
               >
                 <!-- Day Header -->
                 <div
-                  class="px-5 sm:px-6 py-4 bg-slate-50/80 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3"
+                  class="px-5 sm:px-6 py-4 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3"
                 >
                   <div class="flex items-center gap-3">
                     <span
@@ -878,12 +878,12 @@ function goToLoginWithRedirect() {
                     >
                       День {{ day.dayNumber }}
                     </span>
-                    <h2 class="text-base font-bold text-slate-900">
+                    <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">
                       {{ day.label }}
                     </h2>
                   </div>
 
-                  <span class="text-xs font-semibold text-slate-500">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
                     {{ (eventsByDate[day.date] || []).length }}
                     {{ (eventsByDate[day.date] || []).length === 1 ? 'мероприятие' : 'мероприятий' }}
                   </span>
@@ -893,7 +893,7 @@ function goToLoginWithRedirect() {
                 <div class="p-5 sm:p-6">
                   <div
                     v-if="!eventsByDate[day.date] || eventsByDate[day.date].length === 0"
-                    class="py-5 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/40 text-sm text-slate-500"
+                    class="py-5 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/40 text-sm text-slate-500 dark:text-slate-400"
                   >
                     Свободный день — мероприятий не запланировано
                   </div>
@@ -902,15 +902,15 @@ function goToLoginWithRedirect() {
                     <article
                       v-for="(ev, evIdx) in eventsByDate[day.date]"
                       :key="`${day.date}-${evIdx}`"
-                      class="rounded-xl border border-slate-200/80 p-4 sm:p-5 bg-white hover:border-teal-200/90 transition-colors space-y-2.5"
+                      class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 p-4 sm:p-5 bg-white dark:bg-slate-800/50 hover:border-teal-200/90 dark:hover:border-teal-500/40 transition-colors space-y-2.5"
                     >
                       <div class="flex flex-wrap items-center gap-2">
                         <!-- Time -->
                         <span
                           v-if="ev.startTime || ev.endTime"
-                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/70 text-xs font-semibold"
+                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30 text-xs font-semibold"
                         >
-                          <Clock class="w-3.5 h-3.5 text-teal-600" />
+                          <Clock class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                           <span v-if="ev.startTime && ev.endTime">
                             {{ ev.startTime }} — {{ ev.endTime }}
                           </span>
@@ -919,7 +919,7 @@ function goToLoginWithRedirect() {
                         </span>
                         <span
                           v-else
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium"
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium"
                         >
                           Весь день / без времени
                         </span>
@@ -940,37 +940,37 @@ function goToLoginWithRedirect() {
                             ev.estimatedCost !== null &&
                             ev.estimatedCost !== undefined
                           "
-                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs font-semibold"
+                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-500/30 text-xs font-semibold"
                         >
                           <Wallet class="w-3 h-3" />
                           <span>{{ formatCurrency(ev.estimatedCost, expensesData.summary.currency) }}</span>
                         </span>
                       </div>
 
-                      <h3 class="text-base font-bold text-slate-900">
+                      <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">
                         {{ ev.title }}
                       </h3>
 
                       <p
                         v-if="ev.location"
-                        class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"
+                        class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400"
                       >
-                        <MapPin class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                        <MapPin class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
                         <span>{{ ev.location }}</span>
                       </p>
 
                       <p
                         v-if="ev.description"
-                        class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"
+                        class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line"
                       >
                         {{ ev.description }}
                       </p>
 
                       <div
                         v-if="ev.note"
-                        class="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex items-start gap-2"
+                        class="p-2.5 rounded-lg bg-amber-50/80 dark:bg-amber-500/15 border border-amber-200/70 dark:border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2"
                       >
-                        <StickyNote class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <StickyNote class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                         <span class="whitespace-pre-line">{{ ev.note }}</span>
                       </div>
                     </article>
@@ -987,32 +987,32 @@ function goToLoginWithRedirect() {
           >
             <!-- Companion Progress Card -->
             <div
-              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-5 sm:p-6 space-y-4"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6 space-y-4"
             >
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="text-lg font-extrabold text-slate-900">
+                    <h2 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
                       Ваш личный чек-лист сборов
                     </h2>
                     <span
-                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-700 border border-teal-200/70"
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30"
                     >
                       <CheckCircle2 class="w-3.5 h-3.5" />
                       <span>Сохраняется в вашем браузере</span>
                     </span>
                   </div>
-                  <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                     Отмечайте собранные вещи самостоятельно — ваши галочки видны только на этом устройстве и не влияют на список организатора.
                   </p>
                 </div>
 
                 <div class="flex items-center gap-3 shrink-0">
                   <div class="text-right">
-                    <p class="text-xl font-black text-slate-900 tabular-nums">
+                    <p class="text-xl font-black text-slate-900 dark:text-slate-100 tabular-nums">
                       {{ localPackedCount }} / {{ packingItems.length }}
                     </p>
-                    <p class="text-xs font-semibold text-teal-700">
+                    <p class="text-xs font-semibold text-teal-700 dark:text-teal-400">
                       {{ localPackingProgress }}% собрано
                     </p>
                   </div>
@@ -1020,7 +1020,7 @@ function goToLoginWithRedirect() {
               </div>
 
               <!-- Progress Bar -->
-              <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
                   class="h-full rounded-full transition-all duration-300"
                   :class="
@@ -1044,8 +1044,8 @@ function goToLoginWithRedirect() {
                     :class="[
                       'px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
                       packingFilter === 'all'
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80',
+                        ? 'bg-slate-900 dark:bg-teal-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700',
                     ]"
                   >
                     Все ({{ packingItems.length }})
@@ -1056,8 +1056,8 @@ function goToLoginWithRedirect() {
                     :class="[
                       'px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
                       packingFilter === 'remaining'
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80',
+                        ? 'bg-slate-900 dark:bg-teal-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700',
                     ]"
                   >
                     Осталось ({{ packingItems.length - localPackedCount }})
@@ -1068,8 +1068,8 @@ function goToLoginWithRedirect() {
                     :class="[
                       'px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
                       packingFilter === 'packed'
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80',
+                        ? 'bg-slate-900 dark:bg-teal-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700',
                     ]"
                   >
                     Собрано ({{ localPackedCount }})
@@ -1080,7 +1080,7 @@ function goToLoginWithRedirect() {
                   v-if="localPackedCount > 0"
                   type="button"
                   @click="resetLocalPacking"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 transition-colors"
                 >
                   <RotateCcw class="w-3.5 h-3.5" />
                   <span>Сбросить отметки</span>
@@ -1091,11 +1091,11 @@ function goToLoginWithRedirect() {
             <!-- Empty Packing List -->
             <div
               v-if="packingItems.length === 0"
-              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-10 text-center space-y-2"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-10 text-center space-y-2"
             >
-              <Briefcase class="w-8 h-8 text-slate-300 mx-auto" />
-              <p class="text-base font-bold text-slate-800">Список вещей пока пуст</p>
-              <p class="text-sm text-slate-500">
+              <Briefcase class="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+              <p class="text-base font-bold text-slate-800 dark:text-slate-100">Список вещей пока пуст</p>
+              <p class="text-sm text-slate-500 dark:text-slate-400">
                 Организатор ещё не сформировал список вещей для этой поездки.
               </p>
             </div>
@@ -1103,10 +1103,10 @@ function goToLoginWithRedirect() {
             <!-- Empty Filter Result -->
             <div
               v-else-if="groupedPackingCategories.length === 0"
-              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-10 text-center space-y-3"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-10 text-center space-y-3"
             >
-              <CheckCircle2 class="w-9 h-9 text-emerald-500 mx-auto" />
-              <p class="text-base font-bold text-slate-800">
+              <CheckCircle2 class="w-9 h-9 text-emerald-500 dark:text-emerald-400 mx-auto" />
+              <p class="text-base font-bold text-slate-800 dark:text-slate-100">
                 {{
                   packingFilter === 'remaining'
                     ? 'Все вещи собраны! Отличная подготовка.'
@@ -1123,30 +1123,30 @@ function goToLoginWithRedirect() {
               <section
                 v-for="group in groupedPackingCategories"
                 :key="group.category"
-                class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden flex flex-col"
+                class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col"
               >
                 <div
-                  class="px-5 py-3.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between gap-2"
+                  class="px-5 py-3.5 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2"
                 >
-                  <h3 class="text-sm font-extrabold text-slate-900">
+                  <h3 class="text-sm font-extrabold text-slate-900 dark:text-slate-100">
                     {{ group.nameRu }}
                   </h3>
                   <span
                     class="px-2.5 py-0.5 rounded-full text-xs font-bold"
                     :class="
                       group.packedCount === group.items.length
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'bg-slate-200/70 text-slate-700'
+                        ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
                     "
                   >
                     {{ group.packedCount }} / {{ group.items.length }}
                   </span>
                 </div>
 
-                <ul class="divide-y divide-slate-100">
+                <ul class="divide-y divide-slate-100 dark:divide-slate-800">
                   <li v-for="item in group.items" :key="item.key">
                     <label
-                      class="flex items-start gap-3 px-5 py-3.5 cursor-pointer hover:bg-slate-50/70 transition-colors select-none"
+                      class="flex items-start gap-3 px-5 py-3.5 cursor-pointer hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors select-none"
                     >
                       <input
                         type="checkbox"
@@ -1159,7 +1159,7 @@ function goToLoginWithRedirect() {
                         :class="
                           localPackedMap[item.key]
                             ? 'bg-teal-600 border-teal-600 text-white'
-                            : 'bg-white border-slate-300 text-transparent'
+                            : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-transparent'
                         "
                       >
                         <Check class="w-3.5 h-3.5 stroke-[3]" />
@@ -1171,15 +1171,15 @@ function goToLoginWithRedirect() {
                             class="text-sm font-semibold transition-colors"
                             :class="
                               localPackedMap[item.key]
-                                ? 'line-through text-slate-400'
-                                : 'text-slate-800'
+                                ? 'line-through text-slate-400 dark:text-slate-500'
+                                : 'text-slate-800 dark:text-slate-100'
                             "
                           >
                             {{ item.name }}
                           </span>
                           <span
                             v-if="item.quantity && item.quantity > 1"
-                            class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-600"
+                            class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                           >
                             ×{{ item.quantity }}
                           </span>
@@ -1187,7 +1187,7 @@ function goToLoginWithRedirect() {
 
                         <p
                           v-if="item.reason"
-                          class="text-xs text-slate-400 mt-0.5 leading-snug"
+                          class="text-xs text-slate-400 dark:text-slate-400 mt-0.5 leading-snug"
                         >
                           {{ item.reason }}
                         </p>
@@ -1210,17 +1210,17 @@ function goToLoginWithRedirect() {
 
             <div
               v-else
-              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-4"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-4"
             >
               <div
-                class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 text-teal-600 flex items-center justify-center mx-auto"
+                class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-teal-600 dark:text-teal-400 flex items-center justify-center mx-auto"
               >
                 <Globe2 class="w-7 h-7" />
               </div>
-              <h2 class="text-lg font-extrabold text-slate-900">
+              <h2 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
                 Памятка для направления «{{ trip.country }}» не найдена в справочнике
               </h2>
-              <p class="text-sm text-slate-500">
+              <p class="text-sm text-slate-500 dark:text-slate-400">
                 Страна указана организатором вручную и не сопоставлена с каталогом TravelPlanner.
               </p>
             </div>
@@ -1233,49 +1233,49 @@ function goToLoginWithRedirect() {
           >
             <!-- KPI Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     План бюджета
                   </span>
-                  <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
                     <Wallet class="w-4 h-4" />
                   </div>
                 </div>
-                <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
                   {{ formatCurrency(expensesData.summary.plannedBudget, expensesData.summary.currency) }}
                 </p>
-                <p class="text-xs text-slate-400 mt-1">Запланировано на поездку</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Запланировано на поездку</p>
               </div>
 
-              <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Потрачено
                   </span>
-                  <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                  <div class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                     <Receipt class="w-4 h-4" />
                   </div>
                 </div>
-                <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
                   {{ formatCurrency(expensesData.summary.totalSpent, expensesData.summary.currency) }}
                 </p>
-                <p class="text-xs text-slate-400 mt-1">
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
                   Операций: {{ expensesData.items.length }}
                 </p>
               </div>
 
-              <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Остаток
                   </span>
                   <div
                     class="w-8 h-8 rounded-lg flex items-center justify-center"
                     :class="
                       expensesData.summary.remainingBudget < 0
-                        ? 'bg-rose-50 text-rose-600'
-                        : 'bg-emerald-50 text-emerald-600'
+                        ? 'bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                        : 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
                     "
                   >
                     <TrendingUp class="w-4 h-4" />
@@ -1284,7 +1284,9 @@ function goToLoginWithRedirect() {
                 <p
                   class="text-xl sm:text-2xl font-extrabold"
                   :class="
-                    expensesData.summary.remainingBudget < 0 ? 'text-rose-600' : 'text-emerald-600'
+                    expensesData.summary.remainingBudget < 0
+                      ? 'text-rose-600 dark:text-rose-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
                   "
                 >
                   {{ formatCurrency(expensesData.summary.remainingBudget, expensesData.summary.currency) }}
@@ -1293,8 +1295,8 @@ function goToLoginWithRedirect() {
                   class="text-xs font-medium mt-1"
                   :class="
                     expensesData.summary.remainingBudget < 0
-                      ? 'text-rose-500 font-bold'
-                      : 'text-slate-400'
+                      ? 'text-rose-500 dark:text-rose-400 font-bold'
+                      : 'text-slate-400 dark:text-slate-500'
                   "
                 >
                   {{
@@ -1305,19 +1307,19 @@ function goToLoginWithRedirect() {
                 </p>
               </div>
 
-              <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+              <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Освоение
                   </span>
                   <span
                     class="text-xs font-bold px-2 py-0.5 rounded-full"
                     :class="
                       expensesData.summary.status === 'over_budget'
-                        ? 'bg-rose-100 text-rose-800'
+                        ? 'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-300'
                         : expensesData.summary.status === 'near_budget'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300'
+                          : 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300'
                     "
                   >
                     {{
@@ -1329,10 +1331,10 @@ function goToLoginWithRedirect() {
                     }}
                   </span>
                 </div>
-                <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+                <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
                   {{ expensesData.summary.spentPercentage }}%
                 </p>
-                <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-2 overflow-hidden">
                   <div
                     class="h-full rounded-full transition-all duration-300"
                     :style="{ width: Math.min(expensesData.summary.spentPercentage, 100) + '%' }"
@@ -1351,43 +1353,43 @@ function goToLoginWithRedirect() {
             <!-- Averages Row -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div
-                class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft flex items-center justify-between gap-4"
+                class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-soft dark:shadow-none flex items-center justify-between gap-4"
               >
                 <div class="flex items-center gap-3.5 min-w-0">
-                  <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+                  <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
                     <CalendarDays class="w-5 h-5" />
                   </div>
                   <div class="min-w-0">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       В среднем в день
                     </p>
-                    <p class="text-xs text-slate-400 mt-0.5 truncate">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
                       За {{ formatDaysLabel(trip.durationDays) }}
                     </p>
                   </div>
                 </div>
-                <p class="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums shrink-0">
+                <p class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums shrink-0">
                   {{ formatCurrency(expensesData.summary.dailyAverage, expensesData.summary.currency) }}
                 </p>
               </div>
 
               <div
-                class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft flex items-center justify-between gap-4"
+                class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-soft dark:shadow-none flex items-center justify-between gap-4"
               >
                 <div class="flex items-center gap-3.5 min-w-0">
-                  <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                     <Users class="w-5 h-5" />
                   </div>
                   <div class="min-w-0">
-                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       На 1 путешественника
                     </p>
-                    <p class="text-xs text-slate-400 mt-0.5 truncate">
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
                       Участников: {{ trip.travelersCount }}
                     </p>
                   </div>
                 </div>
-                <p class="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums shrink-0">
+                <p class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums shrink-0">
                   {{ formatCurrency(expensesData.summary.perTravelerAverage, expensesData.summary.currency) }}
                 </p>
               </div>
@@ -1396,13 +1398,13 @@ function goToLoginWithRedirect() {
             <!-- Exchange Rates Bar -->
             <div
               v-if="formattedExchangeRatesLine"
-              class="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-600"
+              class="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300"
             >
               <div class="flex flex-wrap items-center gap-2">
-                <ArrowRightLeft class="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                <span class="font-semibold text-slate-700">Курс пересчёта:</span>
-                <span class="font-medium text-slate-800 tabular-nums">{{ formattedExchangeRatesLine }}</span>
-                <span v-if="hasForeignCurrencyExpenses" class="text-slate-400">
+                <ArrowRightLeft class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span class="font-semibold text-slate-700 dark:text-slate-300">Курс пересчёта:</span>
+                <span class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ formattedExchangeRatesLine }}</span>
+                <span v-if="hasForeignCurrencyExpenses" class="text-slate-400 dark:text-slate-500">
                   (пересчитано в {{ expensesData.summary.currency }})
                 </span>
               </div>
@@ -1411,9 +1413,9 @@ function goToLoginWithRedirect() {
             <!-- Over-budget banner -->
             <div
               v-if="expensesData.summary.status === 'over_budget'"
-              class="flex items-start gap-3 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-900 text-xs sm:text-sm"
+              class="flex items-start gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-500/30 text-rose-900 dark:text-rose-200 text-xs sm:text-sm"
             >
-              <AlertCircle class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <AlertCircle class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <span>
                 <strong class="font-bold">Превышение бюджета:</strong>
                 расходы превышают план на
@@ -1433,16 +1435,16 @@ function goToLoginWithRedirect() {
                 <!-- Daily Dynamics -->
                 <div
                   v-if="expensesData.summary.byDay.length > 0"
-                  class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-4"
+                  class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 space-y-4"
                 >
-                  <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-2.5">
-                      <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                         <BarChart3 class="w-5 h-5" />
                       </div>
                       <div>
-                        <h3 class="font-bold text-slate-900 text-base">Динамика по дням</h3>
-                        <p class="text-xs text-slate-500">В валюте {{ expensesData.summary.currency }}</p>
+                        <h3 class="font-bold text-slate-900 dark:text-slate-100 text-base">Динамика по дням</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">В валюте {{ expensesData.summary.currency }}</p>
                       </div>
                     </div>
                   </div>
@@ -1454,14 +1456,14 @@ function goToLoginWithRedirect() {
                       class="space-y-1.5"
                     >
                       <div class="flex items-center justify-between gap-2 text-xs sm:text-sm">
-                        <span class="font-semibold text-slate-800 truncate">
+                        <span class="font-semibold text-slate-800 dark:text-slate-200 truncate">
                           {{ formatRussianDate(day.date) }}
                         </span>
-                        <span class="font-extrabold text-slate-900 tabular-nums shrink-0">
+                        <span class="font-extrabold text-slate-900 dark:text-slate-100 tabular-nums shrink-0">
                           {{ formatCurrency(day.totalAmount, expensesData.summary.currency) }}
                         </span>
                       </div>
-                      <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
                           class="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500"
                           :style="{
@@ -1476,12 +1478,12 @@ function goToLoginWithRedirect() {
 
               <!-- Read-only Expense Items -->
               <div
-                class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-5"
+                class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 space-y-5"
               >
-                <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <div>
-                    <h3 class="font-extrabold text-slate-900 text-lg">История расходов</h3>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                    <h3 class="font-extrabold text-slate-900 dark:text-slate-100 text-lg">История расходов</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                       Просмотр трат, которыми поделился организатор
                     </p>
                   </div>
@@ -1490,7 +1492,7 @@ function goToLoginWithRedirect() {
                     v-if="selectedExpenseCategory"
                     type="button"
                     @click="selectedExpenseCategory = null"
-                    class="text-xs px-3 py-1.5 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                    class="text-xs px-3 py-1.5 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
                   >
                     Сбросить фильтр
                   </button>
@@ -1504,8 +1506,8 @@ function goToLoginWithRedirect() {
                     :class="[
                       'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
                       selectedExpenseCategory === null
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700',
+                        ? 'bg-slate-900 dark:bg-teal-600 text-white shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200',
                     ]"
                   >
                     <span>Все</span>
@@ -1523,8 +1525,8 @@ function goToLoginWithRedirect() {
                     :class="[
                       'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all',
                       selectedExpenseCategory === catItem.category
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                        : 'bg-white text-slate-700 border-slate-200/80 hover:border-slate-300',
+                        ? 'bg-slate-900 dark:bg-teal-600 text-white border-slate-900 dark:border-teal-600 shadow-sm'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600',
                     ]"
                   >
                     <span
@@ -1538,7 +1540,7 @@ function goToLoginWithRedirect() {
 
                 <div
                   v-if="filteredExpenses.length === 0"
-                  class="py-12 text-center text-sm text-slate-500"
+                  class="py-12 text-center text-sm text-slate-500 dark:text-slate-400"
                 >
                   {{
                     selectedExpenseCategory
@@ -1551,7 +1553,7 @@ function goToLoginWithRedirect() {
                   <div
                     v-for="(exp, idx) in filteredExpenses"
                     :key="`${exp.expenseDate}-${exp.category}-${idx}`"
-                    class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-slate-200/80 bg-white gap-3"
+                    class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-slate-800/50 gap-3"
                   >
                     <div class="flex items-start sm:items-center gap-3.5 min-w-0">
                       <div
@@ -1562,28 +1564,28 @@ function goToLoginWithRedirect() {
                       </div>
                       <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                          <span class="text-sm sm:text-base font-bold text-slate-900">
+                          <span class="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100">
                             {{ exp.categoryNameRu }}
                           </span>
                           <span
-                            class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg"
+                            class="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg"
                           >
                             {{ formatRussianDate(exp.expenseDate) }}
                           </span>
                         </div>
-                        <p v-if="exp.description" class="text-xs sm:text-sm text-slate-600 mt-1">
+                        <p v-if="exp.description" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                           {{ exp.description }}
                         </p>
                       </div>
                     </div>
 
                     <div class="sm:text-right shrink-0">
-                      <span class="block text-lg sm:text-xl font-black text-slate-900 tabular-nums">
+                      <span class="block text-lg sm:text-xl font-black text-slate-900 dark:text-slate-100 tabular-nums">
                         {{ formatCurrency(exp.amount, exp.currency) }}
                       </span>
                       <span
                         v-if="exp.currency !== expensesData.summary.currency"
-                        class="block text-xs font-semibold text-teal-700 tabular-nums"
+                        class="block text-xs font-semibold text-teal-700 dark:text-teal-400 tabular-nums"
                       >
                         ≈ {{ formatCurrency(exp.convertedAmount, expensesData.summary.currency) }}
                       </span>
@@ -1598,12 +1600,12 @@ function goToLoginWithRedirect() {
     </main>
 
     <!-- Subtle Footer -->
-    <footer class="border-t border-slate-200/70 bg-white/80 py-5 mt-8">
+    <footer class="border-t border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 py-5 mt-8">
       <div
-        class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500"
+        class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400"
       >
         <span>TravelPlanner · Умное планирование совместных путешествий</span>
-        <RouterLink to="/" class="font-semibold text-teal-700 hover:text-teal-800 transition-colors">
+        <RouterLink to="/" class="font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors">
           Создать свой маршрут в TravelPlanner →
         </RouterLink>
       </div>

@@ -251,7 +251,7 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
 <template>
   <div
     v-if="hasCountryInput"
-    class="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 sm:p-5 space-y-4 animate-fade-in"
+    class="rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 p-4 sm:p-5 space-y-4 animate-fade-in"
   >
     <!-- Part 1: Quick Country Travel Memo -->
     <div v-if="matchedCountry && hasTravelInfo" class="space-y-3">
@@ -263,15 +263,15 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
             :alt="matchedCountry.nameRu"
             loading="lazy"
             decoding="async"
-            class="w-7 h-5 object-cover rounded-md shadow-sm border border-slate-200/80 shrink-0"
+            class="w-7 h-5 object-cover rounded-md shadow-sm border border-slate-200/80 dark:border-slate-700 shrink-0"
           />
           <span v-else class="text-lg shrink-0" aria-hidden="true">{{ matchedCountry.flagEmoji }}</span>
           <div class="min-w-0">
-            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
-              <BookOpen class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+              <BookOpen class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
               <span>Памятка по стране «{{ matchedCountry.nameRu }}»</span>
             </div>
-            <p class="text-[11px] text-slate-500 truncate">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
               Столица: {{ matchedCountry.capital }} · Валюта: {{ matchedCountry.currency }}
             </p>
           </div>
@@ -288,32 +288,32 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
-        <div class="p-3 rounded-xl bg-white border border-slate-200/70 space-y-1">
-          <div class="inline-flex items-center gap-1.5 font-bold text-indigo-700">
+        <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 space-y-1">
+          <div class="inline-flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-400">
             <Plane class="w-3.5 h-3.5 shrink-0" />
             <span>Виза и въезд</span>
           </div>
-          <p class="text-slate-600 leading-relaxed line-clamp-3">
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
             {{ matchedCountry.travelInfo!.entryRules.summary }}
           </p>
         </div>
 
-        <div class="p-3 rounded-xl bg-white border border-slate-200/70 space-y-1">
-          <div class="inline-flex items-center gap-1.5 font-bold text-emerald-700">
+        <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 space-y-1">
+          <div class="inline-flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
             <Coins class="w-3.5 h-3.5 shrink-0" />
             <span>Валюта и карты</span>
           </div>
-          <p class="text-slate-600 leading-relaxed line-clamp-3">
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
             {{ matchedCountry.travelInfo!.moneyAndPayments.summary }}
           </p>
         </div>
 
-        <div class="p-3 rounded-xl bg-white border border-slate-200/70 space-y-1">
-          <div class="inline-flex items-center gap-1.5 font-bold text-violet-700">
+        <div class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 space-y-1">
+          <div class="inline-flex items-center gap-1.5 font-bold text-violet-700 dark:text-violet-400">
             <Lightbulb class="w-3.5 h-3.5 shrink-0" />
             <span>Розетки и советы</span>
           </div>
-          <p class="text-slate-600 leading-relaxed line-clamp-3">
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed line-clamp-3">
             {{ matchedCountry.travelInfo!.practicalTips.summary }}
           </p>
         </div>
@@ -325,12 +325,12 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
       v-if="weatherQuerySignature"
       :class="[
         'space-y-3',
-        matchedCountry && hasTravelInfo ? 'pt-4 border-t border-slate-200/80' : '',
+        matchedCountry && hasTravelInfo ? 'pt-4 border-t border-slate-200/80 dark:border-slate-800' : '',
       ]"
     >
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900">
-          <CloudSun class="w-4 h-4 text-teal-600 shrink-0" />
+        <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+          <CloudSun class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
           <span>Ожидаемая погода на даты поездки</span>
         </div>
 
@@ -339,8 +339,8 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
           :class="[
             'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
             isForecastMode
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-              : 'bg-amber-50 text-amber-800 border-amber-200/80',
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30'
+              : 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',
           ]"
         >
           {{ isForecastMode ? 'Прогноз' : 'Сезонный ориентир' }}
@@ -350,19 +350,19 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
       <!-- Loading State -->
       <div
         v-if="isLoadingWeather && !weather"
-        class="p-3.5 rounded-xl bg-white border border-slate-200/70 flex items-center gap-2.5 text-xs text-slate-500"
+        class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400"
       >
-        <Loader2 class="w-4 h-4 text-teal-600 animate-spin shrink-0" />
+        <Loader2 class="w-4 h-4 text-teal-600 dark:text-teal-400 animate-spin shrink-0" />
         <span>Определяем прогноз погоды для {{ effectiveCity }} ({{ startDate }} — {{ endDate }})...</span>
       </div>
 
       <!-- Error State (non-blocking) -->
       <div
         v-else-if="weatherError && !weather"
-        class="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-amber-900"
+        class="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-amber-900 dark:text-amber-200"
       >
         <div class="flex items-start gap-2">
-          <Info class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <Info class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <span>{{ weatherError }}</span>
         </div>
         <BaseButton
@@ -382,7 +382,7 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
       <!-- Loaded Weather Preview -->
       <div
         v-else-if="weather"
-        class="p-3.5 rounded-xl bg-white border border-slate-200/80 space-y-2.5"
+        class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-2.5"
       >
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
@@ -393,36 +393,36 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
             />
             <div class="min-w-0">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="text-xs font-bold text-slate-900 inline-flex items-center gap-1">
-                  <MapPin class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                <span class="text-xs font-bold text-slate-900 dark:text-slate-100 inline-flex items-center gap-1">
+                  <MapPin class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
                   <span>{{ weather.resolvedCity }}, {{ weather.resolvedCountry }}</span>
                 </span>
                 <Loader2
                   v-if="isLoadingWeather"
-                  class="w-3.5 h-3.5 text-teal-600 animate-spin shrink-0"
+                  class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 animate-spin shrink-0"
                 />
               </div>
-              <p class="text-xs text-teal-700 font-semibold mt-0.5">
+              <p class="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-0.5">
                 {{ weather.climateLabelRu }}
               </p>
             </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-3 text-xs shrink-0">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-100">
-              <Thermometer class="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span class="font-bold text-slate-900 tabular-nums">{{ tempRangeLabel }}</span>
-              <span class="text-[11px] text-slate-500 tabular-nums hidden sm:inline">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+              <Thermometer class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span class="font-bold text-slate-900 dark:text-slate-100 tabular-nums">{{ tempRangeLabel }}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums hidden sm:inline">
                 ({{ avgDayTempLabel }} / {{ avgNightTempLabel }})
               </span>
             </div>
 
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-100">
-              <Umbrella class="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span class="text-slate-700">
-                Дождливых дней: <strong class="text-slate-900 tabular-nums">{{ rainyDaysLabel }}</strong>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+              <Umbrella class="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+              <span class="text-slate-700 dark:text-slate-300">
+                Дождливых дней: <strong class="text-slate-900 dark:text-slate-100 tabular-nums">{{ rainyDaysLabel }}</strong>
               </span>
-              <span class="text-[11px] text-slate-500 tabular-nums">
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 tabular-nums">
                 ({{ formatWeatherDecimal(weather.summary.totalPrecipitationMm) }} мм)
               </span>
             </div>
@@ -431,7 +431,7 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
 
         <p
           v-if="weather.disclaimerRu"
-          class="text-[11px] text-slate-500 leading-relaxed pt-1 border-t border-slate-100"
+          class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-1 border-t border-slate-100 dark:border-slate-800"
         >
           {{ weather.disclaimerRu }}
         </p>
@@ -439,10 +439,10 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
         <!-- Daily Weather Breakdown -->
         <div
           v-if="dailyItems.length > 0"
-          class="pt-2.5 border-t border-slate-100 space-y-2.5"
+          class="pt-2.5 border-t border-slate-100 dark:border-slate-800 space-y-2.5"
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Погода по дням ({{ formatDaysLabel(dailyItems.length) }})
             </span>
 
@@ -450,7 +450,7 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
               v-if="hasManyDailyItems"
               type="button"
               @click="showAllDailyGrid = !showAllDailyGrid"
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-teal-50 border border-slate-200/80 hover:border-teal-200 text-[11px] font-semibold text-slate-700 hover:text-teal-700 transition-colors"
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-teal-50 dark:hover:bg-teal-500/15 border border-slate-200/80 dark:border-slate-700 hover:border-teal-200 dark:hover:border-teal-500/40 text-[11px] font-semibold text-slate-700 dark:text-slate-200 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
             >
               <PanelTopClose v-if="isDailyGridExpanded" class="w-3.5 h-3.5" />
               <LayoutGrid v-else class="w-3.5 h-3.5" />
@@ -472,17 +472,17 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
                 'rounded-xl border p-2.5 flex flex-col justify-between gap-2 transition-colors',
                 isDailyGridExpanded ? '' : 'w-[142px] sm:w-[148px] shrink-0 snap-start',
                 hasDayPrecipitation(day)
-                  ? 'bg-sky-50/40 border-sky-200/90 hover:border-sky-300'
-                  : 'bg-slate-50/70 border-slate-200/80 hover:border-teal-200',
+                  ? 'bg-sky-50/40 dark:bg-sky-500/10 border-sky-200/90 dark:border-sky-500/30 hover:border-sky-300'
+                  : 'bg-slate-50/70 dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700 hover:border-teal-200 dark:hover:border-teal-500/40',
               ]"
             >
               <div class="flex items-start justify-between gap-1.5">
                 <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 capitalize truncate">
+                  <p class="text-xs font-bold text-slate-900 dark:text-slate-100 capitalize truncate">
                     {{ formatWeatherShortDate(day.date) }}
                   </p>
                   <p
-                    class="text-[11px] text-slate-500 leading-snug line-clamp-2 min-h-[1.9rem] mt-0.5"
+                    class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-2 min-h-[1.9rem] mt-0.5"
                     :title="day.conditionRu"
                   >
                     {{ day.conditionRu }}
@@ -498,29 +498,29 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
               </div>
 
               <div class="flex items-baseline gap-1">
-                <span class="text-sm font-extrabold text-slate-900 tabular-nums">
+                <span class="text-sm font-extrabold text-slate-900 dark:text-slate-100 tabular-nums">
                   {{ formatSignedTemperature(day.tempMax, true) }}
                 </span>
-                <span class="text-[11px] font-semibold text-slate-400 tabular-nums">
+                <span class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 tabular-nums">
                   / {{ formatSignedTemperature(day.tempMin, true) }}
                 </span>
               </div>
 
-              <div class="pt-1 border-t border-slate-200/60">
+              <div class="pt-1 border-t border-slate-200/60 dark:border-slate-700/80">
                 <span
                   v-if="hasDayPrecipitation(day)"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-100/90 text-sky-800 border border-sky-200 text-[11px] font-semibold tabular-nums max-w-full truncate"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-100/90 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 text-[11px] font-semibold tabular-nums max-w-full truncate"
                   :title="formatDayPrecipitationBadge(day)"
                 >
-                  <Droplets class="w-3 h-3 text-sky-600 shrink-0" />
+                  <Droplets class="w-3 h-3 text-sky-600 dark:text-sky-400 shrink-0" />
                   <span class="truncate">{{ formatDayPrecipitationBadge(day) }}</span>
                 </span>
 
                 <span
                   v-else
-                  class="inline-flex items-center gap-1 text-[11px] text-slate-400"
+                  class="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-slate-500"
                 >
-                  <Droplets class="w-3 h-3 text-slate-300 shrink-0" />
+                  <Droplets class="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
                   <span>Без осадков</span>
                 </span>
               </div>
@@ -533,9 +533,9 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
     <!-- Hint when country entered without city/valid dates yet -->
     <div
       v-else-if="hasCountryInput && !weatherQuerySignature"
-      class="text-xs text-slate-500 flex items-center gap-1.5 pt-1"
+      class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-1"
     >
-      <CloudSun class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+      <CloudSun class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
       <span>Укажите город и корректные даты поездки, чтобы увидеть прогноз погоды на период поездки.</span>
     </div>
 
@@ -560,7 +560,7 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
           :href="`/countries/${matchedCountry.slug}`"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-teal-700 transition-colors"
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-semibold text-teal-700 dark:text-teal-400 transition-colors"
         >
           <span>Открыть страницу страны в новой вкладке</span>
           <ExternalLink class="w-3.5 h-3.5" />

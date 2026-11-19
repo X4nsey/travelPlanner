@@ -250,15 +250,15 @@ async function handleRegenerateLink() {
       <BaseAlert v-if="error" type="error" :message="error" />
 
       <!-- Trip Context Card -->
-      <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 flex items-center gap-3">
+      <div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 p-3.5 flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0"
+          class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
         >
           <Share2 class="w-5 h-5" />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-bold text-slate-900 truncate">{{ trip.title }}</p>
-          <p class="text-xs text-slate-500 truncate">
+          <p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{{ trip.title }}</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
             {{ trip.country }}, {{ trip.city }} · Публичный просмотр для попутчиков без регистрации
           </p>
         </div>
@@ -269,26 +269,26 @@ async function handleRegenerateLink() {
         class="rounded-2xl border p-4 transition-colors"
         :class="
           isActive
-            ? 'bg-teal-50/40 border-teal-200/80'
-            : 'bg-white border-slate-200/90'
+            ? 'bg-teal-50/40 dark:bg-teal-500/10 border-teal-200/80 dark:border-teal-500/30'
+            : 'bg-white dark:bg-slate-800/50 border-slate-200/90 dark:border-slate-700/80'
         "
       >
         <div class="flex items-center justify-between gap-4">
           <div class="min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-sm font-bold text-slate-900">Доступ по ссылке</span>
+              <span class="text-sm font-bold text-slate-900 dark:text-slate-100">Доступ по ссылке</span>
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border"
                 :class="
                   isActive
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                    ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 "
               >
                 {{ isActive ? 'Активна' : 'Отключена' }}
               </span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
               {{
                 isActive
                   ? 'Любой человек с этой ссылкой сможет просматривать выбранные разделы и сохранить копию себе.'
@@ -304,8 +304,8 @@ async function handleRegenerateLink() {
             aria-label="Доступ по ссылке"
             :disabled="isSaving || isRegenerating"
             @click="handleToggleActive"
-            class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50"
-            :class="isActive ? 'bg-teal-600' : 'bg-slate-300'"
+            class="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 disabled:opacity-50"
+            :class="isActive ? 'bg-teal-600' : 'bg-slate-300 dark:bg-slate-700'"
           >
             <span
               class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
@@ -315,18 +315,18 @@ async function handleRegenerateLink() {
         </div>
 
         <!-- Active Share Link Box -->
-        <div v-if="share && isActive" class="mt-4 pt-4 border-t border-teal-200/60 space-y-3">
+        <div v-if="share && isActive" class="mt-4 pt-4 border-t border-teal-200/60 dark:border-teal-500/25 space-y-3">
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div class="relative flex-1 min-w-0">
               <Link2
-                class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
               />
               <input
                 type="text"
                 readonly
                 :value="shareUrl"
                 aria-label="Публичная ссылка на маршрут"
-                class="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 select-all"
+                class="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 select-all"
                 @focus="($event.target as HTMLInputElement)?.select()"
               />
             </div>
@@ -337,7 +337,7 @@ async function handleRegenerateLink() {
               class="shrink-0"
               @click="handleCopyLink"
             >
-              <Check v-if="copied" class="w-4 h-4 text-emerald-600" />
+              <Check v-if="copied" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <Copy v-else class="w-4 h-4" />
               <span>{{ copied ? 'Скопировано!' : 'Копировать' }}</span>
             </BaseButton>
@@ -345,11 +345,11 @@ async function handleRegenerateLink() {
 
           <!-- Stats & Link Actions Bar -->
           <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div class="flex items-center gap-3 text-slate-600">
+            <div class="flex items-center gap-3 text-slate-600 dark:text-slate-300">
               <span
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200/80 font-semibold"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 font-semibold"
               >
-                <Eye class="w-3.5 h-3.5 text-teal-600" />
+                <Eye class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                 <span>{{ viewsLabel }}</span>
               </span>
 
@@ -357,7 +357,7 @@ async function handleRegenerateLink() {
                 :href="shareUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 font-semibold text-teal-700 hover:text-teal-800 transition-colors"
+                class="inline-flex items-center gap-1 font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
               >
                 <span>Открыть</span>
                 <ExternalLink class="w-3.5 h-3.5" />
@@ -369,7 +369,7 @@ async function handleRegenerateLink() {
               type="button"
               :disabled="isSaving || isRegenerating"
               @click="confirmRegenerate = true"
-              class="inline-flex items-center gap-1.5 font-semibold text-slate-500 hover:text-amber-700 transition-colors disabled:opacity-50"
+              class="inline-flex items-center gap-1.5 font-semibold text-slate-500 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 transition-colors disabled:opacity-50"
             >
               <RefreshCw class="w-3.5 h-3.5" />
               <span>Обновить ссылку</span>
@@ -379,10 +379,10 @@ async function handleRegenerateLink() {
           <!-- Inline Confirmation for Regenerating / Revoking Old Link -->
           <div
             v-if="confirmRegenerate"
-            class="rounded-xl bg-amber-50 border border-amber-200/80 p-3 space-y-2.5"
+            class="rounded-xl bg-amber-50 dark:bg-amber-500/15 border border-amber-200/80 dark:border-amber-500/30 p-3 space-y-2.5"
           >
-            <div class="flex items-start gap-2 text-xs text-amber-900">
-              <AlertTriangle class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div class="flex items-start gap-2 text-xs text-amber-900 dark:text-amber-200">
+              <AlertTriangle class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
               <span>
                 Старая ссылка сразу перестанет работать для всех, кому вы её отправляли. Создать новую?
               </span>
@@ -412,11 +412,11 @@ async function handleRegenerateLink() {
         <!-- Paused Link Notice -->
         <div
           v-else-if="share && !isActive"
-          class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2 text-xs text-slate-500"
+          class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/80 flex items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400"
         >
           <span>Публичный доступ сейчас закрыт — по прежней ссылке показывается экран «404».</span>
-          <span class="inline-flex items-center gap-1 font-semibold text-slate-600 shrink-0">
-            <Eye class="w-3.5 h-3.5 text-slate-400" />
+          <span class="inline-flex items-center gap-1 font-semibold text-slate-600 dark:text-slate-300 shrink-0">
+            <Eye class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             <span>{{ viewsLabel }}</span>
           </span>
         </div>
@@ -425,29 +425,29 @@ async function handleRegenerateLink() {
       <!-- Visibility Permissions Section -->
       <div class="space-y-2.5">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-bold uppercase tracking-wider text-slate-500">
+          <p class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             Видимость разделов для попутчиков
           </p>
-          <span v-if="isSaving" class="text-[11px] font-semibold text-teal-600">
+          <span v-if="isSaving" class="text-[11px] font-semibold text-teal-600 dark:text-teal-400">
             Сохраняем...
           </span>
         </div>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-teal-200 hover:bg-teal-50/20 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-teal-50/20 dark:hover:bg-teal-500/5 transition-colors cursor-pointer"
         >
           <input
             type="checkbox"
             :checked="showItinerary"
             :disabled="isSaving || isRegenerating"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             @change="handleTogglePermission('showItinerary', ($event.target as HTMLInputElement).checked)"
           />
           <div class="flex items-start gap-2.5 flex-1 min-w-0">
-            <CalendarDays class="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+            <CalendarDays class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
             <div>
-              <span class="block text-sm font-semibold text-slate-800">План по дням</span>
-              <span class="block text-xs text-slate-500">
+              <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">План по дням</span>
+              <span class="block text-xs text-slate-500 dark:text-slate-400">
                 Расписание мероприятий, время, адреса локаций и заметки к событиям.
               </span>
             </div>
@@ -455,20 +455,20 @@ async function handleRegenerateLink() {
         </label>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-teal-200 hover:bg-teal-50/20 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-teal-50/20 dark:hover:bg-teal-500/5 transition-colors cursor-pointer"
         >
           <input
             type="checkbox"
             :checked="showPackingList"
             :disabled="isSaving || isRegenerating"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             @change="handleTogglePermission('showPackingList', ($event.target as HTMLInputElement).checked)"
           />
           <div class="flex items-start gap-2.5 flex-1 min-w-0">
-            <Briefcase class="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+            <Briefcase class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
             <div>
-              <span class="block text-sm font-semibold text-slate-800">Список вещей</span>
-              <span class="block text-xs text-slate-500">
+              <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Список вещей</span>
+              <span class="block text-xs text-slate-500 dark:text-slate-400">
                 Попутчики увидят список без ваших отметок и смогут отмечать сборы у себя в браузере.
               </span>
             </div>
@@ -476,20 +476,20 @@ async function handleRegenerateLink() {
         </label>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-teal-200 hover:bg-teal-50/20 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-teal-50/20 dark:hover:bg-teal-500/5 transition-colors cursor-pointer"
         >
           <input
             type="checkbox"
             :checked="showCountryInfo"
             :disabled="isSaving || isRegenerating"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             @change="handleTogglePermission('showCountryInfo', ($event.target as HTMLInputElement).checked)"
           />
           <div class="flex items-start gap-2.5 flex-1 min-w-0">
-            <BookOpen class="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+            <BookOpen class="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
             <div>
-              <span class="block text-sm font-semibold text-slate-800">Памятка о стране</span>
-              <span class="block text-xs text-slate-500">
+              <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Памятка о стране</span>
+              <span class="block text-xs text-slate-500 dark:text-slate-400">
                 Правила въезда, оплата, транспорт, связь, экстренные службы и практические советы.
               </span>
             </div>
@@ -497,28 +497,28 @@ async function handleRegenerateLink() {
         </label>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-amber-200 hover:bg-amber-50/20 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-amber-200 dark:hover:border-amber-500/40 hover:bg-amber-50/20 dark:hover:bg-amber-500/5 transition-colors cursor-pointer"
         >
           <input
             type="checkbox"
             :checked="showExpenses"
             :disabled="isSaving || isRegenerating"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             @change="handleTogglePermission('showExpenses', ($event.target as HTMLInputElement).checked)"
           />
           <div class="flex items-start gap-2.5 flex-1 min-w-0">
-            <Coins class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <Coins class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-sm font-semibold text-slate-800">Бюджет и расходы</span>
+                <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Бюджет и расходы</span>
                 <span
-                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
                 >
                   <Lock class="w-2.5 h-2.5" />
                   Скрыто по умолчанию
                 </span>
               </div>
-              <span class="block text-xs text-slate-500 mt-0.5">
+              <span class="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Планируемый бюджет, сводка по категориям и список зафиксированных трат.
               </span>
             </div>
@@ -528,15 +528,15 @@ async function handleRegenerateLink() {
 
       <!-- Privacy-by-Design Banner -->
       <div
-        class="rounded-2xl bg-emerald-50/80 border border-emerald-200/80 p-4 flex items-start gap-3"
+        class="rounded-2xl bg-emerald-50/80 dark:bg-emerald-500/10 border border-emerald-200/80 dark:border-emerald-500/30 p-4 flex items-start gap-3"
       >
         <div
-          class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5"
+          class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5"
         >
           <ShieldCheck class="w-5 h-5" />
         </div>
-        <div class="space-y-1 text-xs leading-relaxed text-emerald-950">
-          <p class="font-bold text-emerald-900">Защита приватности (Privacy-by-Design)</p>
+        <div class="space-y-1 text-xs leading-relaxed text-emerald-950 dark:text-emerald-200/90">
+          <p class="font-bold text-emerald-900 dark:text-emerald-200">Защита приватности (Privacy-by-Design)</p>
           <p>
             Брони, чек-лист документов и локальные файлы из вашего браузера никогда не передаются по публичной ссылке. Ваш email, имя аккаунта и внутренние идентификаторы также скрыты.
           </p>

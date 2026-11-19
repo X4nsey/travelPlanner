@@ -120,15 +120,15 @@ async function confirmDeleteTrip() {
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Мои поездки</h1>
-          <p class="text-sm text-slate-500 mt-1">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">Мои поездки</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Список всех ваших запланированных и совершённых путешествий
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5 shrink-0">
           <BaseButton variant="secondary" size="md" @click="templatesModalOpen = true">
-            <Sparkles class="w-4 h-4" />
+            <Sparkles class="w-4 h-4 text-teal-600 dark:text-teal-400" />
             <span>Готовые маршруты</span>
           </BaseButton>
 
@@ -144,27 +144,27 @@ async function confirmDeleteTrip() {
       <!-- Filters Bar (only shown if user has at least 1 trip) -->
       <div
         v-if="tripStore.trips.length > 0"
-        class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-soft dark:shadow-none flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
       >
         <div class="relative flex-1 max-w-md">
-          <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             v-model="searchQuery"
             type="text"
             placeholder="Поиск по названию, стране или городу..."
-            class="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20"
+            class="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-teal-600 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-500/20"
           />
         </div>
 
-        <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
+        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl self-start sm:self-auto">
           <button
             type="button"
             @click="statusFilter = 'all'"
             :class="[
               'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
               statusFilter === 'all'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900',
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100',
             ]"
           >
             Все ({{ tripStore.trips.length }})
@@ -175,8 +175,8 @@ async function confirmDeleteTrip() {
             :class="[
               'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
               statusFilter === 'upcoming'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900',
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100',
             ]"
           >
             Предстоящие ({{ tripStore.upcomingTripsCount }})
@@ -187,8 +187,8 @@ async function confirmDeleteTrip() {
             :class="[
               'px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
               statusFilter === 'past'
-                ? 'bg-white text-slate-900 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900',
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100',
             ]"
           >
             Завершённые

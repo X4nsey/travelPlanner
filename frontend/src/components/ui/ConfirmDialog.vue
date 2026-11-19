@@ -28,10 +28,10 @@ const emit = defineEmits<{
 <template>
   <BaseModal :open="open" :title="title" maxWidth="sm" @close="emit('cancel')">
     <div class="flex items-start gap-4">
-      <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+      <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400 flex items-center justify-center shrink-0">
         <AlertTriangle class="w-6 h-6" />
       </div>
-      <div class="text-sm text-slate-600 leading-relaxed pt-0.5">
+      <div class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed pt-0.5">
         {{ message }}
       </div>
     </div>

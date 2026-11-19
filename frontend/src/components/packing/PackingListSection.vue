@@ -342,35 +342,35 @@ async function confirmClearOutdated() {
   <div class="space-y-6">
     <!-- Section Header -->
     <div
-      class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-soft"
+      class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-soft dark:shadow-none"
     >
       <div class="space-y-1">
         <div class="flex flex-wrap items-center gap-2.5">
-          <h2 class="text-lg sm:text-xl font-bold text-slate-900">Список вещей</h2>
+          <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">Список вещей</h2>
           <span
             v-if="tripType"
-            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200/70"
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30"
           >
             {{ getTripTypeLabelRu(tripType) }}
           </span>
         </div>
-        <p class="text-xs sm:text-sm text-slate-500">
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
           Интеллектуальный подбор вещей с учётом направления, дат, типа поездки и событий маршрута.
         </p>
         <div
           v-if="weatherSummaryBadge"
-          class="inline-flex flex-wrap items-center gap-2 mt-1.5 px-3 py-1.5 rounded-xl bg-sky-50/80 border border-sky-200/70 text-xs text-slate-700"
+          class="inline-flex flex-wrap items-center gap-2 mt-1.5 px-3 py-1.5 rounded-xl bg-sky-50/80 dark:bg-sky-500/10 border border-sky-200/70 dark:border-sky-500/30 text-xs text-slate-700 dark:text-slate-300"
         >
           <WeatherIcon :type="weatherSummaryBadge.iconType" size="sm" />
-          <span class="font-bold text-slate-900 tabular-nums">
+          <span class="font-bold text-slate-900 dark:text-slate-100 tabular-nums">
             {{ weatherSummaryBadge.tempRange }}
           </span>
-          <span class="text-slate-400">·</span>
-          <span class="font-semibold text-teal-800">
+          <span class="text-slate-400 dark:text-slate-500">·</span>
+          <span class="font-semibold text-teal-800 dark:text-teal-300">
             {{ weatherSummaryBadge.climateLabelRu }}
           </span>
-          <span class="text-slate-400">·</span>
-          <span class="text-slate-500">
+          <span class="text-slate-400 dark:text-slate-500">·</span>
+          <span class="text-slate-500 dark:text-slate-400">
             {{ weatherSummaryBadge.sourceLabelRu }}
           </span>
         </div>
@@ -468,10 +468,10 @@ async function confirmClearOutdated() {
       <!-- Smart Merge Results Banner -->
       <div
         v-if="latestMergeSnapshot"
-        class="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 flex items-start justify-between gap-3 text-sm text-emerald-900"
+        class="rounded-2xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/80 dark:bg-emerald-950/40 p-4 flex items-start justify-between gap-3 text-sm text-emerald-900 dark:text-emerald-200"
       >
         <div class="flex items-start gap-3">
-          <CheckCircle2 class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+          <CheckCircle2 class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
           <div class="space-y-1">
             <p class="font-semibold">
               {{
@@ -480,7 +480,7 @@ async function confirmClearOutdated() {
                   : 'Рекомендации обновлены (Smart Merge)'
               }}
             </p>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-emerald-800">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-emerald-800 dark:text-emerald-300">
               <span>
                 Добавлено: <strong>{{ latestMergeSnapshot.addedCount }}</strong>
               </span>
@@ -503,7 +503,7 @@ async function confirmClearOutdated() {
         <button
           type="button"
           @click="latestMergeSnapshot = null"
-          class="p-1 rounded-lg text-emerald-700/70 hover:text-emerald-900 hover:bg-emerald-100 transition-colors shrink-0"
+          class="p-1 rounded-lg text-emerald-700/70 dark:text-emerald-300/70 hover:text-emerald-900 dark:hover:text-emerald-100 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors shrink-0"
           aria-label="Скрыть уведомление"
         >
           <X class="w-4 h-4" />
@@ -513,15 +513,15 @@ async function confirmClearOutdated() {
       <!-- Outdated Recommendations Warning Banner -->
       <div
         v-if="packingStore.hasOutdatedItems"
-        class="rounded-2xl border border-amber-200 bg-amber-50/90 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm text-amber-900"
+        class="rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/90 dark:bg-amber-950/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm text-amber-900 dark:text-amber-200"
       >
         <div class="flex items-start gap-3">
-          <AlertTriangle class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <AlertTriangle class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <div class="space-y-0.5">
             <p class="font-semibold">
               Найдены устаревшие рекомендации ({{ packingStore.outdatedCount }})
             </p>
-            <p class="text-xs sm:text-sm text-amber-800/90 leading-relaxed">
+            <p class="text-xs sm:text-sm text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
               После изменения маршрута, дат или типа поездки часть прежних рекомендаций больше не соответствует плану. Вы можете просмотреть их по фильтру «Устаревшие» или очистить.
             </p>
           </div>
@@ -530,11 +530,11 @@ async function confirmClearOutdated() {
         <BaseButton
           variant="outline"
           size="sm"
-          class="border-amber-300 bg-white text-amber-900 hover:bg-amber-100/70 shrink-0"
+          class="border-amber-300 dark:border-amber-500/40 bg-white dark:bg-slate-900 text-amber-900 dark:text-amber-200 hover:bg-amber-100/70 dark:hover:bg-amber-500/20 shrink-0"
           :loading="packingStore.isClearingOutdated"
           @click="showClearOutdatedConfirm = true"
         >
-          <Trash2 class="w-4 h-4 text-amber-700" />
+          <Trash2 class="w-4 h-4 text-amber-700 dark:text-amber-400" />
           <span>Очистить устаревшие</span>
         </BaseButton>
       </div>
@@ -553,7 +553,7 @@ async function confirmClearOutdated() {
                 ? opt.key === 'outdated'
                   ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
                   : 'bg-teal-600 text-white border-teal-600 shadow-sm'
-                : 'bg-white text-slate-600 border-slate-200/80 hover:border-slate-300 hover:text-slate-900',
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:text-slate-900 dark:hover:text-slate-100',
             ]"
           >
             <span>{{ opt.label }}</span>
@@ -562,7 +562,7 @@ async function confirmClearOutdated() {
                 'px-1.5 py-0.5 rounded-full text-[11px] font-bold',
                 statusFilter === opt.key
                   ? 'bg-white/20 text-white'
-                  : 'bg-slate-100 text-slate-600',
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300',
               ]"
             >
               {{ opt.count }}
@@ -572,7 +572,7 @@ async function confirmClearOutdated() {
 
         <p
           v-if="!isAlreadyGenerated && packingStore.customCount > 0"
-          class="text-xs text-slate-500"
+          class="text-xs text-slate-500 dark:text-slate-400"
         >
           Добавлены только ваши вещи — нажмите «Сгенерировать список» для умных рекомендаций.
         </p>
@@ -581,9 +581,9 @@ async function confirmClearOutdated() {
       <!-- Empty Filter Result -->
       <div
         v-if="filteredCategoryGroups.length === 0"
-        class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-8 text-center space-y-3"
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-8 text-center space-y-3"
       >
-        <p class="text-sm font-medium text-slate-700">
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-300">
           <template v-if="statusFilter === 'packed'">
             Пока ни одна вещь не отмечена как собранная.
           </template>

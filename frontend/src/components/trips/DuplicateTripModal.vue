@@ -119,14 +119,14 @@ defineExpose({
       <BaseAlert v-if="serverError || validationError" type="error" :message="(serverError || validationError)!" />
 
       <!-- Source Trip Summary -->
-      <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 flex items-start gap-3">
-        <div class="w-9 h-9 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+      <div class="rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 p-3.5 flex items-start gap-3">
+        <div class="w-9 h-9 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 mt-0.5">
           <Copy class="w-4 h-4" />
         </div>
         <div class="min-w-0">
-          <p class="text-xs font-medium text-slate-500">Исходный маршрут</p>
-          <p class="text-sm font-bold text-slate-900 truncate">{{ trip.title }}</p>
-          <p class="text-xs text-slate-600 mt-0.5">
+          <p class="text-xs font-medium text-slate-500 dark:text-slate-400">Исходный маршрут</p>
+          <p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{{ trip.title }}</p>
+          <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
             {{ trip.country }}, {{ trip.city }} · {{ formatDaysLabel(durationDays) }}
             ({{ formatDateRange(trip.startDate, trip.endDate) }})
           </p>
@@ -152,15 +152,15 @@ defineExpose({
           :disabled="loading"
         />
 
-        <div class="rounded-xl bg-teal-50/70 border border-teal-100 px-3.5 py-2.5 text-xs text-teal-900">
-          <div class="flex items-center gap-1.5 font-semibold text-teal-800">
-            <Calendar class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+        <div class="rounded-xl bg-teal-50/70 dark:bg-teal-500/10 border border-teal-100 dark:border-teal-500/30 px-3.5 py-2.5 text-xs text-teal-900 dark:text-teal-200">
+          <div class="flex items-center gap-1.5 font-semibold text-teal-800 dark:text-teal-300">
+            <Calendar class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
             <span>Новые даты поездки</span>
           </div>
           <p v-if="computedEndDate" class="mt-1 font-medium">
             {{ formatDateRange(startDate, computedEndDate) }}
           </p>
-          <p class="text-[11px] text-teal-700 mt-0.5">
+          <p class="text-[11px] text-teal-700 dark:text-teal-300/80 mt-0.5">
             {{ formatDaysLabel(durationDays) }} · {{ dayShiftLabel }}
           </p>
         </div>
@@ -168,66 +168,66 @@ defineExpose({
 
       <!-- Options Checkboxes -->
       <div class="space-y-2.5 pt-1">
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           Что перенести в копию
         </p>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-teal-200 hover:bg-teal-50/30 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-teal-50/30 dark:hover:bg-teal-500/5 transition-colors cursor-pointer"
         >
           <input
             v-model="includeEvents"
             type="checkbox"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             :disabled="loading"
           />
           <div>
-            <span class="block text-sm font-semibold text-slate-800">Перенести план по дням</span>
-            <span class="block text-xs text-slate-500">
+            <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Перенести план по дням</span>
+            <span class="block text-xs text-slate-500 dark:text-slate-400">
               Все мероприятия маршрута будут скопированы со сдвигом на новые даты.
             </span>
           </div>
         </label>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-teal-200 hover:bg-teal-50/30 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-teal-50/30 dark:hover:bg-teal-500/5 transition-colors cursor-pointer"
         >
           <input
             v-model="includePackingList"
             type="checkbox"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             :disabled="loading"
           />
           <div>
-            <span class="block text-sm font-semibold text-slate-800">
+            <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">
               Скопировать список вещей (сбросив отметки сбора)
             </span>
-            <span class="block text-xs text-slate-500">
+            <span class="block text-xs text-slate-500 dark:text-slate-400">
               Сгенерированные и пользовательские позиции сохранятся с отметкой «не собрано».
             </span>
           </div>
         </label>
 
         <label
-          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 hover:border-teal-200 hover:bg-teal-50/30 transition-colors cursor-pointer"
+          class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-teal-50/30 dark:hover:bg-teal-500/5 transition-colors cursor-pointer"
         >
           <input
             v-model="includeDocumentsChecklist"
             type="checkbox"
-            class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+            class="mt-0.5 w-4 h-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800 text-teal-600 focus:ring-teal-500"
             :disabled="loading"
           />
           <div>
-            <span class="block text-sm font-semibold text-slate-800">Перенести чек-лист документов</span>
-            <span class="block text-xs text-slate-500">
+            <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Перенести чек-лист документов</span>
+            <span class="block text-xs text-slate-500 dark:text-slate-400">
               Сохранятся названия и категории со статусом «Нужно подготовить» (номера броней и файлы не копируются).
             </span>
           </div>
         </label>
       </div>
 
-      <div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-600">
-        <Info class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+      <div class="flex items-start gap-2.5 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-xs text-slate-600 dark:text-slate-300">
+        <Info class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" />
         <span>
           История расходов из исходной поездки не копируется — дубликат начинается с чистого бюджета.
         </span>

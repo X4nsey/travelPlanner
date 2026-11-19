@@ -66,7 +66,7 @@ const formattedUpdatedAt = computed(() => formatWeatherUpdatedAt(props.weather.f
 </script>
 
 <template>
-  <section class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-5 sm:p-6 space-y-5">
+  <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6 space-y-5">
     <!-- Top Header: Location, Mode Badge & Refresh Action -->
     <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
       <div class="flex items-start gap-3.5 min-w-0">
@@ -78,8 +78,8 @@ const formattedUpdatedAt = computed(() => formatWeatherUpdatedAt(props.weather.f
 
         <div class="space-y-1.5 min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <h2 class="text-lg sm:text-xl font-bold text-slate-900 inline-flex items-center gap-1.5">
-              <MapPin class="w-4 h-4 text-teal-600 shrink-0" />
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 inline-flex items-center gap-1.5">
+              <MapPin class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
               <span class="truncate">{{ weather.resolvedCity }}, {{ weather.resolvedCountry }}</span>
             </h2>
 
@@ -87,20 +87,20 @@ const formattedUpdatedAt = computed(() => formatWeatherUpdatedAt(props.weather.f
               :class="[
                 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
                 isForecastMode
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-                  : 'bg-amber-50 text-amber-800 border-amber-200/80',
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30'
+                  : 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',
               ]"
             >
               {{ weather.sourceLabelRu }}
             </span>
           </div>
 
-          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
             <span v-if="formattedUpdatedAt" class="inline-flex items-center gap-1.5">
-              <Clock class="w-3.5 h-3.5 text-slate-400" />
+              <Clock class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
               <span>Обновлено: {{ formattedUpdatedAt }}</span>
             </span>
-            <span v-if="weather.timezone" class="text-slate-400">
+            <span v-if="weather.timezone" class="text-slate-400 dark:text-slate-500">
               Часовой пояс: {{ weather.timezone }}
             </span>
           </div>
@@ -128,41 +128,41 @@ const formattedUpdatedAt = computed(() => formatWeatherUpdatedAt(props.weather.f
       :class="[
         'rounded-xl border p-3.5 flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed',
         isForecastMode
-          ? 'bg-sky-50/80 border-sky-200/80 text-sky-900'
-          : 'bg-amber-50/85 border-amber-200/80 text-amber-900',
+          ? 'bg-sky-50/80 border-sky-200/80 text-sky-900 dark:bg-sky-950/40 dark:border-sky-500/30 dark:text-sky-200'
+          : 'bg-amber-50/85 border-amber-200/80 text-amber-900 dark:bg-amber-950/40 dark:border-amber-500/30 dark:text-amber-200',
       ]"
     >
-      <Info v-if="isForecastMode" class="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-      <AlertTriangle v-else class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+      <Info v-if="isForecastMode" class="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+      <AlertTriangle v-else class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
       <p>{{ weather.disclaimerRu }}</p>
     </div>
 
     <!-- Weather Summary KPI Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
       <!-- Temperature Range & Average -->
-      <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-start gap-3">
-        <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+      <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
           <Thermometer class="w-5 h-5" />
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500">Температура</p>
-          <p class="text-base font-extrabold text-slate-900 tabular-nums mt-0.5">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Температура</p>
+          <p class="text-base font-extrabold text-slate-900 dark:text-slate-100 tabular-nums mt-0.5">
             {{ tempRangeLabel }}
           </p>
-          <p class="text-[11px] text-slate-500 mt-0.5 tabular-nums">
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
             Средняя: {{ avgTempDayLabel }} днём · {{ avgTempNightLabel }} ночью
           </p>
         </div>
       </div>
 
       <!-- Rainy Days -->
-      <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-start gap-3">
-        <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+      <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
           <Umbrella class="w-5 h-5" />
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500">Дождливые дни</p>
-          <p class="text-base font-extrabold text-slate-900 tabular-nums mt-0.5">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Дождливые дни</p>
+          <p class="text-base font-extrabold text-slate-900 dark:text-slate-100 tabular-nums mt-0.5">
             {{ rainyDaysLabel }}
           </p>
           <div
@@ -171,52 +171,52 @@ const formattedUpdatedAt = computed(() => formatWeatherUpdatedAt(props.weather.f
           >
             <span
               v-if="weather.summary.hasHeavyRain"
-              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-semibold border border-indigo-200/70"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 text-[10px] font-semibold border border-indigo-200/70 dark:border-indigo-500/30"
             >
               <CloudRainWind class="w-3 h-3" />
               Сильные осадки
             </span>
             <span
               v-if="weather.summary.hasSnow"
-              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-cyan-50 text-cyan-700 text-[10px] font-semibold border border-cyan-200/70"
+              class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-cyan-50 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 text-[10px] font-semibold border border-cyan-200/70 dark:border-cyan-500/30"
             >
               <CloudSnow class="w-3 h-3" />
               Снег
             </span>
           </div>
-          <p v-else class="text-[11px] text-slate-500 mt-0.5">
+          <p v-else class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
             Из {{ weather.daily.length }} {{ pluralizeRu(weather.daily.length, ['дня', 'дней', 'дней']) }} в выборке
           </p>
         </div>
       </div>
 
       <!-- Total Precipitation -->
-      <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-start gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+      <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
           <Droplets class="w-5 h-5" />
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500">Сумма осадков</p>
-          <p class="text-base font-extrabold text-slate-900 tabular-nums mt-0.5">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Сумма осадков</p>
+          <p class="text-base font-extrabold text-slate-900 dark:text-slate-100 tabular-nums mt-0.5">
             {{ formatWeatherDecimal(weather.summary.totalPrecipitationMm) }} мм
           </p>
-          <p class="text-[11px] text-slate-500 mt-0.5">
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
             Суммарно за период
           </p>
         </div>
       </div>
 
       <!-- Max Wind -->
-      <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-start gap-3">
-        <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+      <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
           <Wind class="w-5 h-5" />
         </div>
         <div class="min-w-0">
-          <p class="text-xs text-slate-500">Макс. ветер</p>
-          <p class="text-base font-extrabold text-slate-900 tabular-nums mt-0.5">
+          <p class="text-xs text-slate-500 dark:text-slate-400">Макс. ветер</p>
+          <p class="text-base font-extrabold text-slate-900 dark:text-slate-100 tabular-nums mt-0.5">
             {{ formatWeatherDecimal(weather.summary.maxWindKmh) }} км/ч
           </p>
-          <p class="text-[11px] text-slate-500 mt-0.5">
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
             Максимальная скорость за день
           </p>
         </div>

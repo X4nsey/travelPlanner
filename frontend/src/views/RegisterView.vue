@@ -60,13 +60,13 @@ const onSubmit = handleSubmit(async (values) => {
 <template>
   <PublicLayout>
     <div class="flex-1 flex items-center justify-center px-4 py-12">
-      <div class="w-full max-w-md bg-white rounded-2xl border border-slate-200/80 shadow-card p-6 sm:p-8 animate-fade-in">
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-card dark:shadow-none p-6 sm:p-8 animate-fade-in">
         <div class="text-center mb-6">
-          <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
+          <div class="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center mx-auto mb-3">
             <Compass class="w-6 h-6" />
           </div>
-          <h1 class="text-2xl font-bold text-slate-900">Создать аккаунт</h1>
-          <p class="text-sm text-slate-500 mt-1">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Создать аккаунт</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Зарегистрируйтесь, чтобы начать планировать поездки
           </p>
         </div>
@@ -150,9 +150,9 @@ const onSubmit = handleSubmit(async (values) => {
           </div>
         </form>
 
-        <p class="mt-6 text-center text-sm text-slate-600">
+        <p class="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
           Уже есть аккаунт?
-          <RouterLink to="/login" class="font-semibold text-teal-600 hover:text-teal-700">
+          <RouterLink to="/login" class="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300">
             Войти
           </RouterLink>
         </p>

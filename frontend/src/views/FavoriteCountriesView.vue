@@ -29,10 +29,10 @@ function handleOpenCountry(country: CountryData) {
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
             Избранные страны
           </h1>
-          <p class="text-sm text-slate-500 mt-1">
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Ваша личная коллекция направлений, сохранённых для будущих путешествий
           </p>
         </div>
@@ -40,13 +40,13 @@ function handleOpenCountry(country: CountryData) {
         <div class="flex items-center gap-2.5 shrink-0">
           <RouterLink to="/explore">
             <BaseButton variant="secondary" size="sm">
-              <Globe2 class="w-4 h-4 text-teal-600" />
+              <Globe2 class="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>3D-глобус</span>
             </BaseButton>
           </RouterLink>
           <RouterLink to="/countries">
             <BaseButton variant="outline" size="sm">
-              <BookOpen class="w-4 h-4 text-teal-600" />
+              <BookOpen class="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Каталог стран</span>
             </BaseButton>
           </RouterLink>

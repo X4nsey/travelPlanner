@@ -19,7 +19,7 @@ const emit = defineEmits<{
 <template>
   <article
     @click="emit('select', country)"
-    class="group bg-white rounded-2xl border border-slate-200/80 shadow-soft hover:shadow-card hover:border-teal-300/90 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col justify-between"
+    class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card hover:border-teal-300/90 dark:hover:border-teal-500/40 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col justify-between"
   >
     <div>
       <!-- Country Cover Photo with consistent 16:10 aspect ratio -->
@@ -38,9 +38,9 @@ const emit = defineEmits<{
         <!-- Top Badges -->
         <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
           <span
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-xs font-semibold text-slate-800 shadow-sm"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm text-xs font-semibold text-slate-800 dark:text-slate-100 border border-white/40 dark:border-slate-700/80 shadow-sm"
           >
-            <Globe2 class="w-3.5 h-3.5 text-teal-600" />
+            <Globe2 class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             {{ country.continent }}
           </span>
 
@@ -76,19 +76,19 @@ const emit = defineEmits<{
 
       <!-- Card Body -->
       <div class="p-5">
-        <div class="flex items-center gap-2 text-xs font-semibold text-teal-700 mb-2.5">
-          <Landmark class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+        <div class="flex items-center gap-2 text-xs font-semibold text-teal-700 dark:text-teal-400 mb-2.5">
+          <Landmark class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
           <span>Столица: {{ country.capital }}</span>
         </div>
 
-        <p class="text-sm text-slate-600 line-clamp-2 leading-relaxed">
+        <p class="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
           {{ country.shortDescription }}
         </p>
       </div>
     </div>
 
     <!-- Card Footer -->
-    <div class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-teal-700 group-hover:bg-teal-50/50 transition-colors">
+    <div class="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-teal-700 dark:text-teal-400 group-hover:bg-teal-50/50 dark:group-hover:bg-teal-500/10 transition-colors">
       <span>Подробнее о стране</span>
       <ArrowUpRight class="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
     </div>

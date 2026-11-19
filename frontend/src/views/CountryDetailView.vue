@@ -209,7 +209,7 @@ function openAuthPromptForFavorite() {
       <div class="flex items-center justify-between gap-4">
         <RouterLink
           to="/countries"
-          class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <ArrowLeft class="w-4 h-4" />
           <span>Все страны мира</span>
@@ -218,7 +218,7 @@ function openAuthPromptForFavorite() {
         <button
           type="button"
           @click="handleShowOnGlobe"
-          class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
         >
           <Globe2 class="w-4 h-4" />
           <span>Показать на 3D-глобусе</span>
@@ -226,7 +226,7 @@ function openAuthPromptForFavorite() {
       </div>
 
       <!-- 1. HERO COVER SECTION -->
-      <section class="relative rounded-3xl overflow-hidden shadow-card border border-slate-200/80 bg-slate-900">
+      <section class="relative rounded-3xl overflow-hidden shadow-card dark:shadow-none border border-slate-200/80 dark:border-slate-800 bg-slate-900">
         <SmartImage
           :src="country.coverPhoto?.url"
           :thumbSrc="country.coverPhoto?.thumbUrl"
@@ -305,69 +305,69 @@ function openAuthPromptForFavorite() {
       </section>
 
       <!-- 2. MAIN CHARACTERISTICS BLOCK -->
-      <section class="bg-white rounded-3xl border border-slate-200/80 shadow-soft p-6 sm:p-8">
-        <h2 class="text-xl font-bold text-slate-900 mb-5">
+      <section class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-5">
           Основная информация о стране
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
               <Landmark class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Столица</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">{{ country.capital }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Столица</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">{{ country.capital }}</p>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
               <Globe2 class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Континент</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">{{ country.continent }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Континент</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">{{ country.continent }}</p>
             </div>
           </div>
 
-          <div v-if="formattedPopulation" class="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+          <div v-if="formattedPopulation" class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
               <Users class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Население</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">{{ formattedPopulation }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Население</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">{{ formattedPopulation }}</p>
             </div>
           </div>
 
-          <div v-if="formattedArea" class="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div v-if="formattedArea" class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Maximize2 class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Площадь территории</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">{{ formattedArea }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Площадь территории</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">{{ formattedArea }}</p>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
               <Coins class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Национальная валюта</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">{{ country.currency }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Национальная валюта</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">{{ country.currency }}</p>
             </div>
           </div>
 
-          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
               <Languages class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Официальные языки</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">
+              <p class="text-xs text-slate-500 dark:text-slate-400">Официальные языки</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">
                 {{ country.languages.join(', ') }}
               </p>
             </div>
@@ -375,14 +375,14 @@ function openAuthPromptForFavorite() {
 
           <div
             v-if="country.timezone"
-            class="sm:col-span-2 p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-start gap-3.5"
+            class="sm:col-span-2 p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-start gap-3.5"
           >
-            <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
               <Clock class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Часовой пояс</p>
-              <p class="text-sm font-bold text-slate-900 mt-0.5">{{ country.timezone }}</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Часовой пояс</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100 mt-0.5">{{ country.timezone }}</p>
             </div>
           </div>
         </div>
@@ -395,13 +395,13 @@ function openAuthPromptForFavorite() {
       <section v-if="galleryPhotos.length > 0" class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 mb-1">
+            <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400 mb-1">
               <Camera class="w-3.5 h-3.5" />
               <span>Атмосфера путешествия</span>
             </div>
-            <h2 class="text-2xl font-bold text-slate-900">Фотогалерея страны</h2>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Фотогалерея страны</h2>
           </div>
-          <span class="text-xs text-slate-400 hidden sm:inline">
+          <span class="text-xs text-slate-400 dark:text-slate-500 hidden sm:inline">
             Нажмите на любую фотографию для увеличения
           </span>
         </div>
@@ -411,7 +411,7 @@ function openAuthPromptForFavorite() {
             v-for="(photo, idx) in galleryPhotos"
             :key="idx"
             @click="openLightbox(idx)"
-            class="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-soft hover:shadow-card transition-all cursor-pointer flex flex-col"
+            class="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card transition-all cursor-pointer flex flex-col"
           >
             <SmartImage
               :src="photo.url"
@@ -431,7 +431,7 @@ function openAuthPromptForFavorite() {
               <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                 <span
                   v-if="photo.category"
-                  class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[11px] font-bold text-slate-800 shadow-sm"
+                  class="px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm text-[11px] font-bold text-slate-800 dark:text-slate-100 shadow-sm"
                 >
                   {{ photo.category }}
                 </span>
@@ -457,8 +457,8 @@ function openAuthPromptForFavorite() {
       <!-- 4. POPULAR CITIES -->
       <section v-if="country.popularCities && country.popularCities.length > 0" class="space-y-4">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Популярные города</h2>
-          <p class="text-sm text-slate-500">
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Популярные города</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             Лучшие города и курорты направления «{{ country.nameRu }}» для включения в ваш маршрут
           </p>
         </div>
@@ -467,7 +467,7 @@ function openAuthPromptForFavorite() {
           <article
             v-for="city in country.popularCities"
             :key="city.name"
-            class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden flex flex-col justify-between hover:shadow-card transition-all"
+            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:shadow-card dark:hover:border-slate-700 transition-all"
           >
             <div>
               <SmartImage
@@ -488,20 +488,20 @@ function openAuthPromptForFavorite() {
 
               <div class="p-5">
                 <div class="flex items-center gap-2 mb-2">
-                  <MapPin class="w-4 h-4 text-teal-600 shrink-0" />
-                  <h3 class="text-lg font-extrabold text-slate-900 truncate">{{ city.name }}</h3>
+                  <MapPin class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100 truncate">{{ city.name }}</h3>
                 </div>
-                <p class="text-sm text-slate-600 leading-relaxed">
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   {{ city.description }}
                 </p>
               </div>
             </div>
 
-            <div class="px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end">
+            <div class="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
               <button
                 type="button"
                 @click="handleCreateTrip(city.name)"
-                class="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-800 transition-colors"
+                class="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
               >
                 <PlaneTakeoff class="w-3.5 h-3.5" />
                 <span>Запланировать поездку в г. {{ city.name }}</span>
@@ -514,12 +514,12 @@ function openAuthPromptForFavorite() {
       <!-- 5. LANDMARKS (ЧТО ПОСЕТИТЬ) -->
       <section v-if="country.landmarks && country.landmarks.length > 0" class="space-y-4">
         <div>
-          <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 mb-1">
+          <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400 mb-1">
             <Sparkles class="w-3.5 h-3.5" />
             <span>Что посетить</span>
           </div>
-          <h2 class="text-2xl font-bold text-slate-900">Что посетить — известные достопримечательности</h2>
-          <p class="text-sm text-slate-500">
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Что посетить — известные достопримечательности</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             Проверенные знаковые места и памятники природы и архитектуры в стране «{{ country.nameRu }}»
           </p>
         </div>
@@ -528,7 +528,7 @@ function openAuthPromptForFavorite() {
           <article
             v-for="lm in country.landmarks"
             :key="lm.name"
-            class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden flex flex-col justify-between hover:border-teal-200 hover:shadow-card transition-all"
+            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:border-teal-200 dark:hover:border-teal-500/40 hover:shadow-card transition-all"
           >
             <div>
               <SmartImage
@@ -549,33 +549,33 @@ function openAuthPromptForFavorite() {
 
               <div class="p-5">
                 <div class="flex items-center justify-between gap-2 mb-3">
-                  <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200/60 text-xs font-semibold">
+                  <span class="px-2.5 py-1 rounded-full bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/60 dark:border-teal-500/30 text-xs font-semibold">
                     {{ lm.category }}
                   </span>
-                  <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
-                    <MapPin class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                  <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <MapPin class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
                     <span class="truncate max-w-[150px]">{{ lm.city }}</span>
                   </span>
                 </div>
 
-                <h3 class="text-base font-extrabold text-slate-900 mb-2">
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-slate-100 mb-2">
                   {{ lm.name }}
                 </h3>
 
-                <p class="text-sm text-slate-600 leading-relaxed">
+                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                   {{ lm.description }}
                 </p>
               </div>
             </div>
 
-            <div class="px-5 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <div class="px-5 py-3 bg-slate-50/70 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
               <span class="truncate">
                 {{ country.nameRu }} • {{ lm.city }}
               </span>
               <button
                 type="button"
                 @click="handleCreateTrip(lm.city)"
-                class="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-800 transition-colors shrink-0"
+                class="inline-flex items-center gap-1 font-bold text-teal-700 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 transition-colors shrink-0"
               >
                 <PlaneTakeoff class="w-3.5 h-3.5" />
                 <span>В маршрут</span>
@@ -592,10 +592,10 @@ function openAuthPromptForFavorite() {
         class="space-y-4 scroll-mt-6"
       >
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">
+          <h2 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
             Путеводитель и памятка путешественника
           </h2>
-          <p class="text-sm text-slate-500">
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             Визовые правила, оплата, транспорт, связь, культура, безопасность и бытовые советы перед поездкой в страну «{{ country.nameRu }}»
           </p>
         </div>

@@ -396,10 +396,10 @@ async function handleSubmit() {
         />
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
             Статус готовности
           </label>
-          <div class="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200/70">
+          <div class="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">
             <button
               v-for="st in ORDERED_DOCUMENT_STATUSES"
               :key="st"
@@ -410,7 +410,7 @@ async function handleSubmit() {
                 'px-2 py-2 rounded-lg text-xs font-semibold transition-all text-center truncate border',
                 status === st
                   ? DOCUMENT_STATUS_META[st].activeButtonClass
-                  : 'bg-transparent border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/70',
+                  : 'bg-transparent border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/70 dark:hover:bg-slate-700/70',
               ]"
             >
               {{ DOCUMENT_STATUS_META[st].nameRu }}
@@ -460,9 +460,9 @@ async function handleSubmit() {
 
       <div
         v-if="isInsurance"
-        class="rounded-xl border border-teal-200/80 bg-teal-50/60 px-3.5 py-2.5 flex items-start gap-2.5 text-xs text-teal-900"
+        class="rounded-xl border border-teal-200/80 dark:border-teal-500/30 bg-teal-50/60 dark:bg-teal-500/10 px-3.5 py-2.5 flex items-start gap-2.5 text-xs text-teal-900 dark:text-teal-200"
       >
-        <ShieldCheck class="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+        <ShieldCheck class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
         <p class="leading-relaxed">
           Номер полиса не передаётся на сервер — при необходимости прикрепите PDF полиса локально на этом устройстве.
         </p>
@@ -502,16 +502,16 @@ async function handleSubmit() {
       <!-- Privacy-by-Design notice OR Local File Picker -->
       <div
         v-if="isVisaPassport"
-        class="rounded-xl border border-violet-200/80 bg-violet-50/70 p-4 flex items-start gap-3 text-xs sm:text-sm text-violet-950"
+        class="rounded-xl border border-violet-200/80 dark:border-violet-500/30 bg-violet-50/70 dark:bg-violet-500/10 p-4 flex items-start gap-3 text-xs sm:text-sm text-violet-950 dark:text-violet-200"
       >
-        <div class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0">
+        <div class="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-500/20 text-violet-700 dark:text-violet-300 flex items-center justify-center shrink-0">
           <Lock class="w-4 h-4" />
         </div>
         <div class="space-y-1">
-          <p class="font-bold text-violet-900">
+          <p class="font-bold text-violet-900 dark:text-violet-200">
             Защита персональных данных (Privacy-by-Design)
           </p>
-          <p class="text-xs text-violet-800 leading-relaxed">
+          <p class="text-xs text-violet-800 dark:text-violet-300/90 leading-relaxed">
             Для категории «Паспорт и виза» поля для серии/номера паспорта и прикрепления сканов отключены намеренно.
             Используйте эту карточку только как чек-лист готовности и самоконтроль сроков действия.
           </p>
@@ -519,7 +519,7 @@ async function handleSubmit() {
       </div>
 
       <div v-else class="space-y-2">
-        <label class="block text-sm font-medium text-slate-700">
+        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
           Локальный файл билета, полиса или ваучера (необязательно)
         </label>
 
@@ -534,17 +534,17 @@ async function handleSubmit() {
         <!-- Selected new file preview -->
         <div
           v-if="selectedFile && selectedFileMeta"
-          class="rounded-xl border border-teal-200 bg-teal-50/70 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          class="rounded-xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/70 dark:bg-teal-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center shrink-0">
               <FileText class="w-4 h-4" />
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-slate-900 truncate">
+              <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                 {{ selectedFileMeta.fileName }}
               </p>
-              <p class="text-xs text-teal-800 flex items-center gap-1.5">
+              <p class="text-xs text-teal-800 dark:text-teal-300 flex items-center gap-1.5">
                 <span>{{ formatAttachmentFileSize(selectedFileMeta.fileSize) }}</span>
                 <span>·</span>
                 <span>Сохранится локально в IndexedDB</span>
@@ -557,7 +557,7 @@ async function handleSubmit() {
               Заменить
             </BaseButton>
             <BaseButton type="button" variant="ghost" size="sm" :disabled="isBusy" @click="handleDetachInForm">
-              <Trash2 class="w-4 h-4 text-rose-600" />
+              <Trash2 class="w-4 h-4 text-rose-600 dark:text-rose-400" />
             </BaseButton>
           </div>
         </div>
@@ -565,17 +565,17 @@ async function handleSubmit() {
         <!-- Existing local file on this device -->
         <div
           v-else-if="hasExistingLocalOnDevice"
-          class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          class="rounded-xl border border-emerald-200 dark:border-emerald-500/30 bg-emerald-50/60 dark:bg-emerald-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
               <HardDrive class="w-4 h-4" />
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-slate-900 truncate">
+              <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                 {{ existingAttachmentLabel }}
               </p>
-              <p class="text-xs text-emerald-800">
+              <p class="text-xs text-emerald-800 dark:text-emerald-300">
                 Файл уже сохранён локально в этом браузере
               </p>
             </div>
@@ -589,7 +589,7 @@ async function handleSubmit() {
               type="button"
               variant="outline"
               size="sm"
-              class="text-rose-600 hover:bg-rose-50 hover:border-rose-200"
+              class="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 hover:border-rose-200 dark:hover:border-rose-500/40"
               :disabled="isBusy"
               @click="handleDetachInForm"
             >
@@ -601,17 +601,17 @@ async function handleSubmit() {
         <!-- Existing file attached on another device -->
         <div
           v-else-if="hasExistingRemoteAttachment"
-          class="rounded-xl border border-amber-200 bg-amber-50/70 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          class="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/70 dark:bg-amber-500/10 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <div class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
               <Paperclip class="w-4 h-4" />
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-slate-900 truncate">
+              <p class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                 {{ existingAttachmentLabel }}
               </p>
-              <p class="text-xs text-amber-800">
+              <p class="text-xs text-amber-800 dark:text-amber-300">
                 Файл прикреплён на другом устройстве. Вы можете привязать копию на этом устройстве.
               </p>
             </div>
@@ -625,7 +625,7 @@ async function handleSubmit() {
               type="button"
               variant="ghost"
               size="sm"
-              class="text-rose-600 hover:bg-rose-50"
+              class="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15"
               :disabled="isBusy"
               @click="handleDetachInForm"
             >
@@ -640,26 +640,26 @@ async function handleSubmit() {
           type="button"
           :disabled="isBusy"
           @click="triggerFilePicker"
-          class="w-full rounded-xl border border-dashed border-slate-300 hover:border-teal-500 hover:bg-teal-50/40 px-4 py-4 transition-colors flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left disabled:opacity-50"
+          class="w-full rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-teal-500 dark:hover:border-teal-400 hover:bg-teal-50/40 dark:hover:bg-teal-500/10 px-4 py-4 transition-colors flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left disabled:opacity-50"
         >
-          <div class="w-10 h-10 rounded-xl bg-slate-100 text-teal-600 flex items-center justify-center shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
             <Upload class="w-5 h-5" />
           </div>
           <div>
-            <p class="text-sm font-semibold text-slate-800">
+            <p class="text-sm font-semibold text-slate-800 dark:text-slate-100">
               Выбрать локальный файл (PDF, JPG, PNG, WEBP · до 10 МБ)
             </p>
-            <p class="text-xs text-slate-500 mt-0.5">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Файл хранится только в IndexedDB этого браузера и никогда не загружается на сервер.
             </p>
           </div>
         </button>
 
-        <p v-if="fileError" class="text-xs font-medium text-rose-600">
+        <p v-if="fileError" class="text-xs font-medium text-rose-600 dark:text-rose-400">
           {{ fileError }}
         </p>
-        <p class="text-xs text-slate-500 flex items-center gap-1.5">
-          <ShieldCheck class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+        <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+          <ShieldCheck class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
           <span>На сервер передаются только метаданные карточки без содержимого файла.</span>
         </p>
       </div>
@@ -674,7 +674,7 @@ async function handleSubmit() {
         :disabled="isBusy"
       />
 
-      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
         <BaseButton
           type="button"
           variant="outline"

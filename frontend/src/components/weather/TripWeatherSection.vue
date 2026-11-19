@@ -78,44 +78,44 @@ async function handleRefresh() {
   <div class="space-y-6">
     <!-- Loading Skeleton State -->
     <div v-if="isLoading && !weather" class="space-y-6 animate-pulse" aria-busy="true">
-      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-5 sm:p-6 space-y-5">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6 space-y-5">
         <div class="flex items-start justify-between gap-4">
           <div class="flex items-start gap-3.5 flex-1">
-            <div class="w-12 h-12 rounded-2xl bg-slate-200/80 shrink-0" />
+            <div class="w-12 h-12 rounded-2xl bg-slate-200/80 dark:bg-slate-800 shrink-0" />
             <div class="space-y-2 flex-1 max-w-md">
-              <div class="h-5 w-56 bg-slate-200/80 rounded-lg" />
-              <div class="h-3.5 w-40 bg-slate-100 rounded-lg" />
+              <div class="h-5 w-56 bg-slate-200/80 dark:bg-slate-800 rounded-lg" />
+              <div class="h-3.5 w-40 bg-slate-100 dark:bg-slate-800/70 rounded-lg" />
             </div>
           </div>
-          <div class="h-8 w-24 bg-slate-200/80 rounded-xl shrink-0" />
+          <div class="h-8 w-24 bg-slate-200/80 dark:bg-slate-800 rounded-xl shrink-0" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <div
             v-for="i in 4"
             :key="i"
-            class="h-24 rounded-xl bg-slate-100/80 border border-slate-100"
+            class="h-24 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800"
           />
         </div>
       </div>
 
-      <div class="h-20 rounded-2xl bg-teal-50/50 border border-teal-100" />
+      <div class="h-20 rounded-2xl bg-teal-50/50 dark:bg-teal-950/30 border border-teal-100 dark:border-teal-500/20" />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
         <div
           v-for="i in 4"
           :key="i"
-          class="h-36 rounded-2xl bg-white border border-slate-200/80 p-4 space-y-3"
+          class="h-36 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 space-y-3"
         >
           <div class="flex justify-between items-start">
             <div class="space-y-1.5">
-              <div class="h-4 w-24 bg-slate-200/80 rounded" />
-              <div class="h-3 w-32 bg-slate-100 rounded" />
+              <div class="h-4 w-24 bg-slate-200/80 dark:bg-slate-800 rounded" />
+              <div class="h-3 w-32 bg-slate-100 dark:bg-slate-800/70 rounded" />
             </div>
-            <div class="w-10 h-10 rounded-xl bg-slate-100" />
+            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800" />
           </div>
-          <div class="h-7 w-20 bg-slate-200/80 rounded" />
-          <div class="h-3 w-full bg-slate-100 rounded" />
+          <div class="h-7 w-20 bg-slate-200/80 dark:bg-slate-800 rounded" />
+          <div class="h-3 w-full bg-slate-100 dark:bg-slate-800/70 rounded" />
         </div>
       </div>
     </div>
@@ -123,14 +123,14 @@ async function handleRefresh() {
     <!-- Error State (when no cached weather data is available) -->
     <div
       v-else-if="!weather && error"
-      class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 sm:p-8 max-w-2xl mx-auto text-center space-y-4"
+      class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8 max-w-2xl mx-auto text-center space-y-4"
     >
       <div
         :class="[
           'w-14 h-14 rounded-2xl flex items-center justify-center mx-auto',
           isLocationNotFound
-            ? 'bg-amber-50 text-amber-600'
-            : 'bg-rose-50 text-rose-600',
+            ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400'
+            : 'bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400',
         ]"
       >
         <MapPinOff v-if="isLocationNotFound" class="w-7 h-7" />
@@ -138,7 +138,7 @@ async function handleRefresh() {
       </div>
 
       <div class="space-y-2">
-        <h3 class="text-lg font-bold text-slate-900">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
           {{
             isLocationNotFound
               ? 'Город или направление не найдены на карте погоды'
@@ -146,7 +146,7 @@ async function handleRefresh() {
           }}
         </h3>
 
-        <p class="text-sm text-slate-600 leading-relaxed">
+        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
           <template v-if="isLocationNotFound">
             Погодный сервис не смог определить координаты
             <template v-if="locationDisplay">
@@ -159,7 +159,7 @@ async function handleRefresh() {
           </template>
         </p>
 
-        <p v-if="isLocationNotFound && error" class="text-xs text-slate-400">
+        <p v-if="isLocationNotFound && error" class="text-xs text-slate-400 dark:text-slate-500">
           {{ error }}
         </p>
       </div>
@@ -205,22 +205,22 @@ async function handleRefresh() {
 
       <!-- Smart Packing List Integration Notice -->
       <div
-        class="rounded-2xl border border-teal-200/80 bg-gradient-to-r from-teal-50/90 to-sky-50/70 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        class="rounded-2xl border border-teal-200/80 dark:border-teal-500/30 bg-gradient-to-r from-teal-50/90 to-sky-50/70 dark:from-teal-950/50 dark:to-slate-900 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div class="flex items-start gap-3 min-w-0">
-          <div class="w-10 h-10 rounded-xl bg-white text-teal-600 border border-teal-200/70 flex items-center justify-center shrink-0 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-white dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-200/70 dark:border-teal-500/30 flex items-center justify-center shrink-0 shadow-sm dark:shadow-none">
             <Sparkles class="w-5 h-5" />
           </div>
           <div class="space-y-1 min-w-0">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-sm font-bold text-slate-900">
+              <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
                 Связь со списком вещей
               </span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white text-teal-700 border border-teal-200/80">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-white dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/80 dark:border-teal-500/30">
                 {{ weather.climateLabelRu }}
               </span>
             </div>
-            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               При генерации и обновлении списка вещей система автоматически учитывает этот погодный режим, вероятность осадков и силу ветра.
             </p>
           </div>

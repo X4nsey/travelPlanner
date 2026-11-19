@@ -717,7 +717,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       <div>
         <RouterLink
           to="/trips"
-          class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
         >
           <ArrowLeft class="w-4 h-4" />
           <span>Все мои поездки</span>
@@ -725,7 +725,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       </div>
 
       <!-- Trip Hero Header Card -->
-      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 sm:p-8">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8">
         <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
           <div class="space-y-3">
             <div class="flex flex-wrap items-center gap-2.5">
@@ -739,21 +739,21 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 {{ timing.label }}
               </span>
 
-              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200/70">
+              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 dark:bg-teal-500/15 dark:text-teal-300 px-3 py-1 rounded-full border border-teal-200/70 dark:border-teal-500/30">
                 <MapPin class="w-3.5 h-3.5" />
                 {{ trip.country }}, {{ trip.city }}
               </span>
 
               <span
                 v-if="trip.tripType"
-                class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200/70"
+                class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 dark:bg-indigo-500/15 dark:text-indigo-300 px-3 py-1 rounded-full border border-indigo-200/70 dark:border-indigo-500/30"
               >
                 <Compass class="w-3.5 h-3.5" />
                 {{ getTripTypeLabelRu(trip.tripType) }}
               </span>
             </div>
 
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
               {{ trip.title }}
             </h1>
           </div>
@@ -808,50 +808,50 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         </div>
 
         <!-- Key Metrics Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100">
-          <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
               <Calendar class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Даты поездки</p>
-              <p class="text-sm font-bold text-slate-900">
+              <p class="text-xs text-slate-500 dark:text-slate-400">Даты поездки</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {{ formatDateRange(trip.startDate, trip.endDate) }}
               </p>
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
               <Clock class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Продолжительность</p>
-              <p class="text-sm font-bold text-slate-900">
+              <p class="text-xs text-slate-500 dark:text-slate-400">Продолжительность</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {{ formatDaysLabel(trip.durationDays) }}
               </p>
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
               <Users class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Участники</p>
-              <p class="text-sm font-bold text-slate-900">
+              <p class="text-xs text-slate-500 dark:text-slate-400">Участники</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {{ formatTravelersLabel(trip.travelersCount) }}
               </p>
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50/80 border border-slate-100 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Wallet class="w-5 h-5" />
             </div>
             <div>
-              <p class="text-xs text-slate-500">Планируемый бюджет</p>
-              <p class="text-sm font-bold text-slate-900">
+              <p class="text-xs text-slate-500 dark:text-slate-400">Планируемый бюджет</p>
+              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
                 {{ formatCurrency(trip.budget, trip.currency) }}
               </p>
             </div>
@@ -863,12 +863,12 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       <div class="relative">
         <div
           v-if="canScrollTabsLeft"
-          class="absolute left-0 top-0 bottom-px z-10 flex items-center pr-5 bg-gradient-to-r from-slate-50 via-slate-50/95 to-transparent"
+          class="absolute left-0 top-0 bottom-px z-10 flex items-center pr-5 bg-gradient-to-r from-slate-50 via-slate-50/95 dark:from-slate-950 dark:via-slate-950/95 to-transparent"
         >
           <button
             type="button"
             @click="scrollTabs('left')"
-            class="w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-teal-700 hover:border-teal-300 flex items-center justify-center transition-colors"
+            class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 hover:border-teal-300 dark:hover:border-teal-500/50 flex items-center justify-center transition-colors"
             aria-label="Прокрутить вкладки влево"
           >
             <ChevronLeft class="w-4 h-4" />
@@ -878,7 +878,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         <div
           ref="tabsScrollRef"
           @scroll="updateTabsScrollState"
-          class="flex items-stretch gap-1 overflow-x-auto overflow-y-hidden scroll-smooth bg-[linear-gradient(to_top,#e2e8f0_1px,transparent_1px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          class="flex items-stretch gap-1 overflow-x-auto overflow-y-hidden scroll-smooth border-b border-slate-200 dark:border-slate-800 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           <button
             type="button"
@@ -886,8 +886,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'overview'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <FileText class="w-4 h-4 shrink-0" />
@@ -900,14 +900,14 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'itinerary'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <CalendarDays class="w-4 h-4 shrink-0" />
             <span>План поездки</span>
             <span
-              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-teal-50 text-teal-700 font-bold"
+              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300 font-bold"
             >
               {{ totalEventsCount }}
             </span>
@@ -919,15 +919,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'expenses'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <Coins class="w-4 h-4 shrink-0" />
             <span>Бюджет</span>
             <span
               v-if="tripExpenses.length > 0"
-              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-emerald-50 text-emerald-700 font-bold"
+              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold"
             >
               {{ tripExpenses.length }}
             </span>
@@ -939,8 +939,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'packing'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <Briefcase class="w-4 h-4 shrink-0" />
@@ -950,8 +950,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               :class="[
                 'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold',
                 packingStore.packedCount === packingStore.totalCount
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-teal-50 text-teal-700',
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                  : 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300',
               ]"
             >
               {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
@@ -964,8 +964,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'documents'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <FileCheck2 class="w-4 h-4 shrink-0" />
@@ -975,8 +975,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               :class="[
                 'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold',
                 currentTripDocumentsSummary.readyCount === currentTripDocumentsSummary.totalCount
-                  ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-teal-50 text-teal-700',
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+                  : 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300',
               ]"
             >
               {{ currentTripDocumentsSummary.readyCount }}/{{ currentTripDocumentsSummary.totalCount }}
@@ -989,15 +989,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'weather'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <CloudSun class="w-4 h-4 shrink-0" />
             <span>Погода</span>
             <span
               v-if="weatherTabTempRange"
-              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-sky-50 text-sky-700 font-bold tabular-nums"
+              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 font-bold tabular-nums"
             >
               {{ weatherTabTempRange }}
             </span>
@@ -1009,8 +1009,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'travel-info'
-                ? 'border-teal-600 text-teal-700'
-                : 'border-transparent text-slate-500 hover:text-slate-800',
+                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <BookOpen class="w-4 h-4 shrink-0" />
@@ -1021,7 +1021,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               :alt="matchedCountry.nameRu"
               loading="lazy"
               decoding="async"
-              class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/80 shadow-sm shrink-0"
+              class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0"
             />
             <span
               v-else-if="matchedCountry"
@@ -1035,12 +1035,12 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
         <div
           v-if="canScrollTabsRight"
-          class="absolute right-0 top-0 bottom-px z-10 flex items-center pl-5 bg-gradient-to-l from-slate-50 via-slate-50/95 to-transparent"
+          class="absolute right-0 top-0 bottom-px z-10 flex items-center pl-5 bg-gradient-to-l from-slate-50 via-slate-50/95 dark:from-slate-950 dark:via-slate-950/95 to-transparent"
         >
           <button
             type="button"
             @click="scrollTabs('right')"
-            class="w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm text-slate-600 hover:text-teal-700 hover:border-teal-300 flex items-center justify-center transition-colors"
+            class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 hover:border-teal-300 dark:hover:border-teal-500/50 flex items-center justify-center transition-colors"
             aria-label="Прокрутить вкладки вправо"
           >
             <ChevronRight class="w-4 h-4" />
@@ -1050,74 +1050,74 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
       <!-- TAB 1: OVERVIEW -->
       <div v-if="activeTab === 'overview'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 sm:p-8 space-y-4">
-          <h2 class="text-lg font-bold text-slate-900">Описание поездки</h2>
+        <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8 space-y-4">
+          <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Описание поездки</h2>
           <p
             v-if="trip.description"
-            class="text-sm sm:text-base text-slate-700 leading-relaxed whitespace-pre-line"
+            class="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line"
           >
             {{ trip.description }}
           </p>
-          <p v-else class="text-sm text-slate-400 italic">
+          <p v-else class="text-sm text-slate-400 dark:text-slate-500 italic">
             Описание к этой поездке пока не добавлено. Вы можете добавить его, нажав кнопку «Редактировать».
           </p>
 
-          <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
-            <div class="text-xs text-slate-500">
-              В плане поездки: <strong class="text-slate-800">{{ totalEventsCount }}</strong> мероприятий на
-              <strong class="text-slate-800">{{ formatDaysLabel(trip.durationDays) }}</strong>
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+              В плане поездки: <strong class="text-slate-800 dark:text-slate-100">{{ totalEventsCount }}</strong> мероприятий на
+              <strong class="text-slate-800 dark:text-slate-100">{{ formatDaysLabel(trip.durationDays) }}</strong>
             </div>
 
             <BaseButton variant="secondary" size="sm" @click="activeTab = 'itinerary'">
-              <CalendarDays class="w-4 h-4" />
+              <CalendarDays class="w-4 h-4 text-teal-600 dark:text-teal-400" />
               <span>Перейти к плану по дням</span>
             </BaseButton>
           </div>
         </div>
 
         <!-- Summary Sidebar Card -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-4">
-          <h3 class="text-base font-bold text-slate-900">Сводка по маршруту</h3>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 space-y-4">
+          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">Сводка по маршруту</h3>
 
           <dl class="space-y-3 text-sm">
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Направление</dt>
-              <dd class="font-semibold text-slate-900 text-right">{{ trip.country }}, {{ trip.city }}</dd>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Направление</dt>
+              <dd class="font-semibold text-slate-900 dark:text-slate-100 text-right">{{ trip.country }}, {{ trip.city }}</dd>
             </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Дата начала</dt>
-              <dd class="font-semibold text-slate-900">{{ formatRussianDate(trip.startDate) }}</dd>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Дата начала</dt>
+              <dd class="font-semibold text-slate-900 dark:text-slate-100">{{ formatRussianDate(trip.startDate) }}</dd>
             </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Дата окончания</dt>
-              <dd class="font-semibold text-slate-900">{{ formatRussianDate(trip.endDate) }}</dd>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Дата окончания</dt>
+              <dd class="font-semibold text-slate-900 dark:text-slate-100">{{ formatRussianDate(trip.endDate) }}</dd>
             </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Длительность</dt>
-              <dd class="font-semibold text-teal-700">{{ formatDaysLabel(trip.durationDays) }}</dd>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Длительность</dt>
+              <dd class="font-semibold text-teal-700 dark:text-teal-400">{{ formatDaysLabel(trip.durationDays) }}</dd>
             </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Общий бюджет</dt>
-              <dd class="font-semibold text-slate-900">{{ formatCurrency(trip.budget, trip.currency) }}</dd>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Общий бюджет</dt>
+              <dd class="font-semibold text-slate-900 dark:text-slate-100">{{ formatCurrency(trip.budget, trip.currency) }}</dd>
             </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Фактические траты</dt>
-              <dd class="font-semibold text-slate-900">
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Фактические траты</dt>
+              <dd class="font-semibold text-slate-900 dark:text-slate-100">
                 {{ formatCurrency(expenseSummary?.totalSpent || 0, trip.currency) }}
               </dd>
             </div>
-            <div class="flex items-center justify-between py-2 border-b border-slate-100">
-              <dt class="text-slate-500">Остаток бюджета</dt>
+            <div class="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+              <dt class="text-slate-500 dark:text-slate-400">Остаток бюджета</dt>
               <dd
                 class="font-semibold"
-                :class="(expenseSummary?.remainingBudget || 0) < 0 ? 'text-rose-600' : 'text-emerald-600'"
+                :class="(expenseSummary?.remainingBudget || 0) < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'"
               >
                 {{ formatCurrency(expenseSummary?.remainingBudget || 0, trip.currency) }}
               </dd>
             </div>
             <div class="flex items-center justify-between py-2">
-              <dt class="text-slate-500">Оценка по плану</dt>
-              <dd class="font-semibold text-slate-900">
+              <dt class="text-slate-500 dark:text-slate-400">Оценка по плану</dt>
+              <dd class="font-semibold text-slate-900 dark:text-slate-100">
                 {{ formatCurrency(totalEstimatedEventsCost, trip.currency) }}
               </dd>
             </div>
@@ -1137,10 +1137,10 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
       <!-- TAB 2: ITINERARY BY DAYS -->
       <div v-else-if="activeTab === 'itinerary'" class="space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
           <div>
-            <h2 class="text-lg font-bold text-slate-900">Расписание по дням поездки</h2>
-            <p class="text-xs sm:text-sm text-slate-500">
+            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Расписание по дням поездки</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               Календарные дни сформированы автоматически с {{ formatRussianDate(trip.startDate) }} по {{ formatRussianDate(trip.endDate) }}
             </p>
           </div>
@@ -1156,17 +1156,17 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           <section
             v-for="day in calendarDays"
             :key="day.date"
-            class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden"
+            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden"
           >
             <!-- Day Header -->
-            <div class="px-5 sm:px-6 py-4 bg-slate-50/80 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div class="px-5 sm:px-6 py-4 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
               <div class="flex items-center gap-3">
                 <span
                   class="inline-flex items-center justify-center px-3 py-1 rounded-xl bg-teal-600 text-white text-xs font-bold"
                 >
                   День {{ day.dayNumber }}
                 </span>
-                <h3 class="text-base font-bold text-slate-900">
+                <h3 class="text-base font-bold text-slate-900 dark:text-slate-100">
                   {{ day.label }}
                 </h3>
               </div>
@@ -1174,7 +1174,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               <BaseButton
                 variant="ghost"
                 size="sm"
-                class="text-teal-700 hover:bg-teal-50"
+                class="text-teal-700 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-500/15"
                 @click="openAddEventModal(day.date)"
               >
                 <Plus class="w-4 h-4" />
@@ -1186,9 +1186,9 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <div class="p-5 sm:p-6">
               <div
                 v-if="!eventsByDate[day.date] || eventsByDate[day.date].length === 0"
-                class="py-6 text-center rounded-xl border border-dashed border-slate-200 bg-slate-50/40"
+                class="py-6 text-center rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50/40 dark:bg-slate-800/30"
               >
-                <p class="text-sm text-slate-500 mb-3">
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
                   На этот день пока не запланировано мероприятий
                 </p>
                 <BaseButton
@@ -1205,15 +1205,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 <div
                   v-for="ev in eventsByDate[day.date]"
                   :key="ev.id"
-                  class="group rounded-xl border border-slate-200/80 p-4 sm:p-5 hover:border-teal-200 hover:bg-slate-50/40 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                  class="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-slate-50/40 dark:hover:bg-slate-800/50 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4"
                 >
                   <div class="space-y-2 flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
                       <span
                         v-if="ev.startTime || ev.endTime"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/70 text-xs font-semibold"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30 text-xs font-semibold"
                       >
-                        <Clock class="w-3.5 h-3.5 text-teal-600" />
+                        <Clock class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                         <span v-if="ev.startTime && ev.endTime">
                           {{ ev.startTime }} — {{ ev.endTime }}
                         </span>
@@ -1227,44 +1227,44 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
                       <span
                         v-else
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium"
                       >
                         Весь день / без времени
                       </span>
 
                       <span
                         v-if="ev.estimatedCost !== null && ev.estimatedCost !== undefined"
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/70 text-xs font-semibold"
+                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-500/30 text-xs font-semibold"
                       >
                         <Wallet class="w-3 h-3" />
                         {{ formatCurrency(ev.estimatedCost, trip.currency) }}
                       </span>
                     </div>
 
-                    <h4 class="text-base font-bold text-slate-900">
+                    <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">
                       {{ ev.title }}
                     </h4>
 
                     <p
                       v-if="ev.location"
-                      class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600"
+                      class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
                     >
-                      <MapPin class="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                      <MapPin class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
                       <span>{{ ev.location }}</span>
                     </p>
 
                     <p
                       v-if="ev.description"
-                      class="text-sm text-slate-600 leading-relaxed whitespace-pre-line"
+                      class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line"
                     >
                       {{ ev.description }}
                     </p>
 
                     <div
                       v-if="ev.note"
-                      class="mt-2 p-2.5 rounded-lg bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex items-start gap-2"
+                      class="mt-2 p-2.5 rounded-lg bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200/70 dark:border-amber-500/30 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2"
                     >
-                      <StickyNote class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <StickyNote class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                       <span class="whitespace-pre-line">{{ ev.note }}</span>
                     </div>
                   </div>
@@ -1274,7 +1274,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     <button
                       type="button"
                       @click="openEditEventModal(ev)"
-                      class="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200 transition-colors"
+                      class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
                       title="Редактировать мероприятие"
                     >
                       <Pencil class="w-4 h-4" />
@@ -1283,7 +1283,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     <button
                       type="button"
                       @click="eventToDelete = ev"
-                      class="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      class="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 transition-colors"
                       title="Удалить мероприятие"
                     >
                       <Trash2 class="w-4 h-4" />
@@ -1301,11 +1301,11 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         <!-- Header & Action Row -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Coins class="w-5 h-5 text-teal-600" />
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Coins class="w-5 h-5 text-teal-600 dark:text-teal-400" />
               <span>Финансовый помощник</span>
             </h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
               Контролируйте расходы, следите за остатком бюджета и анализируйте структуру трат
             </p>
           </div>
@@ -1323,47 +1323,47 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         <!-- KPI Budget Metrics Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <!-- Planned Budget -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">План бюджета</span>
-              <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">План бюджета</span>
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center">
                 <Wallet class="w-4 h-4" />
               </div>
             </div>
-            <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+            <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               {{ formatCurrency(trip.budget, trip.currency) }}
             </p>
-            <p class="text-xs text-slate-400 mt-1">
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
               Запланировано на поездку
             </p>
           </div>
 
           <!-- Total Spent -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Фактически потрачено</span>
-              <div class="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Фактически потрачено</span>
+              <div class="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                 <Receipt class="w-4 h-4" />
               </div>
             </div>
-            <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+            <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               {{ formatCurrency(expenseSummary?.totalSpent || 0, trip.currency) }}
             </p>
-            <p class="text-xs text-slate-400 mt-1">
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">
               Всего по {{ tripExpenses.length }} {{ tripExpenses.length === 1 ? 'операции' : tripExpenses.length < 5 ? 'операциям' : 'операциям' }}
             </p>
           </div>
 
           <!-- Remaining Budget -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Остаток бюджета</span>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Остаток бюджета</span>
               <div
                 class="w-8 h-8 rounded-lg flex items-center justify-center"
                 :class="
                   (expenseSummary?.remainingBudget || 0) < 0
-                    ? 'bg-rose-50 text-rose-600'
-                    : 'bg-emerald-50 text-emerald-600'
+                    ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400'
+                    : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400'
                 "
               >
                 <TrendingUp class="w-4 h-4" />
@@ -1373,15 +1373,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               class="text-xl sm:text-2xl font-extrabold"
               :class="
                 (expenseSummary?.remainingBudget || 0) < 0
-                  ? 'text-rose-600'
-                  : 'text-emerald-600'
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-emerald-600 dark:text-emerald-400'
               "
             >
               {{ formatCurrency(expenseSummary?.remainingBudget || 0, trip.currency) }}
             </p>
             <p
               class="text-xs font-medium mt-1"
-              :class="(expenseSummary?.remainingBudget || 0) < 0 ? 'text-rose-500 font-bold' : 'text-slate-400'"
+              :class="(expenseSummary?.remainingBudget || 0) < 0 ? 'text-rose-500 dark:text-rose-400 font-bold' : 'text-slate-400 dark:text-slate-500'"
             >
               {{
                 (expenseSummary?.remainingBudget || 0) < 0
@@ -1392,17 +1392,17 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           </div>
 
           <!-- Spent % Progress -->
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-soft">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-soft dark:shadow-none">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Освоение бюджета</span>
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Освоение бюджета</span>
               <span
                 class="text-xs font-bold px-2 py-0.5 rounded-full"
                 :class="
                   expenseSummary?.status === 'over_budget'
-                    ? 'bg-rose-100 text-rose-800'
+                    ? 'bg-rose-100 text-rose-800 dark:bg-rose-500/15 dark:text-rose-300'
                     : expenseSummary?.status === 'near_budget'
-                      ? 'bg-amber-100 text-amber-800'
-                      : 'bg-emerald-100 text-emerald-800'
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300'
+                      : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300'
                 "
               >
                 {{
@@ -1414,11 +1414,11 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 }}
               </span>
             </div>
-            <p class="text-xl sm:text-2xl font-extrabold text-slate-900">
+            <p class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
               {{ expenseSummary?.spentPercentage || 0 }}%
             </p>
             <!-- Progress Bar -->
-            <div class="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-2 overflow-hidden">
               <div
                 class="h-full rounded-full transition-all duration-300"
                 :style="{ width: Math.min(expenseSummary?.spentPercentage || 0, 100) + '%' }"
@@ -1436,36 +1436,36 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
         <!-- Analytical Mini-Cards: Daily Average & Per Traveler Average -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft flex items-center justify-between gap-4">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-soft dark:shadow-none flex items-center justify-between gap-4">
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
                 <CalendarDays class="w-5 h-5" />
               </div>
               <div class="min-w-0">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">В среднем в день</p>
-                <p class="text-xs text-slate-400 mt-0.5 truncate">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">В среднем в день</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
                   За {{ formatDaysLabel(trip.durationDays) }} поездки
                 </p>
               </div>
             </div>
-            <p class="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums shrink-0">
+            <p class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums shrink-0">
               {{ formatCurrency(expenseSummary?.dailyAverage || 0, trip.currency) }}
             </p>
           </div>
 
-          <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft flex items-center justify-between gap-4">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-soft dark:shadow-none flex items-center justify-between gap-4">
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                 <Users class="w-5 h-5" />
               </div>
               <div class="min-w-0">
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">На 1 путешественника</p>
-                <p class="text-xs text-slate-400 mt-0.5 truncate">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">На 1 путешественника</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5 truncate">
                   Участников: {{ trip.travelersCount }}
                 </p>
               </div>
             </div>
-            <p class="text-lg sm:text-xl font-extrabold text-slate-900 tabular-nums shrink-0">
+            <p class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 tabular-nums shrink-0">
               {{ formatCurrency(expenseSummary?.perTravelerAverage || 0, trip.currency) }}
             </p>
           </div>
@@ -1474,13 +1474,13 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         <!-- Compact Exchange Rate Info Bar -->
         <div
           v-if="expenseSummary?.exchangeRates && formattedExchangeRatesLine"
-          class="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600"
+          class="flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300"
         >
           <div class="flex flex-wrap items-center gap-2">
-            <ArrowRightLeft class="w-3.5 h-3.5 text-teal-600 shrink-0" />
-            <span class="font-semibold text-slate-700">Курс пересчёта:</span>
-            <span class="font-medium text-slate-800 tabular-nums">{{ formattedExchangeRatesLine }}</span>
-            <span v-if="hasForeignCurrencyExpenses" class="text-slate-400">
+            <ArrowRightLeft class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+            <span class="font-semibold text-slate-700 dark:text-slate-300">Курс пересчёта:</span>
+            <span class="font-medium text-slate-800 dark:text-slate-100 tabular-nums">{{ formattedExchangeRatesLine }}</span>
+            <span v-if="hasForeignCurrencyExpenses" class="text-slate-400 dark:text-slate-500">
               (траты в других валютах пересчитаны в {{ trip.currency }})
             </span>
           </div>
@@ -1488,8 +1488,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
             :class="
               expenseSummary.exchangeRates.isFallback
-                ? 'bg-amber-50 text-amber-800 border-amber-200/80'
-                : 'bg-teal-50 text-teal-800 border-teal-200/80'
+                ? 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30'
+                : 'bg-teal-50 text-teal-800 border-teal-200/80 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/30'
             "
           >
             {{
@@ -1505,9 +1505,9 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         <!-- Over-budget warning banner if budget exceeded -->
         <div
           v-if="expenseSummary?.status === 'over_budget'"
-          class="flex items-start gap-3 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-rose-900"
+          class="flex items-start gap-3 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200/80 dark:border-rose-500/30 text-rose-900 dark:text-rose-200"
         >
-          <AlertCircle class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+          <AlertCircle class="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
           <div class="text-xs sm:text-sm">
             <strong class="font-bold">Предупреждение о перерасходе средств:</strong>
             Текущие расходы превышают запланированный бюджет на {{ formatCurrency(Math.abs(expenseSummary.remainingBudget), trip.currency) }}. Рекомендуем скорректировать дальнейшие траты.
@@ -1527,19 +1527,19 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <!-- Daily Expenses Dynamics -->
             <div
               v-if="expenseSummary?.byDay && expenseSummary.byDay.length > 0"
-              class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-4"
+              class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 space-y-4"
             >
-              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                     <BarChart3 class="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 class="font-bold text-slate-900 text-base">Динамика расходов по дням</h3>
-                    <p class="text-xs text-slate-500">Все суммы приведены к {{ trip.currency }}</p>
+                    <h3 class="font-bold text-slate-900 dark:text-slate-100 text-base">Динамика расходов по дням</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Все суммы приведены к {{ trip.currency }}</p>
                   </div>
                 </div>
-                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+                <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                   {{ formatDaysLabel(expenseSummary.byDay.length) }}
                 </span>
               </div>
@@ -1552,18 +1552,18 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 >
                   <div class="flex items-center justify-between gap-2 text-xs sm:text-sm">
                     <div class="flex items-center gap-2 min-w-0">
-                      <span class="font-semibold text-slate-800 truncate">
+                      <span class="font-semibold text-slate-800 dark:text-slate-200 truncate">
                         {{ formatRussianDate(day.date) }}
                       </span>
-                      <span class="text-[11px] font-medium text-slate-400 shrink-0">
+                      <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 shrink-0">
                         ({{ day.count }} опер.)
                       </span>
                     </div>
-                    <span class="font-extrabold text-slate-900 tabular-nums shrink-0">
+                    <span class="font-extrabold text-slate-900 dark:text-slate-100 tabular-nums shrink-0">
                       {{ formatCurrency(day.totalAmount, trip.currency) }}
                     </span>
                   </div>
-                  <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       class="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300"
                       :style="{
@@ -1577,11 +1577,11 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           </div>
 
           <!-- History of Expenses List -->
-          <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <h3 class="font-extrabold text-slate-900 text-lg sm:text-xl">История расходов</h3>
-                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                <h3 class="font-extrabold text-slate-900 dark:text-slate-100 text-lg sm:text-xl">История расходов</h3>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                   Все зафиксированные траты в хронологическом порядке
                 </p>
               </div>
@@ -1591,7 +1591,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 <button
                   type="button"
                   @click="selectedCategoryFilter = null"
-                  class="text-xs px-3 py-1.5 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                  class="text-xs px-3 py-1.5 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
                 >
                   Сбросить фильтр
                 </button>
@@ -1606,14 +1606,14 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 :class="[
                   'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all',
                   selectedCategoryFilter === null
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-slate-100 hover:bg-slate-200/80 text-slate-700',
+                    ? 'bg-slate-900 dark:bg-teal-600 text-white shadow-sm'
+                    : 'bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300',
                 ]"
               >
                 <span>Все</span>
                 <span
                   class="px-1.5 py-0.5 rounded-md text-[11px]"
-                  :class="selectedCategoryFilter === null ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'"
+                  :class="selectedCategoryFilter === null ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'"
                 >
                   {{ tripExpenses.length }}
                 </span>
@@ -1627,8 +1627,8 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 :class="[
                   'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-bold transition-all',
                   selectedCategoryFilter === catItem.category
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-200/80 hover:border-slate-300 hover:bg-slate-50',
+                    ? 'bg-slate-900 dark:bg-teal-600 text-white border-slate-900 dark:border-teal-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800',
                 ]"
               >
                 <span
@@ -1638,7 +1638,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 <span>{{ catItem.nameRu }}</span>
                 <span
                   class="text-xs font-semibold opacity-75"
-                  :class="selectedCategoryFilter === catItem.category ? 'text-white' : 'text-slate-500'"
+                  :class="selectedCategoryFilter === catItem.category ? 'text-white' : 'text-slate-500 dark:text-slate-400'"
                 >
                   ({{ catItem.count }})
                 </span>
@@ -1650,13 +1650,13 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               v-if="filteredExpenses.length === 0"
               class="flex flex-col items-center justify-center py-14 px-4 text-center"
             >
-              <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 mb-3">
+              <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 mb-3">
                 <Receipt class="w-7 h-7" />
               </div>
-              <p class="text-base font-bold text-slate-800">
+              <p class="text-base font-bold text-slate-800 dark:text-slate-100">
                 {{ selectedCategoryFilter ? 'В этой категории пока нет расходов' : 'Расходы ещё не зафиксированы' }}
               </p>
-              <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-sm">
+              <p class="text-xs sm:text-sm text-slate-400 dark:text-slate-400 mt-1 max-w-sm">
                 {{
                   selectedCategoryFilter
                     ? 'Сбросьте фильтр или добавьте новый расход в эту категорию'
@@ -1688,7 +1688,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               <div
                 v-for="exp in filteredExpenses"
                 :key="exp.id"
-                class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-slate-200/80 hover:border-slate-300 bg-white hover:bg-slate-50/60 shadow-sm transition-all duration-150 gap-4 group"
+                class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/50 hover:bg-slate-50/60 dark:hover:bg-slate-800 shadow-sm dark:shadow-none transition-all duration-150 gap-4 group"
               >
                 <!-- Left: Category Icon, Title, Date, Description -->
                 <div class="flex items-start sm:items-center gap-4 min-w-0">
@@ -1701,35 +1701,35 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
                   <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2.5">
-                      <span class="text-base sm:text-lg font-bold text-slate-900">
+                      <span class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
                         {{ exp.categoryNameRu }}
                       </span>
-                      <span class="inline-flex items-center text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200/60">
+                      <span class="inline-flex items-center text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200/60 dark:border-slate-700">
                         {{ formatRussianDate(exp.expenseDate) }}
                       </span>
                     </div>
 
                     <p
                       v-if="exp.description"
-                      class="text-sm text-slate-600 mt-1 leading-relaxed"
+                      class="text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed"
                     >
                       {{ exp.description }}
                     </p>
-                    <p v-else class="text-xs text-slate-400 italic mt-1">
+                    <p v-else class="text-xs text-slate-400 dark:text-slate-500 italic mt-1">
                       Без описания
                     </p>
                   </div>
                 </div>
 
                 <!-- Right: Amount and Action Buttons -->
-                <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0 sm:pl-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                <div class="flex items-center justify-between sm:justify-end gap-4 shrink-0 sm:pl-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 dark:border-slate-700/80">
                   <div class="sm:text-right">
-                    <span class="block text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    <span class="block text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
                       {{ formatCurrency(exp.amount, exp.currency) }}
                     </span>
                     <span
                       v-if="exp.currency !== trip.currency"
-                      class="block text-xs font-semibold text-teal-700 mt-0.5 tabular-nums"
+                      class="block text-xs font-semibold text-teal-700 dark:text-teal-400 mt-0.5 tabular-nums"
                       :title="`Курс: 1 ${exp.currency} = ${exp.exchangeRateUsed} ${trip.currency}`"
                     >
                       ≈ {{ formatCurrency(exp.convertedAmount, trip.currency) }}
@@ -1741,7 +1741,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     <button
                       type="button"
                       @click="openEditExpenseModal(exp)"
-                      class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200 transition-colors"
+                      class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-700 border border-transparent hover:border-slate-200 dark:hover:border-slate-600 transition-colors"
                       title="Редактировать расход"
                     >
                       <Pencil class="w-4 h-4" />
@@ -1749,7 +1749,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     <button
                       type="button"
                       @click="expenseToDelete = exp"
-                      class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-colors"
+                      class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 border border-transparent hover:border-rose-100 dark:hover:border-rose-500/30 transition-colors"
                       title="Удалить расход"
                     >
                       <Trash2 class="w-4 h-4" />
@@ -1821,17 +1821,17 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
         <!-- Fallback for custom / manually typed country -->
         <div
           v-else
-          class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-5"
+          class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-8 sm:p-12 text-center max-w-2xl mx-auto space-y-5"
         >
-          <div class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center text-teal-600 mx-auto">
+          <div class="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-teal-600 dark:text-teal-400 mx-auto">
             <Globe2 class="w-8 h-8" />
           </div>
 
           <div class="space-y-2">
-            <h2 class="text-xl font-extrabold text-slate-900">
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-slate-100">
               Памятка для направления «{{ trip.country }}» пока не найдена
             </h2>
-            <p class="text-sm text-slate-500 leading-relaxed">
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
               Похоже, страна указана вручную или отсутствует в нашем справочнике стран.
               Выберите страну из каталога в настройках поездки, чтобы автоматически получить подробную памятку о визах, оплате, транспорте, связи и безопасности.
             </p>

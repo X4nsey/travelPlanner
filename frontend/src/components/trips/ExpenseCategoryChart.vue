@@ -169,16 +169,16 @@ function getCategoryIcon(cat: ExpenseCategory) {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6">
     <!-- Header -->
-    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
       <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+        <div class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
           <PieChartIcon class="w-5 h-5" />
         </div>
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Структура расходов</h3>
-          <p class="text-xs text-slate-500">Распределение трат по категориям</p>
+          <h3 class="font-bold text-slate-900 dark:text-slate-100 text-base">Структура расходов</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Распределение трат по категориям</p>
         </div>
       </div>
 
@@ -186,7 +186,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
         v-if="selectedCategory"
         type="button"
         @click="emit('select-category', null)"
-        class="text-xs font-semibold text-teal-700 hover:text-teal-800 bg-teal-50 hover:bg-teal-100/80 px-3 py-1.5 rounded-lg transition-colors"
+        class="text-xs font-semibold text-teal-700 hover:text-teal-800 dark:text-teal-300 dark:hover:text-teal-200 bg-teal-50 hover:bg-teal-100/80 dark:bg-teal-500/15 dark:hover:bg-teal-500/25 px-3 py-1.5 rounded-lg transition-colors"
       >
         Сбросить выбор
       </button>
@@ -197,11 +197,11 @@ function getCategoryIcon(cat: ExpenseCategory) {
       v-if="!summary || summary.totalSpent <= 0"
       class="flex flex-col items-center justify-center py-12 px-4 text-center"
     >
-      <div class="w-36 h-36 rounded-full border-4 border-dashed border-slate-200 flex items-center justify-center text-slate-300 mb-4">
+      <div class="w-36 h-36 rounded-full border-4 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4">
         <PieChartIcon class="w-12 h-12" />
       </div>
-      <p class="text-base font-bold text-slate-800">Расходы ещё не добавлены</p>
-      <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-xs">
+      <p class="text-base font-bold text-slate-800 dark:text-slate-100">Расходы ещё не добавлены</p>
+      <p class="text-xs sm:text-sm text-slate-400 dark:text-slate-400 mt-1 max-w-xs">
         Вносите траты на жильё, транспорт, еду и покупки — здесь появится интерактивная диаграмма
       </p>
     </div>
@@ -221,7 +221,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
               cy="140"
               r="97"
               fill="none"
-              stroke="#f1f5f9"
+              class="stroke-slate-100 dark:stroke-slate-800"
               stroke-width="28"
             />
 
@@ -257,35 +257,35 @@ function getCategoryIcon(cat: ExpenseCategory) {
                   class="w-2.5 h-2.5 rounded-full shrink-0"
                   :style="{ backgroundColor: activeCategoryStat.color }"
                 ></span>
-                <span class="text-xs font-bold text-slate-600 truncate">
+                <span class="text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
                   {{ activeCategoryStat.nameRu }}
                 </span>
               </div>
-              <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-tight">
+              <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
                 {{ formatCurrency(activeCategoryStat.totalAmount, summary.currency) }}
               </span>
               <span
-                class="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700"
+                class="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
               >
                 {{ activeCategoryStat.percentage }}% от расходов
               </span>
             </template>
 
             <template v-else>
-              <span class="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <span class="text-[10px] sm:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 Всего потрачено
               </span>
-              <span class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight my-0.5 leading-tight">
+              <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight my-0.5 leading-tight">
                 {{ formatCurrency(summary.totalSpent, summary.currency) }}
               </span>
               <span
                 class="mt-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
                 :class="
                   summary.status === 'over_budget'
-                    ? 'bg-rose-100 text-rose-700'
+                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'
                     : summary.status === 'near_budget'
-                      ? 'bg-amber-100 text-amber-700'
-                      : 'bg-emerald-100 text-emerald-700'
+                      ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
+                      : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
                 "
               >
                 {{ summary.spentPercentage }}% бюджета
@@ -296,7 +296,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
       </div>
 
       <!-- Categories Legend / Breakdown Cards List -->
-      <div class="space-y-2.5 pt-2 border-t border-slate-100">
+      <div class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
         <div
           v-for="cat in categoriesWithExpenses"
           :key="cat.category"
@@ -306,10 +306,10 @@ function getCategoryIcon(cat: ExpenseCategory) {
           :class="[
             'p-3 rounded-xl border cursor-pointer transition-all duration-150',
             selectedCategory === cat.category
-              ? 'bg-slate-50 border-teal-500 shadow-sm ring-1 ring-teal-500/20'
+              ? 'bg-slate-50 dark:bg-slate-800 border-teal-500 dark:border-teal-400 shadow-sm ring-1 ring-teal-500/20'
               : hoveredCategory === cat.category
-                ? 'bg-slate-50/70 border-slate-300'
-                : 'bg-white border-slate-100 hover:border-slate-200',
+                ? 'bg-slate-50/70 dark:bg-slate-800/70 border-slate-300 dark:border-slate-700'
+                : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700',
           ]"
         >
           <div class="flex items-center justify-between mb-2">
@@ -321,26 +321,26 @@ function getCategoryIcon(cat: ExpenseCategory) {
                 <component :is="getCategoryIcon(cat.category)" class="w-4 h-4" />
               </div>
 
-              <span class="text-sm font-bold text-slate-900 truncate">
+              <span class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                 {{ cat.nameRu }}
               </span>
-              <span class="text-xs text-slate-400 font-medium">
+              <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">
                 {{ cat.count }} {{ cat.count === 1 ? 'запись' : cat.count < 5 ? 'записи' : 'записей' }}
               </span>
             </div>
 
             <div class="text-right shrink-0 pl-2 flex items-baseline gap-2">
-              <span class="text-sm font-extrabold text-slate-900">
+              <span class="text-sm font-extrabold text-slate-900 dark:text-slate-100">
                 {{ formatCurrency(cat.totalAmount, summary.currency) }}
               </span>
-              <span class="text-xs font-bold text-slate-500">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">
                 {{ cat.percentage }}%
               </span>
             </div>
           </div>
 
           <!-- Color Progress Bar for this category -->
-          <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
             <div
               class="h-full rounded-full transition-all duration-300"
               :style="{

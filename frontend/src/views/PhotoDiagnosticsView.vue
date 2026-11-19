@@ -309,30 +309,30 @@ function getStatusBadge(item: PhotoDiagnosticItem) {
   if (item.isDuplicate) {
     return {
       label: 'Дубликат (запрещено)',
-      classes: 'bg-rose-50 text-rose-700 border-rose-200',
+      classes: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-500/50',
     };
   }
   if (clientLoadErrors.value.has(item.id) || item.verificationStatus === 'broken' || item.verificationStatus === 'rejected') {
     return {
       label: 'Ошибка / Отклонено',
-      classes: 'bg-rose-50 text-rose-700 border-rose-200',
+      classes: 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/90 dark:text-rose-200 dark:border-rose-500/50',
     };
   }
   if (item.verificationStatus === 'missing' || !item.url) {
     return {
       label: 'Отсутствует',
-      classes: 'bg-slate-100 text-slate-700 border-slate-300',
+      classes: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-900/90 dark:text-slate-200 dark:border-slate-600',
     };
   }
   if (item.verificationStatus === 'needs_review') {
     return {
       label: 'Требует проверки страны',
-      classes: 'bg-amber-50 text-amber-700 border-amber-200',
+      classes: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-500/50',
     };
   }
   return {
     label: 'Подтверждено (гео-матч)',
-    classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    classes: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/90 dark:text-emerald-200 dark:border-emerald-500/50',
   };
 }
 
@@ -345,16 +345,16 @@ onMounted(() => {
   <AdaptiveLayout>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-soft">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-soft dark:shadow-none">
         <div class="space-y-1">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-500/15 border border-transparent dark:border-teal-500/30 text-teal-700 dark:text-teal-300 text-xs font-bold">
             <ShieldCheck class="w-4 h-4" />
             <span>Административная диагностика и гео-верификация</span>
           </div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
             Диагностика фотографий стран и достопримечательностей
           </h1>
-          <p class="text-sm text-slate-500">
+          <p class="text-sm text-slate-500 dark:text-slate-400">
             Контроль географического соответствия, лицензий, источников (Wikimedia Commons, Unsplash) и целостности URL.
           </p>
         </div>
@@ -374,107 +374,114 @@ onMounted(() => {
 
       <!-- Summary Counters -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3.5">
-        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold mb-2">
             <span>Всего</span>
-            <ImageIcon class="w-4 h-4 text-slate-400" />
+            <ImageIcon class="w-4 h-4 text-slate-400 dark:text-slate-500" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ liveStats.totalImages }}</p>
-          <p v-if="report" class="text-[11px] text-slate-500 mt-1 truncate">
+          <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">{{ liveStats.totalImages }}</p>
+          <p v-if="report" class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
             Обл: {{ report.summary.bySection.cover }} • Мест: {{ report.summary.bySection.landmark }}
           </p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-emerald-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-emerald-700 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-emerald-200/80 dark:border-emerald-500/30 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-emerald-700 dark:text-emerald-400 text-xs font-semibold mb-2">
             <span>Подтверждено</span>
-            <CheckCircle2 class="w-4 h-4 text-emerald-600" />
+            <CheckCircle2 class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-emerald-700">{{ liveStats.verifiedCount }}</p>
-          <p class="text-[11px] text-emerald-600/80 mt-1">
+          <p class="text-2xl sm:text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">{{ liveStats.verifiedCount }}</p>
+          <p class="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 mt-1">
             Строгая гео-проверка
           </p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-violet-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-violet-700 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-violet-200/80 dark:border-violet-500/30 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-violet-700 dark:text-violet-400 text-xs font-semibold mb-2">
             <span>Ручной выбор</span>
-            <Pin class="w-4 h-4 text-violet-600" />
+            <Pin class="w-4 h-4 text-violet-600 dark:text-violet-400" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-violet-700">{{ report?.summary?.manualOverridesCount ?? 0 }}</p>
-          <p class="text-[11px] text-violet-600/80 mt-1">
+          <p class="text-2xl sm:text-3xl font-extrabold text-violet-700 dark:text-violet-300">{{ report?.summary?.manualOverridesCount ?? 0 }}</p>
+          <p class="text-[11px] text-violet-600/80 dark:text-violet-400/80 mt-1">
             В базе PostgreSQL
           </p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-rose-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-rose-700 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-rose-200/80 dark:border-rose-500/30 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-rose-700 dark:text-rose-400 text-xs font-semibold mb-2">
             <span>Дубликаты</span>
-            <Copy class="w-4 h-4 text-rose-600" />
+            <Copy class="w-4 h-4 text-rose-600 dark:text-rose-400" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-rose-700">{{ report?.summary?.duplicateCount ?? 0 }}</p>
-          <p class="text-[11px] text-rose-600/80 mt-1">
+          <p class="text-2xl sm:text-3xl font-extrabold text-rose-700 dark:text-rose-300">{{ report?.summary?.duplicateCount ?? 0 }}</p>
+          <p class="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1">
             Повторные фото
           </p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-slate-600 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-slate-600 dark:text-slate-400 text-xs font-semibold mb-2">
             <span>Отсутствуют</span>
-            <ImageIcon class="w-4 h-4 text-slate-400" />
+            <ImageIcon class="w-4 h-4 text-slate-400 dark:text-slate-500" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-slate-800">{{ liveStats.missingCount }}</p>
-          <p class="text-[11px] text-slate-500 mt-1">
+          <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100">{{ liveStats.missingCount }}</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
             Без случайных фото
           </p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-rose-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-rose-700 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-rose-200/80 dark:border-rose-500/30 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-rose-700 dark:text-rose-400 text-xs font-semibold mb-2">
             <span>Ошибки</span>
-            <XCircle class="w-4 h-4 text-rose-600" />
+            <XCircle class="w-4 h-4 text-rose-600 dark:text-rose-400" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-rose-700">{{ liveStats.errorCount }}</p>
-          <p class="text-[11px] text-rose-600/80 mt-1">
+          <p class="text-2xl sm:text-3xl font-extrabold text-rose-700 dark:text-rose-300">{{ liveStats.errorCount }}</p>
+          <p class="text-[11px] text-rose-600/80 dark:text-rose-400/80 mt-1">
             Битые URL / чужая страна
           </p>
         </div>
 
-        <div class="bg-white rounded-2xl border border-amber-200/80 p-4 shadow-soft">
-          <div class="flex items-center justify-between text-amber-700 text-xs font-semibold mb-2">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-amber-200/80 dark:border-amber-500/30 p-4 shadow-soft dark:shadow-none">
+          <div class="flex items-center justify-between text-amber-700 dark:text-amber-400 text-xs font-semibold mb-2">
             <span>На проверку</span>
-            <AlertTriangle class="w-4 h-4 text-amber-600" />
+            <AlertTriangle class="w-4 h-4 text-amber-600 dark:text-amber-400" />
           </div>
-          <p class="text-2xl sm:text-3xl font-extrabold text-amber-700">{{ liveStats.needsReviewCount }}</p>
-          <p class="text-[11px] text-amber-600/80 mt-1">
+          <p class="text-2xl sm:text-3xl font-extrabold text-amber-700 dark:text-amber-300">{{ liveStats.needsReviewCount }}</p>
+          <p class="text-[11px] text-amber-600/80 dark:text-amber-400/80 mt-1">
             Не подтверждено гео
           </p>
         </div>
       </div>
 
       <!-- Filter Controls -->
-      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-soft space-y-4">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-soft dark:shadow-none space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           <!-- Search -->
           <div class="relative">
-            <Search class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Поиск по стране, городу, месту..."
-              class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
+              class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-colors"
             />
           </div>
 
           <!-- Country Select -->
           <div class="relative">
-            <Filter class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Filter class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <select
               v-model="selectedCountry"
-              class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
+              class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-colors"
             >
-              <option value="all">Все страны ({{ countryOptions.length }})</option>
-              <option v-for="c in countryOptions" :key="c.slug" :value="c.slug">
+              <option value="all" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                Все страны ({{ countryOptions.length }})
+              </option>
+              <option
+                v-for="c in countryOptions"
+                :key="c.slug"
+                :value="c.slug"
+                class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              >
                 {{ c.flagEmoji }} {{ c.nameRu }}
               </option>
             </select>
@@ -483,33 +490,33 @@ onMounted(() => {
           <!-- Section Select -->
           <select
             v-model="selectedSection"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-colors"
           >
-            <option value="all">Все разделы карточек</option>
-            <option value="cover">Главная фотография страны</option>
-            <option value="gallery">Галерея страны</option>
-            <option value="city">Популярные города</option>
-            <option value="landmark">Что посетить (достопримечательности)</option>
+            <option value="all" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Все разделы карточек</option>
+            <option value="cover" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Главная фотография страны</option>
+            <option value="gallery" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Галерея страны</option>
+            <option value="city" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Популярные города</option>
+            <option value="landmark" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Что посетить (достопримечательности)</option>
           </select>
 
           <!-- Status Select -->
           <select
             v-model="selectedStatus"
-            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
+            class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 transition-colors"
           >
-            <option value="all">Все статусы проверки</option>
-            <option value="verified">Подтверждено соответствие</option>
-            <option value="manual">Ручной выбор (закреплено)</option>
-            <option value="duplicate">Дубликаты фото ({{ report?.summary?.duplicateCount ?? 0 }})</option>
-            <option value="needs_review">Требует проверки страны</option>
-            <option value="missing">Отсутствует изображение</option>
-            <option value="error">С ошибками / Отклонено</option>
+            <option value="all" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Все статусы проверки</option>
+            <option value="verified" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Подтверждено соответствие</option>
+            <option value="manual" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Ручной выбор (закреплено)</option>
+            <option value="duplicate" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Дубликаты фото ({{ report?.summary?.duplicateCount ?? 0 }})</option>
+            <option value="needs_review" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Требует проверки страны</option>
+            <option value="missing" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Отсутствует изображение</option>
+            <option value="error" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">С ошибками / Отклонено</option>
           </select>
         </div>
 
-        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 pt-1 border-t border-slate-100">
+        <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-100 dark:border-slate-800">
           <span>
-            Найдено записей: <strong class="text-slate-800">{{ filteredItems.length }}</strong>
+            Найдено записей: <strong class="text-slate-800 dark:text-slate-100">{{ filteredItems.length }}</strong>
           </span>
           <span>
             Страница {{ currentPage }} из {{ totalPages }}
@@ -518,7 +525,7 @@ onMounted(() => {
       </div>
 
       <!-- Error or Loading State -->
-      <div v-if="errorMessage" class="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm">
+      <div v-if="errorMessage" class="p-6 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300 text-sm">
         {{ errorMessage }}
       </div>
 
@@ -526,7 +533,7 @@ onMounted(() => {
         <div
           v-for="n in 6"
           :key="n"
-          class="h-80 rounded-2xl bg-white border border-slate-200/70 p-4 animate-pulse"
+          class="h-80 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 p-4 animate-pulse"
         />
       </div>
 
@@ -535,7 +542,7 @@ onMounted(() => {
         <article
           v-for="item in paginatedItems"
           :key="item.id"
-          class="bg-white rounded-2xl border border-slate-200/80 shadow-soft overflow-hidden flex flex-col justify-between"
+          class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between"
         >
           <div>
             <!-- Image Preview -->
@@ -581,31 +588,31 @@ onMounted(() => {
 
             <!-- Details -->
             <div class="p-4 space-y-2.5">
-              <div class="flex items-center justify-between text-[11px] text-slate-500">
-                <span class="font-semibold text-teal-700">{{ item.sectionLabel }}</span>
+              <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="font-semibold text-teal-700 dark:text-teal-400">{{ item.sectionLabel }}</span>
                 <span class="inline-flex items-center gap-1">
-                  <MapPin class="w-3 h-3 text-slate-400" />
+                  <MapPin class="w-3 h-3 text-slate-400 dark:text-slate-500" />
                   {{ item.cityName }}
                 </span>
               </div>
 
-              <h3 class="text-sm font-extrabold text-slate-900 line-clamp-2">
+              <h3 class="text-sm font-extrabold text-slate-900 dark:text-slate-100 line-clamp-2">
                 {{ item.objectName }}
               </h3>
 
-              <div v-if="item.isDuplicate" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
-                <Copy class="w-3.5 h-3.5 shrink-0 text-rose-500" />
+              <div v-if="item.isDuplicate" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs font-semibold">
+                <Copy class="w-3.5 h-3.5 shrink-0 text-rose-500 dark:text-rose-400" />
                 <span class="truncate">Повтор: {{ item.duplicateOf }}</span>
               </div>
 
-              <p class="text-xs text-slate-600 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+              <p class="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/70 rounded-xl p-2.5 border border-slate-100 dark:border-slate-700/70">
                 {{ item.verificationNotes }}
               </p>
 
-              <div class="text-[11px] text-slate-500 space-y-0.5">
+              <div class="text-[11px] text-slate-500 dark:text-slate-400 space-y-0.5">
                 <div class="flex items-center justify-between">
-                  <span>Источник: <strong class="text-slate-700">{{ item.sourceName }}</strong></span>
-                  <span v-if="item.license" class="text-slate-400">{{ item.license }}</span>
+                  <span>Источник: <strong class="text-slate-700 dark:text-slate-200">{{ item.sourceName }}</strong></span>
+                  <span v-if="item.license" class="text-slate-400 dark:text-slate-500">{{ item.license }}</span>
                 </div>
                 <div class="flex items-center justify-between truncate">
                   <span class="truncate">Автор: {{ item.authorName || 'Не указан' }}</span>
@@ -614,7 +621,7 @@ onMounted(() => {
                     :href="item.sourceUrl"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="inline-flex items-center gap-1 text-teal-600 hover:underline shrink-0 ml-2"
+                    class="inline-flex items-center gap-1 text-teal-600 dark:text-teal-400 hover:underline shrink-0 ml-2"
                   >
                     <span>Оригинал</span>
                     <ExternalLink class="w-3 h-3" />
@@ -625,12 +632,12 @@ onMounted(() => {
           </div>
 
           <!-- Action Buttons -->
-          <div class="px-4 py-3 bg-slate-50/80 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <div class="px-4 py-3 bg-slate-50/80 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-1.5">
               <button
                 type="button"
                 @click="openReplaceModal(item)"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-teal-300 text-xs font-bold text-slate-700 hover:text-teal-700 transition"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-500/60 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-teal-700 dark:hover:text-teal-300 transition"
               >
                 <Edit3 class="w-3.5 h-3.5" />
                 <span>Заменить</span>
@@ -640,7 +647,7 @@ onMounted(() => {
                 type="button"
                 :disabled="processingItemId === item.id"
                 @click="handleAutoWikimedia(item)"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-50 border border-teal-200 hover:bg-teal-100 text-xs font-bold text-teal-700 transition disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 hover:bg-teal-100 dark:hover:bg-teal-500/25 text-xs font-bold text-teal-700 dark:text-teal-300 transition disabled:opacity-50"
                 title="Подобрать проверенное фото из Wikimedia Commons API"
               >
                 <Sparkles class="w-3.5 h-3.5" />
@@ -651,7 +658,7 @@ onMounted(() => {
                 type="button"
                 :disabled="processingItemId === item.id"
                 @click="handleReverify(item)"
-                class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 text-xs font-semibold text-slate-600 transition disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 transition disabled:opacity-50"
                 title="Повторно проверить гео-соответствие и доступность URL"
               >
                 <RefreshCw :class="['w-3.5 h-3.5', processingItemId === item.id ? 'animate-spin' : '']" />
@@ -662,7 +669,7 @@ onMounted(() => {
                 type="button"
                 :disabled="processingItemId === item.id"
                 @click="handleResetOverride(item)"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 border border-rose-200 hover:bg-rose-100 text-xs font-bold text-rose-700 transition disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-xs font-bold text-rose-700 dark:text-rose-300 transition disabled:opacity-50"
                 title="Снять ручное закрепление и восстановить стандартное изображение"
               >
                 <RotateCcw :class="['w-3.5 h-3.5', processingItemId === item.id ? 'animate-spin' : '']" />
@@ -672,7 +679,7 @@ onMounted(() => {
 
             <RouterLink
               :to="`/countries/${item.countrySlug}`"
-              class="text-xs font-bold text-teal-600 hover:text-teal-700"
+              class="text-xs font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300"
             >
               Страница →
             </RouterLink>
@@ -693,7 +700,7 @@ onMounted(() => {
         >
           Назад
         </BaseButton>
-        <span class="text-xs font-semibold text-slate-600 px-3">
+        <span class="text-xs font-semibold text-slate-600 dark:text-slate-400 px-3">
           Страница {{ currentPage }} из {{ totalPages }}
         </span>
         <BaseButton
@@ -711,23 +718,23 @@ onMounted(() => {
     <Teleport to="body">
       <div
         v-if="editingItem"
-        class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4"
         @click.self="closeReplaceModal"
       >
-        <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-lg p-6 space-y-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-xs font-bold text-teal-600">
+              <span class="text-xs font-bold text-teal-600 dark:text-teal-400">
                 {{ editingItem.flagEmoji }} {{ editingItem.countryNameRu }} • {{ editingItem.sectionLabel }}
               </span>
-              <h3 class="text-lg font-extrabold text-slate-900">
+              <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
                 Замена фотографии объекта
               </h3>
             </div>
             <button
               type="button"
               @click="closeReplaceModal"
-              class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+              class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <X class="w-5 h-5" />
             </button>
@@ -736,9 +743,9 @@ onMounted(() => {
           <div class="space-y-3 text-sm">
             <div
               v-if="modalErrorMessage"
-              class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5"
+              class="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-500/40 text-xs text-rose-700 dark:text-rose-200 flex items-start gap-2.5"
             >
-              <AlertTriangle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <AlertTriangle class="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
               <div class="space-y-0.5">
                 <p class="font-bold">Ошибка сохранения</p>
                 <p>{{ modalErrorMessage }}</p>
@@ -746,69 +753,69 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Название объекта / достопримечательности</label>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Название объекта / достопримечательности</label>
               <input
                 v-model="editForm.objectName"
                 :disabled="isSavingReplacement"
                 type="text"
-                class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+                class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Город или регион ({{ editingItem.countryNameRu }})</label>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Город или регион ({{ editingItem.countryNameRu }})</label>
               <input
                 v-model="editForm.cityName"
                 :disabled="isSavingReplacement"
                 type="text"
-                class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+                class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">URL фотографии (Wikimedia Commons / Unsplash)</label>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">URL фотографии (Wikimedia Commons / Unsplash)</label>
               <input
                 v-model="editForm.url"
                 :disabled="isSavingReplacement"
                 type="url"
                 placeholder="https://thumb.wikimedia.org/wikipedia/commons/..."
-                class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+                class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500"
               />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Автор фотографии</label>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Автор фотографии</label>
                 <input
                   v-model="editForm.authorName"
                   :disabled="isSavingReplacement"
                   type="text"
-                  class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+                  class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Лицензия</label>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Лицензия</label>
                 <input
                   v-model="editForm.license"
                   :disabled="isSavingReplacement"
                   type="text"
-                  class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+                  class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500"
                 />
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Ссылка на страницу оригинала</label>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ссылка на страницу оригинала</label>
               <input
                 v-model="editForm.sourceUrl"
                 :disabled="isSavingReplacement"
                 type="url"
                 placeholder="https://commons.wikimedia.org/wiki/File:..."
-                class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm disabled:bg-slate-50 disabled:text-slate-500"
+                class="w-full px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 dark:focus:border-teal-400 disabled:bg-slate-50 dark:disabled:bg-slate-800/50 disabled:text-slate-500"
               />
             </div>
 
-            <p class="text-xs text-slate-500 bg-teal-50/70 border border-teal-200/60 rounded-xl p-2.5">
+            <p class="text-xs text-slate-500 dark:text-teal-200/90 bg-teal-50/70 dark:bg-teal-500/10 border border-teal-200/60 dark:border-teal-500/30 rounded-xl p-2.5">
               Перед сохранением в базу данных PostgreSQL изображение пройдёт автоматическую проверку соответствия стране «{{ editingItem.countryNameRu }}» и будет защищено от автоматической перезаписи.
             </p>
           </div>

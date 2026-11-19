@@ -225,16 +225,16 @@ function handleCancel() {
         <button
           type="button"
           @click="handleCancel"
-          class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors mb-3"
+          class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors mb-3"
         >
           <ArrowLeft class="w-4 h-4" />
           <span>{{ isEditMode ? 'Назад к поездке' : 'Назад к списку поездок' }}</span>
         </button>
 
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
           {{ isEditMode ? 'Редактирование поездки' : 'Создание новой поездки' }}
         </h1>
-        <p class="text-sm text-slate-500 mt-1">
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
           {{
             isEditMode
               ? 'Обновите параметры маршрута, даты, бюджет или описание поездки.'
@@ -260,7 +260,7 @@ function handleCancel() {
       <!-- Form Card -->
       <div
         v-else
-        class="bg-white rounded-2xl border border-slate-200/80 shadow-soft p-6 sm:p-8"
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8"
       >
         <TripForm
           :initialValues="initialFormValues"

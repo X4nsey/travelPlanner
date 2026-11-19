@@ -398,26 +398,26 @@ function handleDownloadHtml() {
         @click.self="!isPrinting && emit('close')"
       >
         <div
-          class="relative w-full max-w-6xl h-[94vh] lg:h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200/80 flex flex-col overflow-hidden animate-fade-in"
+          class="relative w-full max-w-6xl h-[94vh] lg:h-[90vh] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col overflow-hidden animate-fade-in"
           role="dialog"
           aria-modal="true"
           aria-labelledby="guide-export-modal-title"
         >
           <!-- Modal Header -->
-          <div class="flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b border-slate-100 bg-white shrink-0">
+          <div class="flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
             <div class="min-w-0">
               <div class="flex items-center gap-2">
                 <h2
                   id="guide-export-modal-title"
-                  class="text-lg sm:text-xl font-extrabold text-slate-900 truncate"
+                  class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 truncate"
                 >
                   Конструктор путеводителя и экспорт в PDF
                 </h2>
-                <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200/70">
+                <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30">
                   A4
                 </span>
               </div>
-              <p class="text-xs sm:text-sm text-slate-500 truncate mt-0.5">
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 truncate mt-0.5">
                 {{ trip.title }} · {{ trip.country }}, {{ trip.city }}
               </p>
             </div>
@@ -426,7 +426,7 @@ function handleDownloadHtml() {
               type="button"
               :disabled="isPrinting"
               @click="emit('close')"
-              class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors disabled:opacity-50"
+              class="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
               aria-label="Закрыть конструктор путеводителя"
             >
               <X class="w-5 h-5" />
@@ -436,19 +436,19 @@ function handleDownloadHtml() {
           <!-- Two-Column Workspace -->
           <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
             <!-- Left Panel: Presets & Section Toggles -->
-            <aside class="lg:col-span-5 xl:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-200/80 bg-slate-50/70 overflow-y-auto p-4 sm:p-5 space-y-5 max-h-[44vh] lg:max-h-none">
+            <aside class="lg:col-span-5 xl:col-span-4 border-b lg:border-b-0 lg:border-r border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/70 overflow-y-auto p-4 sm:p-5 space-y-5 max-h-[44vh] lg:max-h-none">
               <!-- Live Loading Notice -->
               <div
                 v-if="anySectionLoading"
-                class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-sky-50 border border-sky-200/80 text-xs text-sky-900"
+                class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-sky-50 dark:bg-sky-500/15 border border-sky-200/80 dark:border-sky-500/30 text-xs text-sky-900 dark:text-sky-200"
               >
-                <Loader2 class="w-4 h-4 text-sky-600 animate-spin shrink-0" />
+                <Loader2 class="w-4 h-4 text-sky-600 dark:text-sky-400 animate-spin shrink-0" />
                 <span>Догружаются данные: <strong>{{ loadingLabels }}</strong>…</span>
               </div>
 
               <div
                 v-if="printError"
-                class="px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800"
+                class="px-3.5 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-500/40 text-xs text-rose-800 dark:text-rose-200"
               >
                 {{ printError }}
               </div>
@@ -456,14 +456,14 @@ function handleDownloadHtml() {
               <!-- Presets Selector -->
               <div class="space-y-2.5">
                 <div class="flex items-center justify-between gap-2">
-                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">
+                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     1. Формат путеводителя
                   </h3>
                   <button
                     v-if="isCustomizedFromPreset"
                     type="button"
                     @click="resetToPresetDefaults"
-                    class="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 hover:text-teal-800 shrink-0"
+                    class="inline-flex items-center gap-1 text-xs font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 shrink-0"
                   >
                     <RotateCcw class="w-3 h-3" />
                     <span>Сбросить по умолчанию</span>
@@ -479,8 +479,8 @@ function handleDownloadHtml() {
                     :class="[
                       'w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3',
                       activePreset === preset.id
-                        ? 'bg-white border-teal-500 ring-2 ring-teal-500/15 shadow-sm'
-                        : 'bg-white/80 border-slate-200/80 hover:border-slate-300 hover:bg-white',
+                        ? 'bg-white dark:bg-slate-800 border-teal-500 ring-2 ring-teal-500/15 shadow-sm'
+                        : 'bg-white/80 dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800',
                     ]"
                   >
                     <div
@@ -488,7 +488,7 @@ function handleDownloadHtml() {
                         'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5',
                         activePreset === preset.id
                           ? 'bg-teal-600 text-white'
-                          : 'bg-slate-100 text-slate-600',
+                          : 'bg-slate-100 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300',
                       ]"
                     >
                       <component :is="presetIcons[preset.id]" class="w-4 h-4" />
@@ -496,21 +496,21 @@ function handleDownloadHtml() {
 
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-bold text-slate-900">
+                        <span class="text-sm font-bold text-slate-900 dark:text-slate-100">
                           {{ preset.title }}
                         </span>
                         <span
                           :class="[
                             'text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0',
                             activePreset === preset.id
-                              ? 'bg-teal-50 text-teal-700'
-                              : 'bg-slate-100 text-slate-600',
+                              ? 'bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300'
+                              : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
                           ]"
                         >
                           {{ preset.badge }}
                         </span>
                       </div>
-                      <p class="text-xs text-slate-500 mt-0.5 leading-snug">
+                      <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
                         {{ preset.description }}
                       </p>
                     </div>
@@ -521,46 +521,46 @@ function handleDownloadHtml() {
               <!-- Section Checkboxes -->
               <div class="space-y-2.5">
                 <div class="flex items-center justify-between">
-                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">
+                  <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                     2. Разделы документа
                   </h3>
-                  <span class="text-xs font-semibold text-slate-500">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
                     Выбрано: {{ activeSectionsCount }}
                   </span>
                 </div>
 
-                <div class="bg-white rounded-xl border border-slate-200/80 divide-y divide-slate-100">
+                <div class="bg-white dark:bg-slate-800/70 rounded-xl border border-slate-200/80 dark:border-slate-700/80 divide-y divide-slate-100 dark:divide-slate-700/80">
                   <!-- Cover Photo -->
-                  <label class="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50/70 transition-colors">
+                  <label class="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <input
                       v-model="activeSections.includeCoverPhoto"
                       type="checkbox"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                     />
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-semibold text-slate-800">Обложка с фото направления</span>
-                        <span class="text-[11px] font-medium text-slate-500">
+                        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Обложка с фото направления</span>
+                        <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                           {{ matchedCountry?.coverPhoto?.url ? 'Фото готово' : 'Градиент' }}
                         </span>
                       </div>
-                      <p class="text-xs text-slate-400">
+                      <p class="text-xs text-slate-400 dark:text-slate-400">
                         Баннер с названием, флагом и паспортом поездки
                       </p>
                     </div>
                   </label>
 
                   <!-- Overview & Notes -->
-                  <label class="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50/70 transition-colors">
+                  <label class="flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <input
                       v-model="activeSections.includeOverviewAndNotes"
                       type="checkbox"
-                      class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                      class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                     />
                     <div class="min-w-0 flex-1">
                       <div class="flex items-center justify-between gap-2">
-                        <span class="text-sm font-semibold text-slate-800">Обзор и заметки</span>
-                        <span class="text-[11px] font-medium text-slate-500">
+                        <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Обзор и заметки</span>
+                        <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                           {{ trip.description?.trim() ? 'Есть текст' : 'KPI плана' }}
                         </span>
                       </div>
@@ -568,30 +568,30 @@ function handleDownloadHtml() {
                   </label>
 
                   <!-- Weather -->
-                  <div class="p-3 hover:bg-slate-50/70 transition-colors">
+                  <div class="p-3 hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
                         v-model="activeSections.includeWeather"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="text-sm font-semibold text-slate-800">Погода</span>
+                          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Погода</span>
                           <span
                             v-if="loadingStates.weather"
-                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium"
+                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-medium"
                           >
                             <Loader2 class="w-3 h-3 animate-spin" />
                             Загрузка
                           </span>
                           <span
                             v-else-if="weather"
-                            class="text-[11px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full"
+                            class="text-[11px] font-medium text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/20 px-2 py-0.5 rounded-full"
                           >
                             {{ weather.daily.length }} дн.
                           </span>
-                          <span v-else class="text-[11px] text-amber-600 font-medium">
+                          <span v-else class="text-[11px] text-amber-600 dark:text-amber-400 font-medium">
                             Нет данных
                           </span>
                         </div>
@@ -599,13 +599,13 @@ function handleDownloadHtml() {
                           v-if="!loadingStates.weather && (!weather || errorStates.weather)"
                           class="mt-1.5 flex items-center justify-between gap-2"
                         >
-                          <span class="text-[11px] text-slate-500 truncate">
+                          <span class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                             {{ errorStates.weather || 'Прогноз не загружен' }}
                           </span>
                           <button
                             type="button"
                             @click.prevent="emit('reload-section', 'weather')"
-                            class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
+                            class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 shrink-0"
                           >
                             <RefreshCw class="w-3 h-3" />
                             Догрузить
@@ -616,17 +616,17 @@ function handleDownloadHtml() {
                   </div>
 
                   <!-- Itinerary -->
-                  <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
+                  <div class="p-3 space-y-2 hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
                         v-model="activeSections.includeItinerary"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="text-sm font-semibold text-slate-800">План поездки</span>
-                          <span class="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
+                          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">План поездки</span>
+                          <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                             {{ totalEventsCount }} событий
                           </span>
                         </div>
@@ -636,47 +636,47 @@ function handleDownloadHtml() {
                     <label
                       :class="[
                         'flex items-center gap-2.5 pl-7 text-xs',
-                        activeSections.includeItinerary ? 'cursor-pointer text-slate-600' : 'opacity-50 cursor-not-allowed text-slate-400',
+                        activeSections.includeItinerary ? 'cursor-pointer text-slate-600 dark:text-slate-300' : 'opacity-50 cursor-not-allowed text-slate-400 dark:text-slate-500',
                       ]"
                     >
                       <input
                         v-model="activeSections.includeAllCalendarDays"
                         :disabled="!activeSections.includeItinerary"
                         type="checkbox"
-                        class="h-3.5 w-3.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <span>Включать свободные дни без событий ({{ calendarDays.length }} дн.)</span>
                     </label>
                   </div>
 
                   <!-- Budget & Expenses -->
-                  <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
+                  <div class="p-3 space-y-2 hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
                         v-model="activeSections.includeBudgetSummary"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="text-sm font-semibold text-slate-800">Бюджет и категории</span>
-                          <span class="text-[11px] font-semibold text-slate-600">
+                          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Бюджет и категории</span>
+                          <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
                             {{ formatCurrency(expenseSummary?.totalSpent ?? 0, trip.currency) }}
                           </span>
                         </div>
                       </div>
                     </label>
 
-                    <label class="flex items-center justify-between gap-2 pl-7 text-xs cursor-pointer text-slate-600">
+                    <label class="flex items-center justify-between gap-2 pl-7 text-xs cursor-pointer text-slate-600 dark:text-slate-300">
                       <span class="inline-flex items-center gap-2.5">
                         <input
                           v-model="activeSections.includeExpensesTable"
                           type="checkbox"
-                          class="h-3.5 w-3.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                          class="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                         />
                         <span>Детальная таблица расходов</span>
                       </span>
-                      <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                      <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
                         {{ expenses.length }} записей
                       </span>
                     </label>
@@ -685,11 +685,11 @@ function handleDownloadHtml() {
                       v-if="!loadingStates.expenses && errorStates.expenses"
                       class="pl-7 flex items-center justify-between gap-2"
                     >
-                      <span class="text-[11px] text-rose-600 truncate">{{ errorStates.expenses }}</span>
+                      <span class="text-[11px] text-rose-600 dark:text-rose-400 truncate">{{ errorStates.expenses }}</span>
                       <button
                         type="button"
                         @click.prevent="emit('reload-section', 'expenses')"
-                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
+                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 shrink-0"
                       >
                         <RefreshCw class="w-3 h-3" />
                         Повторить
@@ -698,26 +698,26 @@ function handleDownloadHtml() {
                   </div>
 
                   <!-- Packing List -->
-                  <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
+                  <div class="p-3 space-y-2 hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
                         v-model="activeSections.includePackingList"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="text-sm font-semibold text-slate-800">Список вещей</span>
+                          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Список вещей</span>
                           <span
                             v-if="loadingStates.packing"
-                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium"
+                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-medium"
                           >
                             <Loader2 class="w-3 h-3 animate-spin" />
                             Загрузка
                           </span>
                           <span
                             v-else
-                            class="text-[11px] font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full"
+                            class="text-[11px] font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/20 px-2 py-0.5 rounded-full"
                           >
                             {{ packingTotals.packed }}/{{ packingTotals.total }}
                           </span>
@@ -728,14 +728,14 @@ function handleDownloadHtml() {
                     <label
                       :class="[
                         'flex items-center gap-2.5 pl-7 text-xs',
-                        activeSections.includePackingList ? 'cursor-pointer text-slate-600' : 'opacity-50 cursor-not-allowed text-slate-400',
+                        activeSections.includePackingList ? 'cursor-pointer text-slate-600 dark:text-slate-300' : 'opacity-50 cursor-not-allowed text-slate-400 dark:text-slate-500',
                       ]"
                     >
                       <input
                         v-model="activeSections.onlyUnpackedItems"
                         :disabled="!activeSections.includePackingList"
                         type="checkbox"
-                        class="h-3.5 w-3.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="h-3.5 w-3.5 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <span>Только несобранные вещи (осталось {{ packingTotals.unpacked }})</span>
                     </label>
@@ -744,11 +744,11 @@ function handleDownloadHtml() {
                       v-if="!loadingStates.packing && errorStates.packing"
                       class="pl-7 flex items-center justify-between gap-2"
                     >
-                      <span class="text-[11px] text-rose-600 truncate">{{ errorStates.packing }}</span>
+                      <span class="text-[11px] text-rose-600 dark:text-rose-400 truncate">{{ errorStates.packing }}</span>
                       <button
                         type="button"
                         @click.prevent="emit('reload-section', 'packing')"
-                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
+                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 shrink-0"
                       >
                         <RefreshCw class="w-3 h-3" />
                         Повторить
@@ -757,26 +757,26 @@ function handleDownloadHtml() {
                   </div>
 
                   <!-- Documents & Bookings -->
-                  <div class="p-3 space-y-2 hover:bg-slate-50/70 transition-colors">
+                  <div class="p-3 space-y-2 hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
                         v-model="activeSections.includeDocuments"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="text-sm font-semibold text-slate-800">Брони и чек-лист документов</span>
+                          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Брони и чек-лист документов</span>
                           <span
                             v-if="loadingStates.documents"
-                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium"
+                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-medium"
                           >
                             <Loader2 class="w-3 h-3 animate-spin" />
                             Загрузка
                           </span>
                           <span
                             v-else
-                            class="text-[11px] font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full"
+                            class="text-[11px] font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/20 px-2 py-0.5 rounded-full"
                           >
                             {{ documentsTotals.readyCount }}/{{ documentsTotals.totalCount }}
                           </span>
@@ -788,11 +788,11 @@ function handleDownloadHtml() {
                       v-if="!loadingStates.documents && errorStates.documents"
                       class="pl-7 flex items-center justify-between gap-2"
                     >
-                      <span class="text-[11px] text-rose-600 truncate">{{ errorStates.documents }}</span>
+                      <span class="text-[11px] text-rose-600 dark:text-rose-400 truncate">{{ errorStates.documents }}</span>
                       <button
                         type="button"
                         @click.prevent="emit('reload-section', 'documents')"
-                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
+                        class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 shrink-0"
                       >
                         <RefreshCw class="w-3 h-3" />
                         Повторить
@@ -801,31 +801,31 @@ function handleDownloadHtml() {
                   </div>
 
                   <!-- Country Travel Info -->
-                  <div class="p-3 hover:bg-slate-50/70 transition-colors">
+                  <div class="p-3 hover:bg-slate-50/70 dark:hover:bg-slate-800 transition-colors">
                     <label class="flex items-start gap-3 cursor-pointer">
                       <input
                         v-model="activeSections.includeCountryInfo"
                         type="checkbox"
-                        class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                        class="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900 text-teal-600 focus:ring-teal-500"
                       />
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
-                          <span class="text-sm font-semibold text-slate-800">Памятка о стране</span>
+                          <span class="text-sm font-semibold text-slate-800 dark:text-slate-100">Памятка о стране</span>
                           <span
                             v-if="loadingStates.travelInfo"
-                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 font-medium"
+                            class="inline-flex items-center gap-1 text-[11px] text-sky-600 dark:text-sky-400 font-medium"
                           >
                             <Loader2 class="w-3 h-3 animate-spin" />
                             Загрузка
                           </span>
                           <span
                             v-else-if="travelInfo"
-                            class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full"
+                            class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/20 px-2 py-0.5 rounded-full"
                           >
                             <Check class="w-3 h-3" />
                             7 разделов
                           </span>
-                          <span v-else class="text-[11px] text-slate-400 font-medium">
+                          <span v-else class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
                             {{ matchedCountry ? 'Нет текста' : 'Не в каталоге' }}
                           </span>
                         </div>
@@ -834,13 +834,13 @@ function handleDownloadHtml() {
                           v-if="!loadingStates.travelInfo && matchedCountry && (!travelInfo || errorStates.travelInfo)"
                           class="mt-1.5 flex items-center justify-between gap-2"
                         >
-                          <span class="text-[11px] text-slate-500 truncate">
+                          <span class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                             {{ errorStates.travelInfo || 'Памятка не загружена' }}
                           </span>
                           <button
                             type="button"
                             @click.prevent="emit('reload-section', 'travelInfo')"
-                            class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800 shrink-0"
+                            class="inline-flex items-center gap-1 text-[11px] font-bold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 shrink-0"
                           >
                             <RefreshCw class="w-3 h-3" />
                             Догрузить
@@ -854,13 +854,13 @@ function handleDownloadHtml() {
             </aside>
 
             <!-- Right Panel: Live Preview Iframe -->
-            <section class="lg:col-span-7 xl:col-span-8 flex flex-col min-h-0 bg-slate-200/70">
-              <div class="flex items-center justify-between gap-3 px-4 py-2.5 bg-slate-100 border-b border-slate-200/80 text-xs text-slate-600 shrink-0">
-                <div class="inline-flex items-center gap-1.5 font-semibold text-slate-700">
-                  <Eye class="w-3.5 h-3.5 text-teal-600" />
+            <section class="lg:col-span-7 xl:col-span-8 flex flex-col min-h-0 bg-slate-200/70 dark:bg-slate-950">
+              <div class="flex items-center justify-between gap-3 px-4 py-2.5 bg-slate-100 dark:bg-slate-900 border-b border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300 shrink-0">
+                <div class="inline-flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-200">
+                  <Eye class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                   <span>Предпросмотр путеводителя</span>
                 </div>
-                <span class="text-[11px] text-slate-500 hidden sm:inline">
+                <span class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
                   Формат печати: A4 · поля 12 мм · цветная графика включена
                 </span>
               </div>
@@ -870,16 +870,16 @@ function handleDownloadHtml() {
                   :srcdoc="previewHtml"
                   title="Предпросмотр персонального путеводителя"
                   sandbox=""
-                  class="w-full h-full rounded-xl border border-slate-300/80 bg-white shadow-inner"
+                  class="w-full h-full rounded-xl border border-slate-300/80 dark:border-slate-700 bg-white shadow-inner"
                 />
               </div>
             </section>
           </div>
 
           <!-- Modal Footer -->
-          <div class="px-5 sm:px-6 py-3.5 bg-slate-50 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-            <div class="flex items-center gap-2 text-xs text-slate-600">
-              <Info class="w-4 h-4 text-teal-600 shrink-0" />
+          <div class="px-5 sm:px-6 py-3.5 bg-slate-50 dark:bg-slate-800/70 border-t border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+            <div class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+              <Info class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
               <span>В открывшемся окне выберите принтер «Сохранить как PDF».</span>
             </div>
 

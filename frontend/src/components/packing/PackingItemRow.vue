@@ -58,10 +58,10 @@ function handleDelete() {
     :class="[
       'group flex items-start justify-between gap-3 px-4 py-3.5 transition-colors',
       item.isPacked
-        ? 'bg-slate-50/70'
+        ? 'bg-slate-50/70 dark:bg-slate-800/35'
         : item.isOutdated
-          ? 'bg-amber-50/25 hover:bg-amber-50/40'
-          : 'bg-white hover:bg-slate-50/60',
+          ? 'bg-amber-50/25 hover:bg-amber-50/40 dark:bg-amber-500/5 dark:hover:bg-amber-500/10'
+          : 'bg-white hover:bg-slate-50/60 dark:bg-slate-900 dark:hover:bg-slate-800/50',
       isBusy ? 'opacity-75' : '',
     ]"
   >
@@ -83,7 +83,7 @@ function handleDelete() {
           isBusy ? 'cursor-wait' : 'cursor-pointer',
           item.isPacked
             ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'
-            : 'bg-white border-slate-300 hover:border-teal-600 text-transparent',
+            : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 hover:border-teal-600 dark:hover:border-teal-400 text-transparent',
         ]"
       >
         <Loader2 v-if="isBusy" class="w-3.5 h-3.5 animate-spin text-current" />
@@ -98,8 +98,8 @@ function handleDelete() {
               'text-sm font-medium break-words transition-colors',
               isBusy ? 'pointer-events-none' : 'cursor-pointer',
               item.isPacked
-                ? 'line-through text-slate-400'
-                : 'text-slate-900',
+                ? 'line-through text-slate-400 dark:text-slate-500'
+                : 'text-slate-900 dark:text-slate-100',
             ]"
           >
             {{ item.name }}
@@ -111,8 +111,8 @@ function handleDelete() {
             :class="[
               'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border',
               item.isPacked
-                ? 'bg-slate-100 text-slate-400 border-slate-200/70'
-                : 'bg-slate-100 text-slate-700 border-slate-200',
+                ? 'bg-slate-100 text-slate-400 border-slate-200/70 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700'
+                : 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
             ]"
           >
             ×{{ item.quantity }}
@@ -124,8 +124,8 @@ function handleDelete() {
             :class="[
               'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
               item.isPacked
-                ? 'bg-slate-100/80 text-slate-400 border-slate-200/70'
-                : 'bg-slate-100 text-slate-600 border-slate-200/80',
+                ? 'bg-slate-100/80 text-slate-400 border-slate-200/70 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700'
+                : 'bg-slate-100 text-slate-600 border-slate-200/80 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
             ]"
           >
             <User class="w-3 h-3" />
@@ -137,8 +137,8 @@ function handleDelete() {
             :class="[
               'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border',
               item.isPacked
-                ? 'bg-slate-100/80 text-slate-400 border-slate-200/70'
-                : 'bg-teal-50 text-teal-700 border-teal-200/70',
+                ? 'bg-slate-100/80 text-slate-400 border-slate-200/70 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700'
+                : 'bg-teal-50 text-teal-700 border-teal-200/70 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/30',
             ]"
           >
             <Sparkles class="w-3 h-3" />
@@ -148,9 +148,9 @@ function handleDelete() {
           <!-- Outdated badge -->
           <span
             v-if="item.isOutdated"
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200"
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30"
           >
-            <AlertTriangle class="w-3 h-3 text-amber-600" />
+            <AlertTriangle class="w-3 h-3 text-amber-600 dark:text-amber-400" />
             <span>Неактуально</span>
           </span>
         </div>
@@ -160,7 +160,7 @@ function handleDelete() {
           v-if="item.reason"
           :class="[
             'text-xs leading-relaxed break-words',
-            item.isPacked ? 'text-slate-400' : 'text-slate-500',
+            item.isPacked ? 'text-slate-400 dark:text-slate-500' : 'text-slate-500 dark:text-slate-400',
           ]"
         >
           {{ item.reason }}
@@ -174,7 +174,7 @@ function handleDelete() {
         type="button"
         :disabled="isBusy"
         @click="handleEdit"
-        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-teal-700 hover:bg-teal-50 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/15 transition-colors disabled:opacity-40 disabled:pointer-events-none"
         title="Редактировать позицию"
         aria-label="Редактировать позицию"
       >
@@ -185,7 +185,7 @@ function handleDelete() {
         type="button"
         :disabled="isBusy"
         @click="handleDelete"
-        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+        class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/15 transition-colors disabled:opacity-40 disabled:pointer-events-none"
         title="Удалить позицию"
         aria-label="Удалить позицию"
       >

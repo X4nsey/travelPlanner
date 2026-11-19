@@ -38,15 +38,15 @@ function goToRegister() {
     @close="emit('close')"
   >
     <div class="text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
+      <div class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center mx-auto">
         <Compass class="w-7 h-7" />
       </div>
 
       <div>
-        <h4 class="text-base font-bold text-slate-900 mb-1">
+        <h4 class="text-base font-bold text-slate-900 dark:text-slate-100 mb-1">
           Сохраняйте любимые страны и планируйте маршруты
         </h4>
-        <p class="text-sm text-slate-500 leading-relaxed">
+        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
           Войдите в свой аккаунт или зарегистрируйтесь за полминуты, чтобы добавлять страны в избранное и создавать поездки.
         </p>
       </div>

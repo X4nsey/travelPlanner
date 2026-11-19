@@ -112,16 +112,16 @@ async function confirmDeleteTrip() {
     <div class="space-y-8 animate-fade-in">
       <!-- Welcome Header -->
       <div
-        class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 shadow-soft dark:shadow-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
       >
         <div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-teal-600">
+          <span class="text-xs font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400">
             Личный кабинет
           </span>
-          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-1">
             Здравствуйте, {{ authStore.user?.name }}!
           </h1>
-          <p class="text-sm text-slate-500 mt-1">
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Управляйте своими маршрутами, исследуйте 3D-глобус и планируйте новые путешествия в одном месте.
           </p>
         </div>
@@ -129,7 +129,7 @@ async function confirmDeleteTrip() {
         <div class="flex flex-wrap items-center gap-3 shrink-0">
           <RouterLink to="/explore">
             <BaseButton variant="secondary" size="lg">
-              <Globe2 class="w-5 h-5" />
+              <Globe2 class="w-5 h-5 text-teal-600 dark:text-teal-400" />
               <span>Исследовать 3D-глобус</span>
             </BaseButton>
           </RouterLink>
@@ -148,14 +148,14 @@ async function confirmDeleteTrip() {
 
       <!-- Interactive World Banner -->
       <div
-        class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-2xl p-6 sm:p-7 text-white shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-5"
+        class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 dark:border dark:border-slate-800 rounded-2xl p-6 sm:p-7 text-white shadow-soft dark:shadow-none flex flex-col md:flex-row md:items-center justify-between gap-5"
       >
         <div class="space-y-1.5 max-w-2xl">
           <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-300">
             <Globe2 class="w-4 h-4" />
             <span>Интерактивный 3D-глобус и каталог стран мира</span>
           </div>
-          <h2 class="text-lg sm:text-xl font-bold">
+          <h2 class="text-lg sm:text-xl font-bold text-white">
             Не знаете, куда отправиться дальше?
           </h2>
           <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
@@ -168,7 +168,7 @@ async function confirmDeleteTrip() {
             <BaseButton
               variant="primary"
               size="md"
-              class="!bg-teal-500 hover:!bg-teal-400 !text-slate-950 font-bold"
+              class="!bg-teal-600 hover:!bg-teal-500 !text-white font-semibold"
             >
               <Globe2 class="w-4 h-4" />
               <span>Открыть 3D-глобус</span>
@@ -230,7 +230,7 @@ async function confirmDeleteTrip() {
             </BaseButton>
             <RouterLink to="/explore">
               <BaseButton variant="outline" size="lg">
-                <Globe2 class="w-5 h-5 text-teal-600" />
+                <Globe2 class="w-5 h-5 text-teal-600 dark:text-teal-400" />
                 <span>Выбрать страну на глобусе</span>
               </BaseButton>
             </RouterLink>
@@ -242,14 +242,14 @@ async function confirmDeleteTrip() {
       <section v-else class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-xl font-bold text-slate-900">Последние поездки</h2>
-            <p class="text-xs sm:text-sm text-slate-500">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-slate-100">Последние поездки</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               Быстрый доступ к недавно добавленным маршрутам
             </p>
           </div>
 
           <RouterLink to="/trips">
-            <BaseButton variant="ghost" size="sm" class="text-teal-700">
+            <BaseButton variant="ghost" size="sm" class="text-teal-700 dark:text-teal-400 dark:hover:text-teal-300">
               <span>Все поездки</span>
               <ArrowRight class="w-4 h-4" />
             </BaseButton>
