@@ -3,9 +3,12 @@ import type {
   ApiSuccessResponse,
   CreateTripFromTemplatePayload,
   DuplicateTripPayload,
+  SharedTripResponse,
   Trip,
   TripFormPayload,
+  TripShareSettings,
   TripTemplate,
+  UpdateTripSharePayload,
   UserTravelStats,
 } from '@/types';
 
@@ -64,5 +67,46 @@ export const tripService = {
   async deleteTrip(id: string): Promise<{ id: string; message?: string }> {
     const { data } = await apiClient.delete<ApiSuccessResponse<{ id: string; deleted: boolean }>>(`/trips/${id}`);
     return { id: data.data.id, message: data.message };
+  },
+
+  async getTripShare(tripId: string): Promise<TripShareSettings | null> {
+    const { data } = await apiClient.get<ApiSuccessResponse<{ share: TripShareSettings | null }>>(
+      `/trips/${tripId}/share`
+    );
+    return data.data.share;
+  },
+
+  async updateTripShare(
+    tripId: string,
+    payload: UpdateTripSharePayload
+  ): Promise<{ share: TripShareSettings; message?: string }> {
+    const { data } = await apiClient.put<ApiSuccessResponse<{ share: TripShareSettings }>>(
+      `/trips/${tripId}/share`,
+      payload
+    );
+    return { share: data.data.share, message: data.message };
+  },
+
+  async regenerateTripShare(
+    tripId: string
+  ): Promise<{ share: TripShareSettings; message?: string }> {
+    const { data } = await apiClient.post<ApiSuccessResponse<{ share: TripShareSettings }>>(
+      `/trips/${tripId}/share/regenerate`
+    );
+    return { share: data.data.share, message: data.message };
+  },
+
+  async getSharedTripByToken(token: string): Promise<SharedTripResponse> {
+    const { data } = await apiClient.get<ApiSuccessResponse<SharedTripResponse>>(
+      `/shared/trips/${encodeURIComponent(token)}`
+    );
+    return data.data;
+  },
+
+  async cloneSharedTrip(token: string): Promise<{ trip: Trip; message?: string }> {
+    const { data } = await apiClient.post<ApiSuccessResponse<{ trip: Trip }>>(
+      `/shared/trips/${encodeURIComponent(token)}/clone`
+    );
+    return { trip: data.data.trip, message: data.message };
   },
 };

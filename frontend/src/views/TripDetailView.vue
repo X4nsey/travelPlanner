@@ -39,6 +39,7 @@ import {
   ArrowRightLeft,
   BarChart3,
   Copy,
+  Share2,
 } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
 import { usePackingStore } from '@/stores/packing.store';
@@ -110,6 +111,10 @@ const TripGuideExportModal = defineAsyncComponent(
 
 const DuplicateTripModal = defineAsyncComponent(
   () => import('@/components/trips/DuplicateTripModal.vue')
+);
+
+const ShareTripModal = defineAsyncComponent(
+  () => import('@/components/trips/ShareTripModal.vue')
 );
 
 const route = useRoute();
@@ -618,6 +623,9 @@ function getCategoryIcon(cat: ExpenseCategory) {
 // Guide PDF / HTML export modal state
 const guideExportModalOpen = ref(false);
 
+// Share trip modal state
+const shareModalOpen = ref(false);
+
 // Duplicate trip modal state
 const duplicateModalOpen = ref(false);
 const isDuplicatingTrip = ref(false);
@@ -752,6 +760,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
           <!-- Action Buttons -->
           <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <BaseButton
+              variant="primary"
+              size="sm"
+              @click="shareModalOpen = true"
+            >
+              <Share2 class="w-4 h-4" />
+              <span>Поделиться</span>
+            </BaseButton>
+
             <BaseButton
               variant="secondary"
               size="sm"
@@ -1938,6 +1955,14 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       :loading="isDuplicatingTrip"
       @close="duplicateModalOpen = false"
       @submit="handleDuplicateTrip"
+    />
+
+    <!-- Share Trip Modal -->
+    <ShareTripModal
+      v-if="trip"
+      :open="shareModalOpen"
+      :trip="trip"
+      @close="shareModalOpen = false"
     />
   </DashboardLayout>
 </template>

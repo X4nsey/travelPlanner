@@ -24,11 +24,12 @@ import {
 import type {
   CountryData,
   CountryTravelInfo,
+  SharedCountryInfo,
   TravelInfoSection,
 } from '@/types';
 
 interface Props {
-  country: CountryData;
+  country: CountryData | SharedCountryInfo;
   travelInfo: CountryTravelInfo;
   tripCity?: string;
   showCountryLink?: boolean;

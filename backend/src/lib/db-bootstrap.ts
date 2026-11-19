@@ -232,6 +232,15 @@ export async function ensureDatabaseReady(): Promise<void> {
     await applyMigrationFile('../../prisma/migrations/20261119000000_add_exchange_rate_cache/migration.sql');
     console.log('[Database] Миграция ExchangeRateCache успешно применена.');
   }
+
+  const tripShareRegResult = await prisma.$queryRaw<{ reg: string | null }[]>`SELECT to_regclass('public."TripShare"')::text as reg`;
+  const tripShareTableExists = Boolean(tripShareRegResult?.[0]?.reg);
+
+  if (!tripShareTableExists) {
+    console.log('[Database] Применяем миграцию публичных ссылок маршрутов (TripShare)...');
+    await applyMigrationFile('../../prisma/migrations/20261120000000_add_trip_share/migration.sql');
+    console.log('[Database] Миграция TripShare успешно применена.');
+  }
 }
 
 export async function shutdownDatabase(): Promise<void> {

@@ -587,6 +587,109 @@ export interface UserTravelStats {
   featuredTrip: FeaturedTripSummary | null;
 }
 
+export interface TripShareSettings {
+  id: string;
+  tripId: string;
+  token: string;
+  isActive: boolean;
+  showItinerary: boolean;
+  showPackingList: boolean;
+  showCountryInfo: boolean;
+  showExpenses: boolean;
+  viewsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateTripSharePayload {
+  isActive?: boolean;
+  showItinerary?: boolean;
+  showPackingList?: boolean;
+  showCountryInfo?: boolean;
+  showExpenses?: boolean;
+}
+
+export interface SharedTripPermissions {
+  showItinerary: boolean;
+  showPackingList: boolean;
+  showCountryInfo: boolean;
+  showExpenses: boolean;
+}
+
+export interface SharedTripBasicInfo {
+  title: string;
+  country: string;
+  city: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  durationDays: number;
+  travelersCount: number;
+  tripType: TripType | null;
+  description: string;
+}
+
+export interface SharedItineraryEvent {
+  date: string; // YYYY-MM-DD
+  title: string;
+  description: string;
+  startTime: string | null;
+  endTime: string | null;
+  location: string | null;
+  estimatedCost: number | null;
+  note: string | null;
+}
+
+export interface SharedPackingItem {
+  key: string;
+  category: PackingCategory;
+  categoryNameRu: string;
+  name: string;
+  quantity: number | null;
+  source: PackingItemSource;
+  reason: string | null;
+  sortOrder: number;
+}
+
+export interface SharedCountryInfo {
+  slug: string;
+  nameRu: string;
+  nameEn: string;
+  flagEmoji: string;
+  flagUrl: string;
+  capital: string;
+  currency: string;
+  languages: string[];
+  timezone?: string;
+  shortDescription: string;
+  travelInfo: CountryTravelInfo;
+}
+
+export interface SharedExpenseItem {
+  category: ExpenseCategory;
+  categoryNameRu: string;
+  categoryColor: string;
+  amount: number;
+  currency: Currency;
+  convertedAmount: number;
+  exchangeRateUsed: number;
+  expenseDate: string; // YYYY-MM-DD
+  description: string;
+}
+
+export interface SharedExpensesData {
+  summary: TripExpenseSummary;
+  items: SharedExpenseItem[];
+}
+
+export interface SharedTripResponse {
+  trip: SharedTripBasicInfo;
+  permissions: SharedTripPermissions;
+  events: SharedItineraryEvent[];
+  packingList: SharedPackingItem[] | null;
+  countryInfo: SharedCountryInfo | null;
+  expenses: SharedExpensesData | null;
+}
+
 export * from './weather';
 export * from './document';
 export * from './guideExport';

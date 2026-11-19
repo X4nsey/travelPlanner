@@ -4,6 +4,7 @@ import { EventController } from '../controllers/event.controller';
 import { ExpenseController } from '../controllers/expense.controller';
 import { PackingController } from '../controllers/packing.controller';
 import { DocumentController } from '../controllers/document.controller';
+import { TripShareController } from '../controllers/trip-share.controller';
 import { requireAuth } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -44,5 +45,10 @@ router.delete('/:tripId/packing/outdated', PackingController.clearOutdatedForTri
 router.get('/:tripId/documents', DocumentController.listByTrip);
 router.post('/:tripId/documents', DocumentController.createForTrip);
 router.post('/:tripId/documents/seed-defaults', DocumentController.seedDefaultsForTrip);
+
+// Nested trip sharing settings routes (owner only)
+router.get('/:id/share', TripShareController.getShareSettings);
+router.put('/:id/share', TripShareController.updateShareSettings);
+router.post('/:id/share/regenerate', TripShareController.regenerateShareToken);
 
 export default router;

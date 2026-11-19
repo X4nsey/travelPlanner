@@ -114,6 +114,7 @@ model Trip {
   packingList    PackingList?
   weatherCache   TripWeatherCache?
   documents      TripDocument[]
+  share          TripShare?
 
   @@index([userId])
   @@index([userId, startDate])
@@ -275,6 +276,22 @@ model ExchangeRateCache {
   ratesJson    String   @db.Text
   source       String   @default("cbr")
   fetchedAt    DateTime @default(now())
+}
+
+model TripShare {
+  id              String   @id @default(uuid())
+  tripId          String   @unique
+  token           String   @unique
+  isActive        Boolean  @default(true)
+  showItinerary   Boolean  @default(true)
+  showPackingList Boolean  @default(true)
+  showCountryInfo Boolean  @default(true)
+  showExpenses    Boolean  @default(false)
+  viewsCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trip            Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
 }
 
 

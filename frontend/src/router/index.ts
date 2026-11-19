@@ -55,6 +55,12 @@ const router = createRouter({
       meta: { title: 'Диагностика фотографий — TravelPlanner' },
     },
     {
+      path: '/shared/:token',
+      name: 'shared-trip',
+      component: () => import('@/views/SharedTripView.vue'),
+      meta: { title: 'Публичный маршрут — TravelPlanner' },
+    },
+    {
       path: '/favorites',
       name: 'favorite-countries',
       component: () => import('@/views/FavoriteCountriesView.vue'),

@@ -11,6 +11,7 @@ import favoriteRoutes from './routes/favorite.routes';
 import expenseRoutes from './routes/expense.routes';
 import packingRoutes from './routes/packing.routes';
 import documentRoutes from './routes/document.routes';
+import tripShareRoutes from './routes/trip-share.routes';
 import weatherRoutes, { weatherPreviewRouter } from './routes/weather.routes';
 import { errorHandler } from './middleware/error.middleware';
 import { AppError } from './lib/errors';
@@ -69,6 +70,7 @@ app.use('/api/packing', packingRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/countries', countryRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/shared', tripShareRoutes);
 
 // 404 handler for unknown API routes
 app.use((_req, _res, next) => {
