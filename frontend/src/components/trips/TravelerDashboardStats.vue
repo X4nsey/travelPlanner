@@ -27,6 +27,7 @@ import {
   formatTravelersLabel,
   pluralizeRu,
 } from '@/composables/useFormatters';
+import { resolveTripTheme } from '@/composables/useTripTheme';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 
@@ -46,6 +47,9 @@ onMounted(() => {
 
 const stats = computed(() => tripStore.stats);
 const featuredTrip = computed(() => stats.value?.featuredTrip ?? null);
+const featuredTripTheme = computed(() =>
+  resolveTripTheme(featuredTrip.value?.id, featuredTrip.value?.tripType)
+);
 
 const tripsSubtitle = computed(() => {
   if (!stats.value) return '';
@@ -106,8 +110,7 @@ const featuredCountdownBadge = computed(() => {
   }
   return {
     label: `Через ${ft.daysUntilStart} дн.`,
-    classes:
-      'bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/30',
+    classes: featuredTripTheme.value.badgeClass,
     pulse: false,
   };
 });
@@ -370,17 +373,32 @@ function retryLoad() {
       <!-- 3. Featured Trip Command Center Widget -->
       <div
         v-if="featuredTrip"
-        class="bg-white dark:bg-slate-900 rounded-2xl border border-teal-200/80 dark:border-teal-500/30 shadow-soft dark:shadow-none overflow-hidden"
+        :class="[
+          'bg-white dark:bg-slate-900 rounded-2xl border shadow-soft dark:shadow-none overflow-hidden transition-colors duration-300',
+          featuredTripTheme.cardBorderClass,
+        ]"
       >
+        <!-- Atmospheric Top Accent Strip -->
+        <div
+          :class="['h-1.5 w-full transition-all duration-300', featuredTripTheme.cardTopBarClass]"
+          aria-hidden="true"
+        />
+
         <!-- Top Header Band -->
         <div
-          class="px-5 sm:px-6 py-4 bg-gradient-to-r from-teal-50/80 via-sky-50/50 to-white dark:from-teal-950/50 dark:via-slate-900 dark:to-slate-900 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3"
+          :class="[
+            'px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 transition-colors duration-300',
+            featuredTripTheme.headerBandClass,
+          ]"
         >
           <div class="flex items-center gap-2.5">
             <span
-              class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400"
+              :class="[
+                'inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider',
+                featuredTripTheme.accentTextClass,
+              ]"
             >
-              <Compass class="w-4 h-4 text-teal-600 dark:text-teal-400" />
+              <Compass :class="['w-4 h-4', featuredTripTheme.accentIconClass]" />
               <span>Ближайшая поездка · Командный центр</span>
             </span>
           </div>
@@ -388,7 +406,10 @@ function retryLoad() {
           <div class="flex flex-wrap items-center gap-2">
             <span
               v-if="featuredTrip.tripType"
-              class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/70 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30"
+              :class="[
+                'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border',
+                featuredTripTheme.badgeClass,
+              ]"
             >
               {{ getTripTypeLabelRu(featuredTrip.tripType) }}
             </span>
@@ -424,7 +445,10 @@ function retryLoad() {
                 />
                 <div
                   v-else
-                  class="w-10 h-7 rounded-md bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 flex items-center justify-center text-teal-600 dark:text-teal-400"
+                  :class="[
+                    'w-10 h-7 rounded-md border flex items-center justify-center',
+                    featuredTripTheme.badgeClass,
+                  ]"
                 >
                   <Globe2 class="w-4 h-4" />
                 </div>
@@ -433,14 +457,17 @@ function retryLoad() {
               <div class="min-w-0 space-y-1.5">
                 <RouterLink
                   :to="`/trips/${featuredTrip.id}`"
-                  class="block text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 hover:text-teal-700 dark:hover:text-teal-400 transition-colors leading-tight"
+                  :class="[
+                    'block text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100 transition-colors leading-tight',
+                    featuredTripTheme.accentLinkHoverClass,
+                  ]"
                 >
                   {{ featuredTrip.title }}
                 </RouterLink>
 
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-                  <span class="inline-flex items-center gap-1.5 font-semibold text-teal-700 dark:text-teal-400">
-                    <MapPin class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <span :class="['inline-flex items-center gap-1.5 font-semibold', featuredTripTheme.accentTextClass]">
+                    <MapPin :class="['w-4 h-4 shrink-0', featuredTripTheme.accentIconClass]" />
                     <span>{{ featuredTrip.country }}, {{ featuredTrip.city }}</span>
                   </span>
 
@@ -476,7 +503,7 @@ function retryLoad() {
             <div class="rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/80 p-4 space-y-2.5">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
-                  <Briefcase class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <Briefcase :class="['w-4 h-4 shrink-0', featuredTripTheme.accentIconClass]" />
                   <span>Список вещей</span>
                 </div>
                 <div class="flex items-center gap-2 text-xs">
@@ -484,7 +511,10 @@ function retryLoad() {
                     {{ featuredTrip.packing.packedCount }} / {{ featuredTrip.packing.totalCount }}
                   </span>
                   <span
-                    class="px-2 py-0.5 rounded-full font-bold bg-teal-50 text-teal-700 border border-teal-200/70 dark:bg-teal-500/15 dark:text-teal-300 dark:border-teal-500/30"
+                    :class="[
+                      'px-2 py-0.5 rounded-full font-bold border',
+                      featuredTripTheme.badgeClass,
+                    ]"
                   >
                     {{ featuredTrip.packing.percentage }}%
                   </span>
@@ -493,7 +523,10 @@ function retryLoad() {
 
               <div class="w-full h-2.5 rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden">
                 <div
-                  class="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-500"
+                  :class="[
+                    'h-full rounded-full transition-all duration-500',
+                    featuredTripTheme.progressFillClass,
+                  ]"
                   :style="{ width: `${Math.min(100, Math.max(0, featuredTrip.packing.percentage))}%` }"
                 />
               </div>
@@ -507,7 +540,7 @@ function retryLoad() {
             <div class="rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/80 p-4 space-y-2.5">
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100">
-                  <FileCheck2 class="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                  <FileCheck2 :class="['w-4 h-4 shrink-0', featuredTripTheme.accentIconClass]" />
                   <span>Брони и чек-лист</span>
                 </div>
                 <div class="flex items-center gap-2 text-xs">
@@ -515,7 +548,10 @@ function retryLoad() {
                     {{ featuredTrip.documents.readyCount }} / {{ featuredTrip.documents.totalCount }}
                   </span>
                   <span
-                    class="px-2 py-0.5 rounded-full font-bold bg-sky-50 text-sky-700 border border-sky-200/70 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30"
+                    :class="[
+                      'px-2 py-0.5 rounded-full font-bold border',
+                      featuredTripTheme.badgeClass,
+                    ]"
                   >
                     {{ featuredTrip.documents.percentage }}%
                   </span>
@@ -524,7 +560,10 @@ function retryLoad() {
 
               <div class="w-full h-2.5 rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden">
                 <div
-                  class="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-500"
+                  :class="[
+                    'h-full rounded-full transition-all duration-500',
+                    featuredTripTheme.progressSecondaryFillClass,
+                  ]"
                   :style="{ width: `${Math.min(100, Math.max(0, featuredTrip.documents.percentage))}%` }"
                 />
               </div>

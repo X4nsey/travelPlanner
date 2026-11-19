@@ -70,11 +70,13 @@ import {
   generateCalendarDays,
   getTripTimingStatus,
 } from '@/composables/useFormatters';
+import { resolveTripTheme } from '@/composables/useTripTheme';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+import TripThemeSwitcher from '@/components/trips/TripThemeSwitcher.vue';
 import type { GuideReloadableSection } from '@/components/trips/TripGuideExportModal.vue';
 
 const EventFormModal = defineAsyncComponent(
@@ -216,6 +218,10 @@ const isDeletingExpense = ref(false);
 const selectedCategoryFilter = ref<ExpenseCategory | null>(null);
 
 const trip = computed(() => tripStore.currentTrip);
+
+const tripTheme = computed(() =>
+  resolveTripTheme(trip.value?.id ?? tripId.value, trip.value?.tripType)
+);
 
 const matchedCountry = computed(() => {
   if (!trip.value?.country) return undefined;
@@ -725,142 +731,181 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
       </div>
 
       <!-- Trip Hero Header Card -->
-      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8">
-        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
-          <div class="space-y-3">
-            <div class="flex flex-wrap items-center gap-2.5">
-              <span
-                v-if="timing"
-                :class="[
-                  'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
-                  timing.badgeClass,
-                ]"
-              >
-                {{ timing.label }}
-              </span>
-
-              <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 bg-teal-50 dark:bg-teal-500/15 dark:text-teal-300 px-3 py-1 rounded-full border border-teal-200/70 dark:border-teal-500/30">
-                <MapPin class="w-3.5 h-3.5" />
-                {{ trip.country }}, {{ trip.city }}
-              </span>
-
-              <span
-                v-if="trip.tripType"
-                class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 dark:bg-indigo-500/15 dark:text-indigo-300 px-3 py-1 rounded-full border border-indigo-200/70 dark:border-indigo-500/30"
-              >
-                <Compass class="w-3.5 h-3.5" />
-                {{ getTripTypeLabelRu(trip.tripType) }}
-              </span>
-            </div>
-
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
-              {{ trip.title }}
-            </h1>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            <BaseButton
-              variant="primary"
-              size="sm"
-              @click="shareModalOpen = true"
-            >
-              <Share2 class="w-4 h-4" />
-              <span>Поделиться</span>
-            </BaseButton>
-
-            <BaseButton
-              variant="secondary"
-              size="sm"
-              @click="guideExportModalOpen = true"
-            >
-              <FileDown class="w-4 h-4" />
-              <span>Путеводитель / PDF</span>
-            </BaseButton>
-
-            <BaseButton
-              variant="outline"
-              size="sm"
-              @click="duplicateModalOpen = true"
-            >
-              <Copy class="w-4 h-4" />
-              <span>Дублировать</span>
-            </BaseButton>
-
-            <BaseButton
-              variant="outline"
-              size="sm"
-              @click="router.push(`/trips/${trip.id}/edit`)"
-            >
-              <Pencil class="w-4 h-4" />
-              <span>Редактировать</span>
-            </BaseButton>
-
-            <BaseButton
-              variant="danger"
-              size="sm"
-              @click="showDeleteTripConfirm = true"
-            >
-              <Trash2 class="w-4 h-4" />
-              <span>Удалить</span>
-            </BaseButton>
-          </div>
+      <div
+        :class="[
+          'relative z-20 rounded-2xl border shadow-soft dark:shadow-none transition-colors duration-300',
+          tripTheme.heroBannerClass,
+        ]"
+      >
+        <!-- Decorative Top Accent Strip & Soft Atmospheric Glow -->
+        <div
+          class="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+          aria-hidden="true"
+        >
+          <div
+            :class="['h-1.5 w-full transition-all duration-300', tripTheme.heroAccentStripClass]"
+          />
+          <div
+            :class="[
+              'absolute -top-24 -right-20 w-72 h-72 rounded-full blur-3xl opacity-80 dark:opacity-70 transition-all duration-500',
+              tripTheme.heroGlowClass,
+            ]"
+          />
+          <div
+            :class="[
+              'absolute -bottom-28 -left-20 w-64 h-64 rounded-full blur-3xl opacity-45 dark:opacity-35 transition-all duration-500',
+              tripTheme.heroGlowClass,
+            ]"
+          />
         </div>
 
-        <!-- Key Metrics Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-              <Calendar class="w-5 h-5" />
+        <div class="relative p-6 sm:p-8">
+          <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+            <div class="space-y-3 min-w-0">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span
+                  v-if="timing"
+                  :class="[
+                    'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
+                    timing.badgeClass,
+                  ]"
+                >
+                  {{ timing.label }}
+                </span>
+
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full border transition-colors',
+                    tripTheme.badgeClass,
+                  ]"
+                >
+                  <MapPin class="w-3.5 h-3.5" />
+                  {{ trip.country }}, {{ trip.city }}
+                </span>
+
+                <span
+                  v-if="trip.tripType"
+                  class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-white/85 dark:bg-slate-800/85 dark:text-slate-200 px-3 py-1 rounded-full border border-slate-200/80 dark:border-slate-700"
+                >
+                  <Compass :class="['w-3.5 h-3.5', tripTheme.accentIconClass]" />
+                  {{ getTripTypeLabelRu(trip.tripType) }}
+                </span>
+              </div>
+
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+                {{ trip.title }}
+              </h1>
             </div>
-            <div>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Даты поездки</p>
-              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {{ formatDateRange(trip.startDate, trip.endDate) }}
-              </p>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <TripThemeSwitcher
+                :trip-id="trip.id"
+                :trip-type="trip.tripType"
+              />
+
+              <BaseButton
+                variant="primary"
+                size="sm"
+                @click="shareModalOpen = true"
+              >
+                <Share2 class="w-4 h-4" />
+                <span>Поделиться</span>
+              </BaseButton>
+
+              <BaseButton
+                variant="secondary"
+                size="sm"
+                @click="guideExportModalOpen = true"
+              >
+                <FileDown class="w-4 h-4" />
+                <span>Путеводитель / PDF</span>
+              </BaseButton>
+
+              <BaseButton
+                variant="outline"
+                size="sm"
+                @click="duplicateModalOpen = true"
+              >
+                <Copy class="w-4 h-4" />
+                <span>Дублировать</span>
+              </BaseButton>
+
+              <BaseButton
+                variant="outline"
+                size="sm"
+                @click="router.push(`/trips/${trip.id}/edit`)"
+              >
+                <Pencil class="w-4 h-4" />
+                <span>Редактировать</span>
+              </BaseButton>
+
+              <BaseButton
+                variant="danger"
+                size="sm"
+                @click="showDeleteTripConfirm = true"
+              >
+                <Trash2 class="w-4 h-4" />
+                <span>Удалить</span>
+              </BaseButton>
             </div>
           </div>
 
-          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-              <Clock class="w-5 h-5" />
+          <!-- Key Metrics Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200/60 dark:border-slate-800/80">
+            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+                <Calendar class="w-5 h-5" />
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Даты поездки</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {{ formatDateRange(trip.startDate, trip.endDate) }}
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Продолжительность</p>
-              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {{ formatDaysLabel(trip.durationDays) }}
-              </p>
-            </div>
-          </div>
 
-          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
-              <Users class="w-5 h-5" />
+            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                <Clock class="w-5 h-5" />
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Продолжительность</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {{ formatDaysLabel(trip.durationDays) }}
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Участники</p>
-              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {{ formatTravelersLabel(trip.travelersCount) }}
-              </p>
-            </div>
-          </div>
 
-          <div class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-              <Wallet class="w-5 h-5" />
+            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <Users class="w-5 h-5" />
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Участники</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {{ formatTravelersLabel(trip.travelersCount) }}
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="text-xs text-slate-500 dark:text-slate-400">Планируемый бюджет</p>
-              <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                {{ formatCurrency(trip.budget, trip.currency) }}
-              </p>
+
+            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Wallet class="w-5 h-5" />
+              </div>
+              <div>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Планируемый бюджет</p>
+                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {{ formatCurrency(trip.budget, trip.currency) }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Tabs Switcher -->
-      <div class="relative">
+      <div class="relative z-10">
         <div
           v-if="canScrollTabsLeft"
           class="absolute left-0 top-0 bottom-px z-10 flex items-center pr-5 bg-gradient-to-r from-slate-50 via-slate-50/95 dark:from-slate-950 dark:via-slate-950/95 to-transparent"
@@ -868,7 +913,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           <button
             type="button"
             @click="scrollTabs('left')"
-            class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 hover:border-teal-300 dark:hover:border-teal-500/50 flex items-center justify-center transition-colors"
+            class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
             aria-label="Прокрутить вкладки влево"
           >
             <ChevronLeft class="w-4 h-4" />
@@ -886,7 +931,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'overview'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
@@ -900,14 +945,17 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'itinerary'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
             <CalendarDays class="w-4 h-4 shrink-0" />
             <span>План поездки</span>
             <span
-              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300 font-bold"
+              :class="[
+                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold transition-colors',
+                tripTheme.tabBadgeClass,
+              ]"
             >
               {{ totalEventsCount }}
             </span>
@@ -919,7 +967,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'expenses'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
@@ -927,7 +975,10 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <span>Бюджет</span>
             <span
               v-if="tripExpenses.length > 0"
-              class="ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 font-bold"
+              :class="[
+                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold transition-colors',
+                tripTheme.tabBadgeClass,
+              ]"
             >
               {{ tripExpenses.length }}
             </span>
@@ -939,7 +990,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'packing'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
@@ -948,10 +999,10 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <span
               v-if="packingStore.totalCount > 0"
               :class="[
-                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold',
+                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold transition-colors',
                 packingStore.packedCount === packingStore.totalCount
                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
-                  : 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300',
+                  : tripTheme.tabBadgeClass,
               ]"
             >
               {{ packingStore.packedCount }}/{{ packingStore.totalCount }}
@@ -964,7 +1015,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'documents'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
@@ -973,10 +1024,10 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <span
               v-if="currentTripDocumentsSummary.totalCount > 0"
               :class="[
-                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold',
+                'ml-0.5 px-1.5 py-0.5 text-[11px] rounded-full font-bold transition-colors',
                 currentTripDocumentsSummary.readyCount === currentTripDocumentsSummary.totalCount
                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
-                  : 'bg-teal-50 text-teal-700 dark:bg-teal-500/15 dark:text-teal-300',
+                  : tripTheme.tabBadgeClass,
               ]"
             >
               {{ currentTripDocumentsSummary.readyCount }}/{{ currentTripDocumentsSummary.totalCount }}
@@ -989,7 +1040,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'weather'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
@@ -1009,7 +1060,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             :class="[
               'inline-flex items-center gap-1.5 px-3 py-3 text-[13px] xl:text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
               activeTab === 'travel-info'
-                ? 'border-teal-600 text-teal-700 dark:border-teal-400 dark:text-teal-400'
+                ? tripTheme.tabActiveClass
                 : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
             ]"
           >
@@ -1040,7 +1091,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           <button
             type="button"
             @click="scrollTabs('right')"
-            class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-teal-400 hover:border-teal-300 dark:hover:border-teal-500/50 flex items-center justify-center transition-colors"
+            class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
             aria-label="Прокрутить вкладки вправо"
           >
             <ChevronRight class="w-4 h-4" />
@@ -1162,7 +1213,10 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <div class="px-5 sm:px-6 py-4 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
               <div class="flex items-center gap-3">
                 <span
-                  class="inline-flex items-center justify-center px-3 py-1 rounded-xl bg-teal-600 text-white text-xs font-bold"
+                  :class="[
+                    'inline-flex items-center justify-center px-3 py-1 rounded-xl text-xs font-bold transition-all duration-300',
+                    tripTheme.dayBadgeClass,
+                  ]"
                 >
                   День {{ day.dayNumber }}
                 </span>
@@ -1174,7 +1228,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               <BaseButton
                 variant="ghost"
                 size="sm"
-                class="text-teal-700 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-500/15"
+                :class="tripTheme.accentGhostBtnClass"
                 @click="openAddEventModal(day.date)"
               >
                 <Plus class="w-4 h-4" />
@@ -1211,9 +1265,12 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     <div class="flex flex-wrap items-center gap-2">
                       <span
                         v-if="ev.startTime || ev.endTime"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30 text-xs font-semibold"
+                        :class="[
+                          'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs font-semibold transition-colors',
+                          tripTheme.badgeClass,
+                        ]"
                       >
-                        <Clock class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                        <Clock class="w-3.5 h-3.5" />
                         <span v-if="ev.startTime && ev.endTime">
                           {{ ev.startTime }} — {{ ev.endTime }}
                         </span>
@@ -1249,7 +1306,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                       v-if="ev.location"
                       class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300"
                     >
-                      <MapPin class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                      <MapPin :class="['w-3.5 h-3.5 shrink-0', tripTheme.accentIconClass]" />
                       <span>{{ ev.location }}</span>
                     </p>
 
@@ -1427,7 +1484,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     ? 'bg-rose-500'
                     : expenseSummary?.status === 'near_budget'
                       ? 'bg-amber-500'
-                      : 'bg-teal-500'
+                      : tripTheme.progressFillClass
                 "
               ></div>
             </div>
@@ -1565,7 +1622,10 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                   </div>
                   <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
-                      class="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300"
+                      :class="[
+                        'h-full rounded-full transition-all duration-300',
+                        tripTheme.progressFillClass,
+                      ]"
                       :style="{
                         width: Math.max(4, Math.round((day.totalAmount / maxDailyExpenseAmount) * 100)) + '%',
                       }"

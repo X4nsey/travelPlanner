@@ -54,6 +54,7 @@ import {
   generateCalendarDays,
   getTripTimingStatus,
 } from '@/composables/useFormatters';
+import { resolveTripTheme } from '@/composables/useTripTheme';
 import type {
   EventCategory,
   ExpenseCategory,
@@ -272,6 +273,10 @@ watch(token, (next, prev) => {
 });
 
 const trip = computed(() => sharedData.value?.trip ?? null);
+
+const tripTheme = computed(() =>
+  resolveTripTheme(undefined, trip.value?.tripType)
+);
 
 const fallbackCatalogCountry = computed(() => {
   if (sharedData.value?.countryInfo || !trip.value?.country) return undefined;
@@ -632,169 +637,203 @@ function goToLoginWithRedirect() {
       <div v-else class="space-y-6 animate-fade-in">
         <!-- Trip Hero Card -->
         <section
-          class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-8 space-y-6"
+          :class="[
+            'relative overflow-hidden rounded-2xl border shadow-soft dark:shadow-none transition-colors duration-300',
+            tripTheme.heroBannerClass,
+          ]"
         >
-          <div class="flex flex-col md:flex-row md:items-start justify-between gap-5">
-            <div class="flex items-start gap-4 min-w-0">
-              <!-- Country Flag -->
-              <img
-                v-if="headerFlagUrl"
-                :src="headerFlagUrl"
-                :alt="trip.country"
-                loading="lazy"
-                decoding="async"
-                class="w-16 h-11 object-cover rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0 mt-1"
-              />
-              <div
-                v-else-if="headerFlagEmoji"
-                class="w-16 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-3xl shrink-0 mt-1 shadow-sm"
-                aria-hidden="true"
-              >
-                {{ headerFlagEmoji }}
-              </div>
-              <div
-                v-else
-                class="w-14 h-14 rounded-2xl bg-teal-50 dark:bg-teal-500/15 border border-teal-100 dark:border-teal-500/30 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
-              >
-                <Globe2 class="w-7 h-7" />
-              </div>
+          <!-- Decorative Top Accent Strip & Soft Atmospheric Glow -->
+          <div
+            class="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+            aria-hidden="true"
+          >
+            <div :class="['h-1.5 w-full', tripTheme.heroAccentStripClass]" />
+            <div
+              :class="[
+                'absolute -top-24 -right-20 w-72 h-72 rounded-full blur-3xl opacity-80 dark:opacity-70',
+                tripTheme.heroGlowClass,
+              ]"
+            />
+            <div
+              :class="[
+                'absolute -bottom-28 -left-20 w-64 h-64 rounded-full blur-3xl opacity-45 dark:opacity-35',
+                tripTheme.heroGlowClass,
+              ]"
+            />
+          </div>
 
-              <div class="min-w-0 space-y-2.5">
-                <!-- Badges -->
-                <div class="flex flex-wrap items-center gap-2">
-                  <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/30"
-                  >
-                    <Users class="w-3.5 h-3.5" />
-                    <span>Публичный маршрут для попутчиков</span>
-                  </span>
-
-                  <span
-                    v-if="timing"
-                    :class="[
-                      'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
-                      timing.badgeClass,
-                    ]"
-                  >
-                    {{ timing.label }}
-                  </span>
-
-                  <span
-                    v-if="trip.tripType"
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/70 dark:border-slate-700"
-                  >
-                    <Compass class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-                    <span>{{ getTripTypeLabelRu(trip.tripType) }}</span>
-                  </span>
+          <div class="relative p-6 sm:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-5">
+              <div class="flex items-start gap-4 min-w-0">
+                <!-- Country Flag -->
+                <img
+                  v-if="headerFlagUrl"
+                  :src="headerFlagUrl"
+                  :alt="trip.country"
+                  loading="lazy"
+                  decoding="async"
+                  class="w-16 h-11 object-cover rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0 mt-1"
+                />
+                <div
+                  v-else-if="headerFlagEmoji"
+                  class="w-16 h-11 rounded-xl bg-white/85 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-3xl shrink-0 mt-1 shadow-sm"
+                  aria-hidden="true"
+                >
+                  {{ headerFlagEmoji }}
+                </div>
+                <div
+                  v-else
+                  :class="[
+                    'w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0',
+                    tripTheme.badgeClass,
+                  ]"
+                >
+                  <Globe2 class="w-7 h-7" />
                 </div>
 
-                <!-- Title & Location -->
-                <div>
-                  <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
-                    {{ trip.title }}
-                  </h1>
+                <div class="min-w-0 space-y-2.5">
+                  <!-- Badges -->
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span
+                      :class="[
+                        'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border',
+                        tripTheme.badgeClass,
+                      ]"
+                    >
+                      <Users class="w-3.5 h-3.5" />
+                      <span>Публичный маршрут для попутчиков</span>
+                    </span>
+
+                    <span
+                      v-if="timing"
+                      :class="[
+                        'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border',
+                        timing.badgeClass,
+                      ]"
+                    >
+                      {{ timing.label }}
+                    </span>
+
+                    <span
+                      v-if="trip.tripType"
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/85 dark:bg-slate-800/85 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700"
+                    >
+                      <Compass :class="['w-3.5 h-3.5', tripTheme.accentIconClass]" />
+                      <span>{{ getTripTypeLabelRu(trip.tripType) }}</span>
+                    </span>
+                  </div>
+
+                  <!-- Title & Location -->
+                  <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
+                      {{ trip.title }}
+                    </h1>
+                    <p
+                      :class="[
+                        'inline-flex items-center gap-1.5 text-sm font-semibold mt-1.5',
+                        tripTheme.accentTextClass,
+                      ]"
+                    >
+                      <MapPin :class="['w-4 h-4 shrink-0', tripTheme.accentIconClass]" />
+                      <span>{{ trip.country }}, {{ trip.city }}</span>
+                    </p>
+                  </div>
+
+                  <!-- Optional Trip Description -->
                   <p
-                    class="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 dark:text-teal-400 mt-1.5"
+                    v-if="trip.description"
+                    class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line max-w-3xl"
                   >
-                    <MapPin class="w-4 h-4 shrink-0" />
-                    <span>{{ trip.country }}, {{ trip.city }}</span>
+                    {{ trip.description }}
                   </p>
                 </div>
+              </div>
+            </div>
 
-                <!-- Optional Trip Description -->
-                <p
-                  v-if="trip.description"
-                  class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line max-w-3xl"
+            <!-- Key Metrics Grid -->
+            <div
+              class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 border-t border-slate-200/60 dark:border-slate-800/80"
+              :class="
+                sharedData.permissions.showExpenses && expensesData
+                  ? 'lg:grid-cols-4'
+                  : 'lg:grid-cols-3'
+              "
+            >
+              <div
+                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
+              >
+                <div
+                  class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
                 >
-                  {{ trip.description }}
-                </p>
+                  <Calendar class="w-5 h-5" />
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Даты поездки</p>
+                  <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {{ formatDateRange(trip.startDate, trip.endDate) }}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Key Metrics Grid -->
-          <div
-            class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 border-t border-slate-100 dark:border-slate-800"
-            :class="
-              sharedData.permissions.showExpenses && expensesData
-                ? 'lg:grid-cols-4'
-                : 'lg:grid-cols-3'
-            "
-          >
-            <div
-              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
-            >
               <div
-                class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
+                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
-                <Calendar class="w-5 h-5" />
+                <div
+                  class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"
+                >
+                  <Clock class="w-5 h-5" />
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Продолжительность</p>
+                  <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {{ formatDaysLabel(trip.durationDays) }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Даты поездки</p>
-                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ formatDateRange(trip.startDate, trip.endDate) }}
-                </p>
-              </div>
-            </div>
 
-            <div
-              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
-            >
               <div
-                class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"
+                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
-                <Clock class="w-5 h-5" />
+                <div
+                  class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"
+                >
+                  <Users class="w-5 h-5" />
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Участники</p>
+                  <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {{ formatTravelersLabel(trip.travelersCount) }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Продолжительность</p>
-                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ formatDaysLabel(trip.durationDays) }}
-                </p>
-              </div>
-            </div>
 
-            <div
-              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
-            >
               <div
-                class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"
+                v-if="sharedData.permissions.showExpenses && expensesData"
+                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
-                <Users class="w-5 h-5" />
-              </div>
-              <div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Участники</p>
-                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ formatTravelersLabel(trip.travelersCount) }}
-                </p>
+                <div
+                  class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                >
+                  <Wallet class="w-5 h-5" />
+                </div>
+                <div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Планируемый бюджет</p>
+                  <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {{ formatCurrency(expensesData.summary.plannedBudget, expensesData.summary.currency) }}
+                  </p>
+                </div>
               </div>
             </div>
 
+            <!-- Compact Privacy Notice -->
             <div
-              v-if="sharedData.permissions.showExpenses && expensesData"
-              class="p-4 rounded-xl bg-slate-50/80 dark:bg-slate-800/70 border border-slate-100 dark:border-slate-700/70 flex items-center gap-3.5"
+              class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1"
             >
-              <div
-                class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
-              >
-                <Wallet class="w-5 h-5" />
-              </div>
-              <div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">Планируемый бюджет</p>
-                <p class="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {{ formatCurrency(expensesData.summary.plannedBudget, expensesData.summary.currency) }}
-                </p>
-              </div>
+              <ShieldCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>
+                Режим «только чтение»: личные брони, документы и контакты организатора скрыты.
+              </span>
             </div>
-          </div>
-
-          <!-- Compact Privacy Notice -->
-          <div
-            class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 pt-1"
-          >
-            <ShieldCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>
-              Режим «только чтение»: личные брони, документы и контакты организатора скрыты.
-            </span>
           </div>
         </section>
 
@@ -824,7 +863,7 @@ function goToLoginWithRedirect() {
               :class="[
                 'inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors shrink-0 whitespace-nowrap',
                 activeTab === tab.key
-                  ? 'border-teal-600 dark:border-teal-400 text-teal-700 dark:text-teal-400'
+                  ? tripTheme.tabActiveClass
                   : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200',
               ]"
             >
@@ -837,10 +876,10 @@ function goToLoginWithRedirect() {
 
               <span
                 v-if="tab.badge !== undefined"
-                class="px-2 py-0.5 text-[11px] rounded-full font-bold"
+                class="px-2 py-0.5 text-[11px] rounded-full font-bold transition-colors"
                 :class="
                   activeTab === tab.key
-                    ? 'bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300'
+                    ? tripTheme.tabBadgeClass
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                 "
               >
@@ -874,7 +913,10 @@ function goToLoginWithRedirect() {
                 >
                   <div class="flex items-center gap-3">
                     <span
-                      class="inline-flex items-center justify-center px-3 py-1 rounded-xl bg-teal-600 text-white text-xs font-bold"
+                      :class="[
+                        'inline-flex items-center justify-center px-3 py-1 rounded-xl text-xs font-bold',
+                        tripTheme.dayBadgeClass,
+                      ]"
                     >
                       День {{ day.dayNumber }}
                     </span>
@@ -902,15 +944,21 @@ function goToLoginWithRedirect() {
                     <article
                       v-for="(ev, evIdx) in eventsByDate[day.date]"
                       :key="`${day.date}-${evIdx}`"
-                      class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 p-4 sm:p-5 bg-white dark:bg-slate-800/50 hover:border-teal-200/90 dark:hover:border-teal-500/40 transition-colors space-y-2.5"
+                      :class="[
+                        'rounded-xl border border-slate-200/80 dark:border-slate-700/80 p-4 sm:p-5 bg-white dark:bg-slate-800/50 transition-colors space-y-2.5',
+                        tripTheme.cardHoverBorderClass,
+                      ]"
                     >
                       <div class="flex flex-wrap items-center gap-2">
                         <!-- Time -->
                         <span
                           v-if="ev.startTime || ev.endTime"
-                          class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 text-teal-800 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30 text-xs font-semibold"
+                          :class="[
+                            'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border text-xs font-semibold',
+                            tripTheme.badgeClass,
+                          ]"
                         >
-                          <Clock class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                          <Clock class="w-3.5 h-3.5" />
                           <span v-if="ev.startTime && ev.endTime">
                             {{ ev.startTime }} — {{ ev.endTime }}
                           </span>
@@ -955,7 +1003,7 @@ function goToLoginWithRedirect() {
                         v-if="ev.location"
                         class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-400"
                       >
-                        <MapPin class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                        <MapPin :class="['w-3.5 h-3.5 shrink-0', tripTheme.accentIconClass]" />
                         <span>{{ ev.location }}</span>
                       </p>
 
@@ -996,7 +1044,10 @@ function goToLoginWithRedirect() {
                       Ваш личный чек-лист сборов
                     </h2>
                     <span
-                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30"
+                      :class="[
+                        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                        tripTheme.badgeClass,
+                      ]"
                     >
                       <CheckCircle2 class="w-3.5 h-3.5" />
                       <span>Сохраняется в вашем браузере</span>
@@ -1012,7 +1063,7 @@ function goToLoginWithRedirect() {
                     <p class="text-xl font-black text-slate-900 dark:text-slate-100 tabular-nums">
                       {{ localPackedCount }} / {{ packingItems.length }}
                     </p>
-                    <p class="text-xs font-semibold text-teal-700 dark:text-teal-400">
+                    <p :class="['text-xs font-semibold', tripTheme.accentTextClass]">
                       {{ localPackingProgress }}% собрано
                     </p>
                   </div>
@@ -1026,7 +1077,7 @@ function goToLoginWithRedirect() {
                   :class="
                     localPackingProgress === 100 && packingItems.length > 0
                       ? 'bg-emerald-500'
-                      : 'bg-gradient-to-r from-teal-500 to-sky-500'
+                      : tripTheme.progressFillClass
                   "
                   :style="{ width: `${localPackingProgress}%` }"
                 />
@@ -1343,7 +1394,7 @@ function goToLoginWithRedirect() {
                         ? 'bg-rose-500'
                         : expensesData.summary.status === 'near_budget'
                           ? 'bg-amber-500'
-                          : 'bg-teal-500'
+                          : tripTheme.progressFillClass
                     "
                   />
                 </div>
@@ -1465,7 +1516,7 @@ function goToLoginWithRedirect() {
                       </div>
                       <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          class="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500"
+                          :class="['h-full rounded-full transition-all duration-300', tripTheme.progressFillClass]"
                           :style="{
                             width: Math.max(4, Math.round((day.totalAmount / maxDailyExpenseAmount) * 100)) + '%',
                           }"
