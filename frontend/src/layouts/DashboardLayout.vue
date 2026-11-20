@@ -163,10 +163,10 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:flex-row transition-colors duration-200">
+  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:flex-row">
     <!-- Desktop Sidebar -->
     <aside
-      class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 z-30 transition-colors duration-200"
+      class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 z-30"
     >
       <!-- Brand Header -->
       <div class="h-16 px-5 flex items-center border-b border-slate-100 dark:border-slate-800/80 shrink-0">
@@ -187,7 +187,7 @@ async function handleLogout() {
         <RouterLink
           to="/trips/new"
           :class="[
-            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 shadow-sm shadow-teal-600/20 dark:shadow-teal-950/50 transition-all duration-150 active:scale-[0.99]',
+            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 shadow-sm shadow-teal-600/20 dark:shadow-teal-950/50 transition-[background-color,transform] duration-150 active:scale-[0.99]',
             isCreateTripActive ? 'ring-2 ring-teal-500/40 ring-offset-2 ring-offset-white dark:ring-teal-400/50 dark:ring-offset-slate-900' : '',
           ]"
         >
@@ -208,7 +208,7 @@ async function handleLogout() {
             :key="item.to"
             :to="item.to"
             :class="[
-              'group flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
+              'group flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors duration-150',
               isItemActive(item)
                 ? 'bg-teal-50 text-teal-700 font-semibold shadow-sm dark:bg-teal-500/15 dark:text-teal-300 dark:shadow-none dark:ring-1 dark:ring-inset dark:ring-teal-500/25'
                 : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/70 dark:hover:text-slate-100',
@@ -254,7 +254,7 @@ async function handleLogout() {
             :aria-pressed="themeMode === opt.mode"
             @click="setTheme(opt.mode)"
             :class="[
-              'flex-1 flex items-center justify-center py-1.5 rounded-lg transition-all duration-150',
+              'flex-1 flex items-center justify-center py-1.5 rounded-lg transition-colors duration-150',
               themeMode === opt.mode
                 ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-700'
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
@@ -303,7 +303,7 @@ async function handleLogout() {
 
     <!-- Mobile Top Bar -->
     <header
-      class="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 h-16 flex items-center justify-between transition-colors duration-200"
+      class="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 px-4 h-16 flex items-center justify-between"
     >
       <RouterLink to="/dashboard" class="flex items-center gap-2.5">
         <div
@@ -332,7 +332,7 @@ async function handleLogout() {
             :aria-pressed="themeMode === opt.mode"
             @click="setTheme(opt.mode)"
             :class="[
-              'p-1.5 rounded-lg transition-all',
+              'p-1.5 rounded-lg transition-colors',
               themeMode === opt.mode
                 ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-sm'
                 : 'text-slate-500 dark:text-slate-400',

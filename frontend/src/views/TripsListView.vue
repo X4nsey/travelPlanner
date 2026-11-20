@@ -3,6 +3,7 @@ import { onMounted, ref, computed, defineAsyncComponent } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { Plus, Search, Compass, RefreshCw, Sparkles } from 'lucide-vue-next';
 import { useTripStore } from '@/stores/trip.store';
+import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
 import type { DuplicateTripPayload, Trip } from '@/types';
 import { getTodayIso } from '@/composables/useFormatters';
@@ -23,6 +24,7 @@ const TripTemplatesModal = defineAsyncComponent(
 );
 
 const tripStore = useTripStore();
+const countryStore = useCountryStore();
 const toastStore = useToastStore();
 const router = useRouter();
 
@@ -41,6 +43,7 @@ onMounted(() => {
   tripStore.fetchTrips().catch(() => {
     // Error stored in tripStore.listError
   });
+  countryStore.ensureCountriesLoaded().catch(() => {});
 });
 
 const filteredTrips = computed(() => {

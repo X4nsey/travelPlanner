@@ -22,6 +22,7 @@ import GlobeCountryPanel from '@/components/countries/GlobeCountryPanel.vue';
 import CountryCard from '@/components/countries/CountryCard.vue';
 import AuthPromptModal from '@/components/countries/AuthPromptModal.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 // Lazy-load the heavy 3D Globe + Three.js component only when ExploreWorldView is rendered
 const WorldGlobe = defineAsyncComponent({
@@ -152,7 +153,7 @@ function handlePickForTrip(country: CountryData) {
     }
   }
 
-  toastStore.success(`Выбрана страна: ${country.flagEmoji} ${country.nameRu}`);
+  toastStore.success(`Выбрана страна: ${country.nameRu}`);
   router.push({
     path: returnPath,
     query: {
@@ -267,7 +268,7 @@ function openAuthPrompt() {
             type="button"
             @click="selectQuickCountry(item)"
             :class="[
-              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 border transition-all',
+              'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 border transition-colors',
               countryStore.selectedGlobeCountry?.slug === item.slug
                 ? 'bg-orange-500 text-white border-orange-500 shadow-sm'
                 : hasPlannedTrip(item)
@@ -277,7 +278,12 @@ function openAuthPrompt() {
                     : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-900 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-700/80 dark:hover:border-teal-500/60 dark:hover:text-white',
             ]"
           >
-            <span>{{ item.flagEmoji }}</span>
+            <CountryFlag
+              :code="item.isoAlpha2 || item.flagEmoji"
+              :flagUrl="item.flagUrl"
+              :name="item.nameRu"
+              size="xs"
+            />
             <span>{{ item.nameRu }}</span>
             <PlaneTakeoff
               v-if="hasPlannedTrip(item)"

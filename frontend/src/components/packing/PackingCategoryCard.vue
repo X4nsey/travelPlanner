@@ -129,7 +129,7 @@ function toggleExpanded() {
             <div class="flex-1 bg-slate-200/70 dark:bg-slate-700/80 rounded-full h-1.5 overflow-hidden">
               <div
                 :class="[
-                  'h-full rounded-full transition-all duration-300',
+                  'h-full rounded-full transition-[width] duration-300',
                   isCategoryComplete ? 'bg-emerald-500' : 'bg-teal-600 dark:bg-teal-500',
                 ]"
                 :style="{ width: `${progressPercent}%` }"

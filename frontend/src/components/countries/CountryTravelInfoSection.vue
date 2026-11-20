@@ -27,6 +27,7 @@ import type {
   SharedCountryInfo,
   TravelInfoSection,
 } from '@/types';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 interface Props {
   country: CountryData | SharedCountryInfo;
@@ -204,21 +205,13 @@ function formatLastUpdated(value?: string): string {
     >
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="flex items-start gap-4 min-w-0">
-          <img
-            v-if="country.flagUrl"
-            :src="country.flagUrl"
-            :alt="country.nameRu"
-            loading="lazy"
-            decoding="async"
-            class="w-14 h-10 object-cover rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0"
+          <CountryFlag
+            :code="'isoAlpha2' in country ? country.isoAlpha2 || country.flagEmoji : country.flagEmoji"
+            :flagUrl="country.flagUrl"
+            :name="country.nameRu"
+            size="lg"
+            class="!w-14 !h-10 !rounded-xl shadow-sm"
           />
-          <div
-            v-else
-            class="w-14 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-2xl shrink-0 shadow-sm"
-            aria-hidden="true"
-          >
-            {{ country.flagEmoji }}
-          </div>
 
           <div class="min-w-0 space-y-1">
             <div class="flex flex-wrap items-center gap-2">
@@ -348,7 +341,7 @@ function formatLastUpdated(value?: string): string {
         v-for="{ config, data } in resolvedSections"
         :id="`travel-info-section-${config.key}`"
         :key="config.key"
-        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden transition-all"
+        class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden transition-colors"
       >
         <!-- Accordion Header -->
         <button

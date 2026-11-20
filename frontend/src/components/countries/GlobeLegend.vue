@@ -58,7 +58,7 @@ function getCountBadge(id: GlobeColorState): number | null {
 
 <template>
   <div
-    class="bg-slate-900/95 backdrop-blur-md border-t border-slate-800/90 px-3.5 py-3 sm:px-5 sm:py-3.5 text-slate-200 select-none"
+    class="bg-slate-900/95 border-t border-slate-800/90 px-3.5 py-3 sm:px-5 sm:py-3.5 text-slate-200 select-none"
     role="region"
     aria-label="Легенда цветов интерактивного глобуса"
   >
@@ -110,7 +110,7 @@ function getCountBadge(id: GlobeColorState): number | null {
           @blur="handleMouseLeave"
           :title="`${item.colorName} — ${item.label}: ${item.tooltip}`"
           :class="[
-            'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-all duration-150',
+            'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-[background-color,border-color,box-shadow,transform] duration-150',
             activeHighlight === item.id
               ? 'bg-slate-800 border-sky-400/70 shadow-md ring-1 ring-sky-400/30 scale-[1.01]'
               : 'bg-slate-900/70 border-slate-800 hover:bg-slate-800/80 hover:border-slate-700',
@@ -162,7 +162,7 @@ function getCountBadge(id: GlobeColorState): number | null {
         >
           <div
             v-if="openTooltipId === item.id"
-            class="pointer-events-none absolute bottom-full left-0 right-0 sm:w-64 mb-2 z-30 p-3 rounded-xl bg-slate-950/95 border border-slate-700 text-xs text-slate-200 shadow-xl backdrop-blur-md"
+            class="pointer-events-none absolute bottom-full left-0 right-0 sm:w-64 mb-2 z-30 p-3 rounded-xl bg-slate-950/95 border border-slate-700 text-xs text-slate-200 shadow-xl"
           >
             <div class="flex items-center gap-2 font-bold text-white mb-1">
               <span

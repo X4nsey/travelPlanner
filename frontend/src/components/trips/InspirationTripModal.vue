@@ -14,6 +14,7 @@ import {
 } from 'lucide-vue-next';
 import SmartImage from '@/components/ui/SmartImage.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 export interface InspirationTrip {
   id: string;
@@ -149,7 +150,7 @@ function handleViewCountry() {
             <button
               type="button"
               @click="emit('close')"
-              class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-900/60 hover:bg-slate-900/90 text-white flex items-center justify-center backdrop-blur-md transition-colors"
+              class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-900/75 hover:bg-slate-900/95 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
               aria-label="Закрыть"
             >
               <X class="w-5 h-5" />
@@ -158,14 +159,18 @@ function handleViewCountry() {
             <!-- Badges on Photo -->
             <div class="absolute top-4 left-4 z-10 flex flex-wrap items-center gap-2">
               <span
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 border border-transparent dark:border-slate-700/80 text-xs font-bold shadow-sm backdrop-blur-md"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100 border border-transparent dark:border-slate-700/80 text-xs font-bold shadow-sm"
               >
-                <span>{{ trip.flag }}</span>
+                <CountryFlag
+                  :code="trip.flag"
+                  :name="trip.country"
+                  size="xs"
+                />
                 <span>{{ trip.country }}</span>
               </span>
 
               <span
-                class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-900/70 text-white text-xs font-semibold backdrop-blur-md border border-white/20"
+                class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-900/80 text-white text-xs font-semibold backdrop-blur-sm border border-white/20"
               >
                 <CalendarDays class="w-3.5 h-3.5 text-teal-300" />
                 <span>{{ trip.days }}</span>

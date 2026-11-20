@@ -21,6 +21,8 @@ import {
   formatWeatherDecimal,
   formatWeatherShortDate,
 } from '@/utils/weatherFormatters';
+import { buildFlagCdnUrl, resolveFlagCode } from '@/utils/countryFlag';
+import { lookupIsoAlpha2ByCountryName } from '@/data/world-countries-meta';
 import type {
   CountryTravelInfo,
   Currency,
@@ -287,15 +289,20 @@ function renderHeaderSection(
   const { trip, matchedCountry } = payload;
   const timing = getTripTimingStatus(trip.startDate, trip.endDate);
   const coverUrl = includeCoverPhoto ? sanitizeSafeUrl(matchedCountry?.coverPhoto?.url) : '';
-  const flagUrl = sanitizeSafeUrl(matchedCountry?.flagUrl);
-  const flagEmoji = matchedCountry?.flagEmoji || '';
+  const resolvedIso =
+    resolveFlagCode(
+      matchedCountry?.isoAlpha2,
+      matchedCountry?.flagUrl,
+      matchedCountry?.flagEmoji
+    ) || lookupIsoAlpha2ByCountryName(trip.country);
+  const flagUrl =
+    sanitizeSafeUrl(matchedCountry?.flagUrl) ||
+    (resolvedIso ? buildFlagCdnUrl(resolvedIso, 80) : '');
   const tripTypeLabel = trip.tripType ? getTripTypeLabelRu(trip.tripType) : '';
 
   const flagMarkup = flagUrl
     ? `<img class="tp-flag" src="${escapeHtml(flagUrl)}" alt="${escapeHtml(trip.country)}" onerror="this.style.display='none'" />`
-    : flagEmoji
-      ? `<span class="tp-flag-emoji" aria-hidden="true">${escapeHtml(flagEmoji)}</span>`
-      : '';
+    : '';
 
   const passportGrid = `
     <div class="tp-passport-grid">

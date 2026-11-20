@@ -527,7 +527,7 @@ async function confirmDeleteDocument() {
           >
             <div
               :class="[
-                'h-full rounded-full transition-all duration-300',
+                'h-full rounded-full transition-[width] duration-300',
                 isComplete ? 'bg-emerald-500' : 'bg-teal-600 dark:bg-teal-500',
               ]"
               :style="{ width: barWidthStyle }"
@@ -616,7 +616,7 @@ async function confirmDeleteDocument() {
                 type="button"
                 @click="selectedStatusFilter = 'ALL'"
                 :class="[
-                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
                   selectedStatusFilter === 'ALL'
                     ? 'bg-slate-900 dark:bg-teal-600 text-white shadow-sm'
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700',
@@ -639,7 +639,7 @@ async function confirmDeleteDocument() {
                 type="button"
                 @click="selectedStatusFilter = selectedStatusFilter === st ? 'ALL' : st"
                 :class="[
-                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all',
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors',
                   selectedStatusFilter === st
                     ? getDocumentStatusMeta(st).activeButtonClass
                     : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800',
@@ -674,7 +674,7 @@ async function confirmDeleteDocument() {
               type="button"
               @click="selectedCategoryFilter = 'ALL'"
               :class="[
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors',
                 selectedCategoryFilter === 'ALL'
                   ? 'bg-teal-600 text-white shadow-sm'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700',
@@ -689,7 +689,7 @@ async function confirmDeleteDocument() {
               type="button"
               @click="selectedCategoryFilter = selectedCategoryFilter === cat ? 'ALL' : cat"
               :class="[
-                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors',
                 selectedCategoryFilter === cat
                   ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
                   : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800',
@@ -796,7 +796,7 @@ async function confirmDeleteDocument() {
                   :disabled="documentStore.isDocumentMutating(doc.id)"
                   @click="handleQuickStatusChange(doc, st)"
                   :class="[
-                    'px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-all border text-center truncate disabled:opacity-60',
+                    'px-2 py-1.5 rounded-lg text-[11px] sm:text-xs font-bold transition-colors border text-center truncate disabled:opacity-60',
                     doc.status === st
                       ? getDocumentStatusMeta(st).activeButtonClass
                       : 'bg-transparent border-transparent text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/70 dark:hover:bg-slate-700/70',

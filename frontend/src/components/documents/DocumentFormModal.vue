@@ -407,7 +407,7 @@ async function handleSubmit() {
               :disabled="isBusy"
               @click="status = st"
               :class="[
-                'px-2 py-2 rounded-lg text-xs font-semibold transition-all text-center truncate border',
+                'px-2 py-2 rounded-lg text-xs font-semibold transition-colors text-center truncate border',
                 status === st
                   ? DOCUMENT_STATUS_META[st].activeButtonClass
                   : 'bg-transparent border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-white/70 dark:hover:bg-slate-700/70',

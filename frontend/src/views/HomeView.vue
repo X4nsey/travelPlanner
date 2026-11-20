@@ -392,7 +392,7 @@ const featureCards: FeatureCard[] = [
                   <RouterLink to="/explore" class="w-full sm:w-auto">
                     <button
                       type="button"
-                      class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-all duration-200 active:scale-[0.99]"
+                      class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-[background-color,transform] duration-200 active:scale-[0.99]"
                     >
                       <Globe2 class="w-5 h-5 text-teal-300" />
                       <span>Открыть 3D-глобус</span>

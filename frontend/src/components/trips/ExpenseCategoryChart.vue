@@ -229,7 +229,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
             <g
               v-for="slice in svgSlices"
               :key="slice.category"
-              class="cursor-pointer transition-all duration-200"
+              class="cursor-pointer transition-opacity duration-200"
               :style="{
                 transformOrigin: '140px 140px',
                 transform: slice.isHovered || slice.isSelected ? 'scale(1.04)' : 'scale(1)',
@@ -304,7 +304,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
           @mouseenter="hoveredCategory = cat.category"
           @mouseleave="hoveredCategory = null"
           :class="[
-            'p-3 rounded-xl border cursor-pointer transition-all duration-150',
+            'p-3 rounded-xl border cursor-pointer transition-colors duration-150',
             selectedCategory === cat.category
               ? 'bg-slate-50 dark:bg-slate-800 border-teal-500 dark:border-teal-400 shadow-sm ring-1 ring-teal-500/20'
               : hoveredCategory === cat.category
@@ -342,7 +342,7 @@ function getCategoryIcon(cat: ExpenseCategory) {
           <!-- Color Progress Bar for this category -->
           <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
             <div
-              class="h-full rounded-full transition-all duration-300"
+              class="h-full rounded-full transition-[width] duration-300"
               :style="{
                 width: `${Math.min(cat.percentage, 100)}%`,
                 backgroundColor: cat.color,

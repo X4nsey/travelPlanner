@@ -222,7 +222,7 @@ const dailyPreview = computed(() => (weather.value?.daily || []).slice(0, 7));
         type="button"
         @click="selectCity(city.name)"
         :class="[
-          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all',
+          'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors',
           selectedCity === city.name
             ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
             : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:bg-teal-50 dark:hover:bg-teal-500/15 hover:text-teal-700 dark:hover:text-teal-300 hover:border-teal-200 dark:hover:border-teal-500/40',

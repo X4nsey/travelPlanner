@@ -320,7 +320,7 @@ onBeforeUnmount(() => {
       @load="handleLoad"
       @error="handleError"
       :class="[
-        'w-full h-full object-cover transition-all duration-500 ease-out',
+        'w-full h-full object-cover transition-[opacity,transform] duration-500 ease-out',
         imgClass,
         isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]',
       ]"
@@ -365,7 +365,7 @@ onBeforeUnmount(() => {
     <!-- Optional Attribution Overlay -->
     <div
       v-if="showAttribution && authorName && !hasError"
-      class="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded-md bg-slate-900/55 backdrop-blur-sm text-[10px] text-white/90"
+      class="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded-md bg-slate-900/75 text-[10px] text-white/95"
       @click.stop
     >
       <span>Фото: </span>

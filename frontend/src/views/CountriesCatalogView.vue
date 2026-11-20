@@ -140,7 +140,7 @@ function handleOpenCountry(country: CountryData) {
             type="button"
             @click="selectedContinent = cont.value"
             :class="[
-              'px-3.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all',
+              'px-3.5 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-colors',
               selectedContinent === cont.value
                 ? 'bg-teal-600 text-white shadow-sm'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100',

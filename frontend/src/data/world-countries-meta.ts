@@ -1,4 +1,5 @@
 import type { ContinentName } from '@/types';
+import { flagEmojiToIsoAlpha2 } from '@/utils/countryFlag';
 
 export interface WorldCountryMeta {
   nameRu: string;
@@ -211,4 +212,34 @@ export function lookupWorldCountryMeta(
   }
 
   return undefined;
+}
+
+let cachedNameRuToIso: Map<string, string> | null = null;
+
+/**
+ * Resolves an ISO alpha-2 code (e.g. 'FR', 'RU', 'JP') from a Russian or known English country name.
+ */
+export function lookupIsoAlpha2ByCountryName(name?: string | null): string | null {
+  if (!name) return null;
+  const clean = name.trim().toLowerCase();
+  if (!clean) return null;
+
+  if (!cachedNameRuToIso) {
+    cachedNameRuToIso = new Map<string, string>();
+    for (const meta of Object.values(WORLD_COUNTRIES_BY_ISO)) {
+      const iso = flagEmojiToIsoAlpha2(meta.flag);
+      if (iso) {
+        cachedNameRuToIso.set(meta.nameRu.toLowerCase(), iso);
+      }
+    }
+    for (const [enKey, meta] of Object.entries(WORLD_COUNTRIES_BY_NAME)) {
+      const iso = flagEmojiToIsoAlpha2(meta.flag);
+      if (iso) {
+        cachedNameRuToIso.set(enKey, iso);
+        cachedNameRuToIso.set(meta.nameRu.toLowerCase(), iso);
+      }
+    }
+  }
+
+  return cachedNameRuToIso.get(clean) ?? null;
 }

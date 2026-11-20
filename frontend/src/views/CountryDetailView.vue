@@ -24,6 +24,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import type { CountryData, CountryPhoto } from '@/types';
 import AdaptiveLayout from '@/layouts/AdaptiveLayout.vue';
 import SmartImage from '@/components/ui/SmartImage.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 import FavoriteButton from '@/components/countries/FavoriteButton.vue';
 import AuthPromptModal from '@/components/countries/AuthPromptModal.vue';
 import CountryTravelInfoSection from '@/components/countries/CountryTravelInfoSection.vue';
@@ -248,7 +249,7 @@ function openAuthPromptForFavorite() {
             <!-- Top Row: Continent Badge & Favorite Button -->
             <div class="flex items-center justify-between gap-3">
               <span
-                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md text-xs font-bold text-slate-900 shadow"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/95 text-xs font-bold text-slate-900 shadow"
               >
                 <Globe2 class="w-3.5 h-3.5 text-teal-600" />
                 <span>{{ country.continent }}</span>
@@ -265,13 +266,14 @@ function openAuthPromptForFavorite() {
             <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
               <div class="space-y-3 max-w-3xl text-white">
                 <div class="flex items-center gap-3.5">
-                  <img
-                    v-if="country.flagUrl"
-                    :src="country.flagUrl"
-                    :alt="country.nameRu"
-                    class="w-12 h-8 sm:w-14 sm:h-10 object-cover rounded-lg shadow-md border border-white/30 shrink-0"
+                  <CountryFlag
+                    :code="country.isoAlpha2 || country.flagEmoji"
+                    :flagUrl="country.flagUrl"
+                    :name="country.nameRu"
+                    size="lg"
+                    eager
+                    class="!w-12 !h-8 sm:!w-14 sm:!h-10 !rounded-lg shadow-md"
                   />
-                  <span v-else class="text-4xl">{{ country.flagEmoji }}</span>
 
                   <div>
                     <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
@@ -411,7 +413,7 @@ function openAuthPromptForFavorite() {
             v-for="(photo, idx) in galleryPhotos"
             :key="idx"
             @click="openLightbox(idx)"
-            class="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card transition-all cursor-pointer flex flex-col"
+            class="group bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card transition-shadow cursor-pointer flex flex-col"
           >
             <SmartImage
               :src="photo.url"
@@ -431,7 +433,7 @@ function openAuthPromptForFavorite() {
               <div class="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
                 <span
                   v-if="photo.category"
-                  class="px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm text-[11px] font-bold text-slate-800 dark:text-slate-100 shadow-sm"
+                  class="px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/90 text-[11px] font-bold text-slate-800 dark:text-slate-100 shadow-sm"
                 >
                   {{ photo.category }}
                 </span>
@@ -467,7 +469,7 @@ function openAuthPromptForFavorite() {
           <article
             v-for="city in country.popularCities"
             :key="city.name"
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:shadow-card dark:hover:border-slate-700 transition-all"
+            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:shadow-card dark:hover:border-slate-700 transition-[border-color,box-shadow]"
           >
             <div>
               <SmartImage
@@ -528,7 +530,7 @@ function openAuthPromptForFavorite() {
           <article
             v-for="lm in country.landmarks"
             :key="lm.name"
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:border-teal-200 dark:hover:border-teal-500/40 hover:shadow-card transition-all"
+            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:border-teal-200 dark:hover:border-teal-500/40 hover:shadow-card transition-[border-color,box-shadow]"
           >
             <div>
               <SmartImage
@@ -645,7 +647,7 @@ function openAuthPromptForFavorite() {
       >
         <div
           v-if="activeLightboxPhoto"
-          class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8"
+          class="fixed inset-0 z-50 bg-slate-950/92 backdrop-blur-sm flex flex-col items-center justify-center p-4 sm:p-8"
           @click.self="closeLightbox"
         >
           <!-- Top Bar -->
@@ -687,6 +689,7 @@ function openAuthPromptForFavorite() {
             <img
               :src="activeLightboxPhoto.url"
               :alt="activeLightboxPhoto.alt"
+              loading="eager"
               decoding="async"
               class="max-h-[75vh] w-auto max-w-full rounded-2xl shadow-2xl object-contain border border-white/15"
             />

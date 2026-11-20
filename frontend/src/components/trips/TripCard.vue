@@ -20,7 +20,10 @@ import {
   getTripTimingStatus,
 } from '@/composables/useFormatters';
 import { resolveTripTheme } from '@/composables/useTripTheme';
+import { useCountryStore } from '@/stores/country.store';
+import { lookupIsoAlpha2ByCountryName } from '@/data/world-countries-meta';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 interface Props {
   trip: Trip;
@@ -38,21 +41,31 @@ const emit = defineEmits<{
   (e: 'delete', trip: Trip): void;
 }>();
 
+const countryStore = useCountryStore();
+
 const timing = computed(() => getTripTimingStatus(props.trip.startDate, props.trip.endDate));
 const tripTheme = computed(() => resolveTripTheme(props.trip.id, props.trip.tripType));
+const matchedCountry = computed(() => countryStore.findCountryByQuery(props.trip.country));
+const countryFlagCode = computed(
+  () =>
+    matchedCountry.value?.isoAlpha2 ||
+    matchedCountry.value?.flagEmoji ||
+    lookupIsoAlpha2ByCountryName(props.trip.country)
+);
+const countryFlagUrl = computed(() => matchedCountry.value?.flagUrl || null);
 </script>
 
 <template>
   <article
     :class="[
-      'group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card transition-all duration-200 flex flex-col justify-between overflow-hidden',
+      'group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card transition-[border-color,box-shadow] duration-200 flex flex-col justify-between overflow-hidden',
       tripTheme.cardHoverBorderClass,
     ]"
   >
     <div>
       <!-- Atmospheric Top Accent Bar -->
       <div
-        :class="['h-1.5 w-full transition-all duration-300', tripTheme.cardTopBarClass]"
+        :class="['h-1.5 w-full transition-colors duration-300', tripTheme.cardTopBarClass]"
         aria-hidden="true"
       />
 
@@ -86,7 +99,14 @@ const tripTheme = computed(() => resolveTripTheme(props.trip.id, props.trip.trip
         </h3>
 
         <div :class="['flex items-center gap-1.5 text-sm font-medium mb-4', tripTheme.accentTextClass]">
-          <MapPin :class="['w-4 h-4 shrink-0', tripTheme.accentIconClass]" />
+          <CountryFlag
+            v-if="countryFlagCode || countryFlagUrl"
+            :code="countryFlagCode"
+            :flagUrl="countryFlagUrl"
+            :name="trip.country"
+            size="xs"
+          />
+          <MapPin v-else :class="['w-4 h-4 shrink-0', tripTheme.accentIconClass]" />
           <span class="truncate">{{ trip.country }}, {{ trip.city }}</span>
         </div>
 

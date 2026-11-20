@@ -23,6 +23,7 @@ import { formatCurrency, formatDaysLabel } from '@/composables/useFormatters';
 import type { TripTemplate, TripTemplateEvent } from '@/types';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import SmartImage from '@/components/ui/SmartImage.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 const SLIDE_DURATION_MS = 6000;
 
@@ -399,14 +400,6 @@ function pickKeyEvents(events: TripTemplateEvent[]): TripTemplateEvent[] {
   return picked;
 }
 
-const failedFlagUrls = ref<Record<string, boolean>>({});
-
-function handleFlagError(url: string) {
-  if (url) {
-    failedFlagUrls.value[url] = true;
-  }
-}
-
 const slides = computed(() =>
   templates.value.map((tpl) => {
     const matchedCountry = countryStore.findCountryByQuery(tpl.country);
@@ -417,6 +410,7 @@ const slides = computed(() =>
     const isoCode = (matchedCountry?.isoAlpha2 || fallbackMedia?.isoAlpha2 || '')
       .trim()
       .toLowerCase();
+    const isoAlpha2 = isoCode ? isoCode.toUpperCase() : '';
     const flagUrl = isoCode
       ? `https://flagcdn.com/w40/${isoCode}.png`
       : fallbackMedia?.flagUrl || matchedCountry?.flagUrl || '';
@@ -433,6 +427,7 @@ const slides = computed(() =>
       photoUrl,
       thumbUrl,
       photoAuthor,
+      isoAlpha2,
       flagUrl,
       flagLargeUrl,
       flagEmoji,
@@ -565,21 +560,18 @@ onBeforeUnmount(() => {
           :aria-selected="idx === activeIndex"
           @click="goToSlide(idx)"
           :class="[
-            'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 shrink-0 whitespace-nowrap',
+            'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors duration-200 shrink-0 whitespace-nowrap',
             idx === activeIndex
               ? ['bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm', slide.theme.ringClass]
               : 'bg-white/90 dark:bg-slate-900/80 border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:border-slate-300 dark:hover:border-slate-700',
           ]"
         >
-          <img
-            v-if="slide.flagUrl && !failedFlagUrls[slide.flagUrl]"
-            :src="slide.flagUrl"
-            :alt="slide.template.country"
-            decoding="async"
-            @error="handleFlagError(slide.flagUrl)"
-            class="w-4 h-3 object-cover rounded-[2px] border border-slate-200/80 dark:border-slate-700 shrink-0"
+          <CountryFlag
+            :code="slide.isoAlpha2 || slide.flagEmoji"
+            :flagUrl="slide.flagUrl"
+            :name="slide.template.country"
+            size="xs"
           />
-          <span v-else class="text-sm leading-none" aria-hidden="true">{{ slide.flagEmoji }}</span>
           <span>{{ slide.template.city }}</span>
         </button>
       </div>
@@ -671,22 +663,18 @@ onBeforeUnmount(() => {
             >
               <div
                 :class="[
-                  'absolute -top-16 -right-16 w-56 h-56 rounded-full blur-3xl opacity-80',
+                  'absolute -top-16 -right-16 w-56 h-56 rounded-full opacity-60 pointer-events-none',
                   activeSlide.theme.heroGlowClass,
                 ]"
                 aria-hidden="true"
               />
-              <img
-                v-if="activeSlide.flagLargeUrl && !failedFlagUrls[activeSlide.flagLargeUrl]"
-                :src="activeSlide.flagLargeUrl"
-                :alt="activeSlide.template.country"
-                decoding="async"
-                @error="handleFlagError(activeSlide.flagLargeUrl)"
-                class="w-20 h-14 object-cover rounded-xl shadow-md border border-white/60 dark:border-slate-700 mb-3 relative z-10"
+              <CountryFlag
+                :code="activeSlide.isoAlpha2 || activeSlide.flagEmoji"
+                :flagUrl="activeSlide.flagLargeUrl"
+                :name="activeSlide.template.country"
+                size="lg"
+                class="!w-20 !h-14 !rounded-xl shadow-md mb-3 relative z-10"
               />
-              <span v-else class="text-5xl mb-3 relative z-10" aria-hidden="true">
-                {{ activeSlide.flagEmoji }}
-              </span>
               <p class="text-xl font-extrabold text-slate-900 dark:text-slate-100 relative z-10">
                 {{ activeSlide.template.city }}
               </p>
@@ -704,22 +692,19 @@ onBeforeUnmount(() => {
             <!-- Top Overlays: Country + Duration -->
             <div class="absolute top-4 left-4 right-4 z-10 flex items-center justify-between gap-2">
               <span
-                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 shadow-sm backdrop-blur-md border border-white/40 dark:border-slate-700/80"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/95 text-slate-900 dark:text-slate-100 shadow-sm border border-white/40 dark:border-slate-700/80"
               >
-                <img
-                  v-if="activeSlide.flagUrl && !failedFlagUrls[activeSlide.flagUrl]"
-                  :src="activeSlide.flagUrl"
-                  :alt="activeSlide.template.country"
-                  decoding="async"
-                  @error="handleFlagError(activeSlide.flagUrl)"
-                  class="w-4 h-3 object-cover rounded-[2px] border border-slate-200/80 dark:border-slate-700 shrink-0"
+                <CountryFlag
+                  :code="activeSlide.isoAlpha2 || activeSlide.flagEmoji"
+                  :flagUrl="activeSlide.flagUrl"
+                  :name="activeSlide.template.country"
+                  size="xs"
                 />
-                <span v-else aria-hidden="true">{{ activeSlide.flagEmoji }}</span>
                 <span>{{ activeSlide.template.country }}</span>
               </span>
 
               <span
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900/75 text-white backdrop-blur-md border border-white/15"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900/85 text-white backdrop-blur-sm border border-white/15"
               >
                 <CalendarDays class="w-3.5 h-3.5 text-teal-300" />
                 <span>{{ formatDaysLabel(activeSlide.template.durationDays) }}</span>
@@ -730,14 +715,14 @@ onBeforeUnmount(() => {
             <div class="absolute bottom-4 left-4 right-4 z-10 space-y-2.5">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span
-                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900/75 text-white backdrop-blur-md border border-white/15"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900/85 text-white backdrop-blur-sm border border-white/15"
                 >
                   <Compass class="w-3 h-3 text-teal-300" />
                   <span>{{ getTripTypeLabelRu(activeSlide.template.tripType) }}</span>
                 </span>
                 <span
                   v-if="activeSlide.template.paceLabel"
-                  class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/90 dark:bg-slate-900/85 text-slate-800 dark:text-slate-100 backdrop-blur-md"
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 dark:bg-slate-900/90 text-slate-800 dark:text-slate-100"
                 >
                   Темп: {{ activeSlide.template.paceLabel }}
                 </span>
@@ -880,7 +865,7 @@ onBeforeUnmount(() => {
         tabindex="-1"
         @click="goToSlide(idx)"
         :class="[
-          'h-2 rounded-full transition-all duration-300',
+          'h-2 rounded-full transition-[width,background-color] duration-300',
           idx === activeIndex
             ? ['w-7', slide.theme.heroAccentStripClass]
             : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600',

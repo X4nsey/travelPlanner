@@ -2,6 +2,7 @@
 import { Landmark, ArrowUpRight, Globe2 } from 'lucide-vue-next';
 import type { CountryData } from '@/types';
 import SmartImage from '@/components/ui/SmartImage.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 import FavoriteButton from './FavoriteButton.vue';
 
 interface Props {
@@ -19,7 +20,7 @@ const emit = defineEmits<{
 <template>
   <article
     @click="emit('select', country)"
-    class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card hover:border-teal-300/90 dark:hover:border-teal-500/40 transition-all duration-300 overflow-hidden cursor-pointer flex flex-col justify-between"
+    class="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none hover:shadow-card hover:border-teal-300/90 dark:hover:border-teal-500/40 transition-[border-color,box-shadow] duration-200 overflow-hidden cursor-pointer flex flex-col justify-between"
   >
     <div>
       <!-- Country Cover Photo with consistent 16:10 aspect ratio -->
@@ -38,7 +39,7 @@ const emit = defineEmits<{
         <!-- Top Badges -->
         <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
           <span
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm text-xs font-semibold text-slate-800 dark:text-slate-100 border border-white/40 dark:border-slate-700/80 shadow-sm"
+            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/95 dark:bg-slate-900/90 text-xs font-semibold text-slate-800 dark:text-slate-100 border border-white/40 dark:border-slate-700/80 shadow-sm"
           >
             <Globe2 class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             {{ country.continent }}
@@ -54,14 +55,13 @@ const emit = defineEmits<{
         <!-- Bottom Overlay: Flag & Country Name -->
         <div class="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-2 text-white">
           <div class="flex items-center gap-2.5 min-w-0">
-            <img
-              v-if="country.flagUrl"
-              :src="country.flagUrl"
-              :alt="country.nameRu"
-              loading="lazy"
-              class="w-7 h-5 object-cover rounded shadow-sm border border-white/30 shrink-0"
+            <CountryFlag
+              :code="country.isoAlpha2 || country.flagEmoji"
+              :flagUrl="country.flagUrl"
+              :name="country.nameRu"
+              size="md"
+              class="!w-7 !h-5 shadow-sm"
             />
-            <span v-else class="text-2xl leading-none">{{ country.flagEmoji }}</span>
             <div class="min-w-0">
               <h3 class="text-lg font-extrabold leading-tight truncate drop-shadow-sm">
                 {{ country.nameRu }}

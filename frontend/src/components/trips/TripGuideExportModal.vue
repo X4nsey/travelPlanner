@@ -477,7 +477,7 @@ function handleDownloadHtml() {
                     type="button"
                     @click="selectPreset(preset.id)"
                     :class="[
-                      'w-full text-left p-3 rounded-xl border transition-all flex items-start gap-3',
+                      'w-full text-left p-3 rounded-xl border transition-colors flex items-start gap-3',
                       activePreset === preset.id
                         ? 'bg-white dark:bg-slate-800 border-teal-500 ring-2 ring-teal-500/15 shadow-sm'
                         : 'bg-white/80 dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-white dark:hover:bg-slate-800',

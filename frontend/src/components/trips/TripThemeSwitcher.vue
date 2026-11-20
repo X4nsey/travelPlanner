@@ -145,7 +145,7 @@ onBeforeUnmount(() => {
       aria-label="Переключить атмосферу поездки"
       @click="togglePopover"
       :class="[
-        'inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-slate-900',
+        'inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-slate-900',
         'bg-white/90 hover:bg-white text-slate-800 border-slate-200/90 hover:border-slate-300 shadow-sm',
         'dark:bg-slate-800/90 dark:hover:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:hover:border-slate-600 dark:shadow-none',
         isOpen ? activeTheme.ringClass : '',
@@ -153,7 +153,7 @@ onBeforeUnmount(() => {
     >
       <span
         :class="[
-          'w-3 h-3 rounded-full shrink-0 shadow-sm ring-1 ring-black/10 dark:ring-white/25 transition-all duration-300',
+          'w-3 h-3 rounded-full shrink-0 shadow-sm ring-1 ring-black/10 dark:ring-white/25 transition-colors duration-300',
           activeTheme.swatchClass,
         ]"
         aria-hidden="true"
@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
             type="button"
             @click="selectPreference('auto')"
             :class="[
-              'w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-all duration-150',
+              'w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-colors duration-150',
               isAuto
                 ? [defaultTheme.switcherActiveBgClass, defaultTheme.ringClass]
                 : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/70',
@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
             type="button"
             @click="selectPreference(preset.id)"
             :class="[
-              'w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-all duration-150',
+              'w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-xl border text-left transition-colors duration-150',
               !isAuto && preference === preset.id
                 ? [preset.switcherActiveBgClass, preset.ringClass]
                 : isAuto && activeTheme.id === preset.id

@@ -19,9 +19,9 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+  <div class="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
     <!-- Top Navigation -->
-    <header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
+    <header class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200/80 dark:border-slate-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
         <!-- Logo -->
         <RouterLink to="/" class="flex items-center gap-2.5 group shrink-0">
@@ -83,7 +83,7 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
               :aria-pressed="themeMode === opt.mode"
               @click="setTheme(opt.mode)"
               :class="[
-                'p-1.5 rounded-lg transition-all duration-150',
+                'p-1.5 rounded-lg transition-colors duration-150',
                 themeMode === opt.mode
                   ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-700'
                   : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
@@ -127,7 +127,7 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
               :aria-pressed="themeMode === opt.mode"
               @click="setTheme(opt.mode)"
               :class="[
-                'p-1.5 rounded-lg transition-all',
+                'p-1.5 rounded-lg transition-colors',
                 themeMode === opt.mode
                   ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-sm'
                   : 'text-slate-500 dark:text-slate-400',

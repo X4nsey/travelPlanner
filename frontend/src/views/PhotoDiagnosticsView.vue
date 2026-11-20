@@ -22,6 +22,8 @@ import {
 import AdaptiveLayout from '@/layouts/AdaptiveLayout.vue';
 import SmartImage, { clearSmartImageCache } from '@/components/ui/SmartImage.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
+import { lookupIsoAlpha2ByCountryName } from '@/data/world-countries-meta';
 import { countryService } from '@/services/country.service';
 import { useCountryStore } from '@/stores/country.store';
 import { useToastStore } from '@/stores/toast.store';
@@ -336,7 +338,18 @@ function getStatusBadge(item: PhotoDiagnosticItem) {
   };
 }
 
+function resolveDiagnosticFlagCode(item: Pick<PhotoDiagnosticItem, 'countrySlug' | 'countryNameRu' | 'flagEmoji'>): string | null {
+  const matched = countryStore.findCountryByQuery(item.countrySlug) || countryStore.findCountryByQuery(item.countryNameRu);
+  return matched?.isoAlpha2 || item.flagEmoji || lookupIsoAlpha2ByCountryName(item.countryNameRu);
+}
+
+function resolveDiagnosticFlagUrl(item: Pick<PhotoDiagnosticItem, 'countrySlug' | 'countryNameRu'>): string | null {
+  const matched = countryStore.findCountryByQuery(item.countrySlug) || countryStore.findCountryByQuery(item.countryNameRu);
+  return matched?.flagUrl || null;
+}
+
 onMounted(() => {
+  countryStore.ensureCountriesLoaded().catch(() => {});
   loadDiagnostics();
 });
 </script>
@@ -482,7 +495,7 @@ onMounted(() => {
                 :value="c.slug"
                 class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
               >
-                {{ c.flagEmoji }} {{ c.nameRu }}
+                {{ c.nameRu }}
               </option>
             </select>
           </div>
@@ -563,8 +576,14 @@ onMounted(() => {
               @error="handleImgError(item.id)"
             >
               <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 pointer-events-none">
-                <span class="px-2.5 py-1 rounded-full bg-slate-900/75 backdrop-blur-sm text-white text-[11px] font-bold truncate">
-                  {{ item.flagEmoji }} {{ item.countryNameRu }}
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/85 text-white text-[11px] font-bold truncate">
+                  <CountryFlag
+                    :code="resolveDiagnosticFlagCode(item)"
+                    :flagUrl="resolveDiagnosticFlagUrl(item)"
+                    :name="item.countryNameRu"
+                    size="xs"
+                  />
+                  <span class="truncate">{{ item.countryNameRu }}</span>
                 </span>
                 <div class="flex items-center gap-1 shrink-0">
                   <span
@@ -576,7 +595,7 @@ onMounted(() => {
                   </span>
                   <span
                     :class="[
-                      'px-2.5 py-0.5 rounded-full border text-[11px] font-bold backdrop-blur-sm',
+                      'px-2.5 py-0.5 rounded-full border text-[11px] font-bold',
                       getStatusBadge(item).classes,
                     ]"
                   >
@@ -637,7 +656,7 @@ onMounted(() => {
               <button
                 type="button"
                 @click="openReplaceModal(item)"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-500/60 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-teal-700 dark:hover:text-teal-300 transition"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-500/60 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
               >
                 <Edit3 class="w-3.5 h-3.5" />
                 <span>Заменить</span>
@@ -647,7 +666,7 @@ onMounted(() => {
                 type="button"
                 :disabled="processingItemId === item.id"
                 @click="handleAutoWikimedia(item)"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 hover:bg-teal-100 dark:hover:bg-teal-500/25 text-xs font-bold text-teal-700 dark:text-teal-300 transition disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-50 dark:bg-teal-500/15 border border-teal-200 dark:border-teal-500/30 hover:bg-teal-100 dark:hover:bg-teal-500/25 text-xs font-bold text-teal-700 dark:text-teal-300 transition-colors disabled:opacity-50"
                 title="Подобрать проверенное фото из Wikimedia Commons API"
               >
                 <Sparkles class="w-3.5 h-3.5" />
@@ -658,7 +677,7 @@ onMounted(() => {
                 type="button"
                 :disabled="processingItemId === item.id"
                 @click="handleReverify(item)"
-                class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 transition disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-colors disabled:opacity-50"
                 title="Повторно проверить гео-соответствие и доступность URL"
               >
                 <RefreshCw :class="['w-3.5 h-3.5', processingItemId === item.id ? 'animate-spin' : '']" />
@@ -669,7 +688,7 @@ onMounted(() => {
                 type="button"
                 :disabled="processingItemId === item.id"
                 @click="handleResetOverride(item)"
-                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-xs font-bold text-rose-700 dark:text-rose-300 transition disabled:opacity-50"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 hover:bg-rose-100 dark:hover:bg-rose-500/25 text-xs font-bold text-rose-700 dark:text-rose-300 transition-colors disabled:opacity-50"
                 title="Снять ручное закрепление и восстановить стандартное изображение"
               >
                 <RotateCcw :class="['w-3.5 h-3.5', processingItemId === item.id ? 'animate-spin' : '']" />
@@ -724,8 +743,14 @@ onMounted(() => {
         <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg p-6 space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-xs font-bold text-teal-600 dark:text-teal-400">
-                {{ editingItem.flagEmoji }} {{ editingItem.countryNameRu }} • {{ editingItem.sectionLabel }}
+              <span class="inline-flex items-center gap-1.5 text-xs font-bold text-teal-600 dark:text-teal-400">
+                <CountryFlag
+                  :code="resolveDiagnosticFlagCode(editingItem)"
+                  :flagUrl="resolveDiagnosticFlagUrl(editingItem)"
+                  :name="editingItem.countryNameRu"
+                  size="xs"
+                />
+                <span>{{ editingItem.countryNameRu }} • {{ editingItem.sectionLabel }}</span>
               </span>
               <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
                 Замена фотографии объекта

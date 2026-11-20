@@ -29,6 +29,7 @@ import {
 } from '@/utils/weatherFormatters';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 import CountryTravelInfoSection from '@/components/countries/CountryTravelInfoSection.vue';
 import WeatherIcon from '@/components/weather/WeatherIcon.vue';
 
@@ -257,15 +258,13 @@ function formatDayPrecipitationBadge(day: WeatherDailyItemDto): string {
     <div v-if="matchedCountry && hasTravelInfo" class="space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2.5">
         <div class="flex items-center gap-2.5 min-w-0">
-          <img
-            v-if="matchedCountry.flagUrl"
-            :src="matchedCountry.flagUrl"
-            :alt="matchedCountry.nameRu"
-            loading="lazy"
-            decoding="async"
-            class="w-7 h-5 object-cover rounded-md shadow-sm border border-slate-200/80 dark:border-slate-700 shrink-0"
+          <CountryFlag
+            :code="matchedCountry.isoAlpha2 || matchedCountry.flagEmoji"
+            :flagUrl="matchedCountry.flagUrl"
+            :name="matchedCountry.nameRu"
+            size="md"
+            class="!w-7 !h-5 shadow-sm"
           />
-          <span v-else class="text-lg shrink-0" aria-hidden="true">{{ matchedCountry.flagEmoji }}</span>
           <div class="min-w-0">
             <div class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
               <BookOpen class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />

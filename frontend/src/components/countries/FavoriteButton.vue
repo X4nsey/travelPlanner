@@ -49,16 +49,16 @@ async function onClick(event: MouseEvent) {
     :title="active ? 'Убрать из избранного' : 'Добавить в избранное'"
     :aria-label="active ? 'Убрать из избранного' : 'Добавить в избранное'"
     :class="[
-      'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 focus:outline-none active:scale-95',
+      'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-[color,background-color,border-color,transform] duration-200 focus:outline-none active:scale-95',
       showLabel
         ? active
           ? 'px-4 py-2.5 text-sm bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/40 dark:hover:bg-rose-500/30'
           : 'px-4 py-2.5 text-sm bg-white/95 text-slate-700 border border-slate-200 hover:bg-slate-50 dark:bg-slate-900/90 dark:text-slate-100 dark:border-slate-700 dark:hover:bg-slate-800 shadow-sm'
         : size === 'sm'
-          ? 'w-8 h-8 bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-900 shadow-sm border border-slate-200/70 dark:border-slate-700/80'
+          ? 'w-8 h-8 bg-white/95 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-900 shadow-sm border border-slate-200/70 dark:border-slate-700/80'
           : size === 'lg'
-            ? 'w-11 h-11 bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-900 shadow-md border border-slate-200/70 dark:border-slate-700/80'
-            : 'w-9 h-9 bg-white/90 dark:bg-slate-900/85 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-900 shadow-sm border border-slate-200/70 dark:border-slate-700/80',
+            ? 'w-11 h-11 bg-white/95 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-900 shadow-md border border-slate-200/70 dark:border-slate-700/80'
+            : 'w-9 h-9 bg-white/95 dark:bg-slate-900/90 hover:bg-white dark:hover:bg-slate-900 shadow-sm border border-slate-200/70 dark:border-slate-700/80',
     ]"
   >
     <Heart

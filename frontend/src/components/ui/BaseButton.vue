@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const classes = computed(() => {
   const base =
-    'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-slate-900 disabled:opacity-55 disabled:cursor-not-allowed active:scale-[0.99]';
+    'inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-[color,background-color,border-color,box-shadow,transform] duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-slate-900 disabled:opacity-55 disabled:cursor-not-allowed active:scale-[0.99]';
 
   const variants: Record<string, string> = {
     primary:

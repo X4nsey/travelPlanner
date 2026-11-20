@@ -79,7 +79,7 @@ function handleDelete() {
         :disabled="isBusy"
         @click="handleToggle"
         :class="[
-          'mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all focus:outline-none focus:ring-2 focus:ring-teal-500/25',
+          'mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500/25',
           isBusy ? 'cursor-wait' : 'cursor-pointer',
           item.isPacked
             ? 'bg-emerald-600 border-emerald-600 text-white shadow-sm'

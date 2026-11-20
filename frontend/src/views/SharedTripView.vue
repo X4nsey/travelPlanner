@@ -55,6 +55,7 @@ import {
   getTripTimingStatus,
 } from '@/composables/useFormatters';
 import { resolveTripTheme } from '@/composables/useTripTheme';
+import { lookupIsoAlpha2ByCountryName } from '@/data/world-countries-meta';
 import type {
   EventCategory,
   ExpenseCategory,
@@ -66,6 +67,7 @@ import type {
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 const CountryTravelInfoSection = defineAsyncComponent(
   () => import('@/components/countries/CountryTravelInfoSection.vue')
@@ -287,8 +289,13 @@ const headerFlagUrl = computed(
   () => sharedData.value?.countryInfo?.flagUrl || fallbackCatalogCountry.value?.flagUrl || ''
 );
 
-const headerFlagEmoji = computed(
-  () => sharedData.value?.countryInfo?.flagEmoji || fallbackCatalogCountry.value?.flagEmoji || ''
+const headerFlagCode = computed(
+  () =>
+    fallbackCatalogCountry.value?.isoAlpha2 ||
+    sharedData.value?.countryInfo?.flagEmoji ||
+    fallbackCatalogCountry.value?.flagEmoji ||
+    lookupIsoAlpha2ByCountryName(trip.value?.country) ||
+    ''
 );
 
 const timing = computed(() => {
@@ -522,7 +529,7 @@ function goToLoginWithRedirect() {
   <div class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
     <!-- Top Public Header Bar -->
     <header
-      class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-sm dark:shadow-none"
+      class="sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200/80 dark:border-slate-800 shadow-sm dark:shadow-none"
     >
       <div
         class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4"
@@ -650,13 +657,13 @@ function goToLoginWithRedirect() {
             <div :class="['h-1.5 w-full', tripTheme.heroAccentStripClass]" />
             <div
               :class="[
-                'absolute -top-24 -right-20 w-72 h-72 rounded-full blur-3xl opacity-80 dark:opacity-70',
+                'absolute -top-24 -right-20 w-72 h-72 rounded-full opacity-55 dark:opacity-45',
                 tripTheme.heroGlowClass,
               ]"
             />
             <div
               :class="[
-                'absolute -bottom-28 -left-20 w-64 h-64 rounded-full blur-3xl opacity-45 dark:opacity-35',
+                'absolute -bottom-28 -left-20 w-64 h-64 rounded-full opacity-35 dark:opacity-25',
                 tripTheme.heroGlowClass,
               ]"
             />
@@ -666,21 +673,14 @@ function goToLoginWithRedirect() {
             <div class="flex flex-col md:flex-row md:items-start justify-between gap-5">
               <div class="flex items-start gap-4 min-w-0">
                 <!-- Country Flag -->
-                <img
-                  v-if="headerFlagUrl"
-                  :src="headerFlagUrl"
-                  :alt="trip.country"
-                  loading="lazy"
-                  decoding="async"
-                  class="w-16 h-11 object-cover rounded-xl border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0 mt-1"
+                <CountryFlag
+                  v-if="headerFlagCode || headerFlagUrl"
+                  :code="headerFlagCode"
+                  :flagUrl="headerFlagUrl"
+                  :name="trip.country"
+                  size="lg"
+                  class="!w-16 !h-11 !rounded-xl shadow-sm mt-1"
                 />
-                <div
-                  v-else-if="headerFlagEmoji"
-                  class="w-16 h-11 rounded-xl bg-white/85 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-3xl shrink-0 mt-1 shadow-sm"
-                  aria-hidden="true"
-                >
-                  {{ headerFlagEmoji }}
-                </div>
                 <div
                   v-else
                   :class="[
@@ -760,7 +760,7 @@ function goToLoginWithRedirect() {
               "
             >
               <div
-                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
+                class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
                 <div
                   class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
@@ -776,7 +776,7 @@ function goToLoginWithRedirect() {
               </div>
 
               <div
-                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
+                class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
                 <div
                   class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"
@@ -792,7 +792,7 @@ function goToLoginWithRedirect() {
               </div>
 
               <div
-                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
+                class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
                 <div
                   class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"
@@ -809,7 +809,7 @@ function goToLoginWithRedirect() {
 
               <div
                 v-if="sharedData.permissions.showExpenses && expensesData"
-                class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
+                class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5"
               >
                 <div
                   class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
@@ -1073,7 +1073,7 @@ function goToLoginWithRedirect() {
               <!-- Progress Bar -->
               <div class="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
-                  class="h-full rounded-full transition-all duration-300"
+                  class="h-full rounded-full transition-[width] duration-300"
                   :class="
                     localPackingProgress === 100 && packingItems.length > 0
                       ? 'bg-emerald-500'
@@ -1206,7 +1206,7 @@ function goToLoginWithRedirect() {
                         @change="toggleLocalPacked(item.key)"
                       />
                       <span
-                        class="mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all"
+                        class="mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-colors"
                         :class="
                           localPackedMap[item.key]
                             ? 'bg-teal-600 border-teal-600 text-white'
@@ -1387,7 +1387,7 @@ function goToLoginWithRedirect() {
                 </p>
                 <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-2 overflow-hidden">
                   <div
-                    class="h-full rounded-full transition-all duration-300"
+                    class="h-full rounded-full transition-[width] duration-300"
                     :style="{ width: Math.min(expensesData.summary.spentPercentage, 100) + '%' }"
                     :class="
                       expensesData.summary.status === 'over_budget'
@@ -1516,7 +1516,7 @@ function goToLoginWithRedirect() {
                       </div>
                       <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                         <div
-                          :class="['h-full rounded-full transition-all duration-300', tripTheme.progressFillClass]"
+                          :class="['h-full rounded-full transition-[width] duration-300', tripTheme.progressFillClass]"
                           :style="{
                             width: Math.max(4, Math.round((day.totalAmount / maxDailyExpenseAmount) * 100)) + '%',
                           }"
@@ -1555,7 +1555,7 @@ function goToLoginWithRedirect() {
                     type="button"
                     @click="selectedExpenseCategory = null"
                     :class="[
-                      'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+                      'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors',
                       selectedExpenseCategory === null
                         ? 'bg-slate-900 dark:bg-teal-600 text-white shadow-sm'
                         : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200',
@@ -1574,7 +1574,7 @@ function goToLoginWithRedirect() {
                         selectedExpenseCategory === catItem.category ? null : catItem.category
                     "
                     :class="[
-                      'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all',
+                      'inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors',
                       selectedExpenseCategory === catItem.category
                         ? 'bg-slate-900 dark:bg-teal-600 text-white border-slate-900 dark:border-teal-600 shadow-sm'
                         : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600',

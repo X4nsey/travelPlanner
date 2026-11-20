@@ -71,11 +71,13 @@ import {
   getTripTimingStatus,
 } from '@/composables/useFormatters';
 import { resolveTripTheme } from '@/composables/useTripTheme';
+import { lookupIsoAlpha2ByCountryName } from '@/data/world-countries-meta';
 import DashboardLayout from '@/layouts/DashboardLayout.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseSpinner from '@/components/ui/BaseSpinner.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 import TripThemeSwitcher from '@/components/trips/TripThemeSwitcher.vue';
 import type { GuideReloadableSection } from '@/components/trips/TripGuideExportModal.vue';
 
@@ -226,6 +228,15 @@ const tripTheme = computed(() =>
 const matchedCountry = computed(() => {
   if (!trip.value?.country) return undefined;
   return countryStore.findCountryByQuery(trip.value.country);
+});
+
+const tripCountryFlagCode = computed(() => {
+  if (!trip.value?.country) return null;
+  return (
+    matchedCountry.value?.isoAlpha2 ||
+    matchedCountry.value?.flagEmoji ||
+    lookupIsoAlpha2ByCountryName(trip.value.country)
+  );
 });
 
 const resolvedTravelInfo = computed<CountryTravelInfo | null>(() => {
@@ -743,17 +754,17 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           aria-hidden="true"
         >
           <div
-            :class="['h-1.5 w-full transition-all duration-300', tripTheme.heroAccentStripClass]"
+            :class="['h-1.5 w-full transition-colors duration-300', tripTheme.heroAccentStripClass]"
           />
           <div
             :class="[
-              'absolute -top-24 -right-20 w-72 h-72 rounded-full blur-3xl opacity-80 dark:opacity-70 transition-all duration-500',
+              'absolute -top-24 -right-20 w-72 h-72 rounded-full opacity-55 dark:opacity-45',
               tripTheme.heroGlowClass,
             ]"
           />
           <div
             :class="[
-              'absolute -bottom-28 -left-20 w-64 h-64 rounded-full blur-3xl opacity-45 dark:opacity-35 transition-all duration-500',
+              'absolute -bottom-28 -left-20 w-64 h-64 rounded-full opacity-35 dark:opacity-25',
               tripTheme.heroGlowClass,
             ]"
           />
@@ -779,8 +790,15 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                     tripTheme.badgeClass,
                   ]"
                 >
-                  <MapPin class="w-3.5 h-3.5" />
-                  {{ trip.country }}, {{ trip.city }}
+                  <CountryFlag
+                    v-if="tripCountryFlagCode || matchedCountry?.flagUrl"
+                    :code="tripCountryFlagCode"
+                    :flagUrl="matchedCountry?.flagUrl"
+                    :name="trip.country"
+                    size="xs"
+                  />
+                  <MapPin v-else class="w-3.5 h-3.5" />
+                  <span>{{ trip.country }}, {{ trip.city }}</span>
                 </span>
 
                 <span
@@ -853,7 +871,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
 
           <!-- Key Metrics Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-200/60 dark:border-slate-800/80">
-            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+            <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
                 <Calendar class="w-5 h-5" />
               </div>
@@ -865,7 +883,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               </div>
             </div>
 
-            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+            <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
                 <Clock class="w-5 h-5" />
               </div>
@@ -877,7 +895,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               </div>
             </div>
 
-            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+            <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
                 <Users class="w-5 h-5" />
               </div>
@@ -889,7 +907,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               </div>
             </div>
 
-            <div class="p-4 rounded-xl bg-white/80 dark:bg-slate-900/75 backdrop-blur-sm border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
+            <div class="p-4 rounded-xl bg-white/90 dark:bg-slate-900/85 border border-slate-200/70 dark:border-slate-800/90 flex items-center gap-3.5">
               <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                 <Wallet class="w-5 h-5" />
               </div>
@@ -1066,21 +1084,13 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
           >
             <BookOpen class="w-4 h-4 shrink-0" />
             <span>О стране</span>
-            <img
-              v-if="matchedCountry?.flagUrl"
-              :src="matchedCountry.flagUrl"
-              :alt="matchedCountry.nameRu"
-              loading="lazy"
-              decoding="async"
-              class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/80 dark:border-slate-700 shadow-sm shrink-0"
+            <CountryFlag
+              v-if="tripCountryFlagCode || matchedCountry?.flagUrl"
+              :code="tripCountryFlagCode"
+              :flagUrl="matchedCountry?.flagUrl"
+              :name="matchedCountry?.nameRu || trip.country"
+              size="sm"
             />
-            <span
-              v-else-if="matchedCountry"
-              class="ml-0.5 text-sm leading-none"
-              aria-hidden="true"
-            >
-              {{ matchedCountry.flagEmoji }}
-            </span>
           </button>
         </div>
 
@@ -1214,7 +1224,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               <div class="flex items-center gap-3">
                 <span
                   :class="[
-                    'inline-flex items-center justify-center px-3 py-1 rounded-xl text-xs font-bold transition-all duration-300',
+                    'inline-flex items-center justify-center px-3 py-1 rounded-xl text-xs font-bold transition-colors duration-300',
                     tripTheme.dayBadgeClass,
                   ]"
                 >
@@ -1259,7 +1269,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 <div
                   v-for="ev in eventsByDate[day.date]"
                   :key="ev.id"
-                  class="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-slate-50/40 dark:hover:bg-slate-800/50 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4"
+                  class="group rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-slate-50/40 dark:hover:bg-slate-800/50 transition-colors flex flex-col sm:flex-row sm:items-start justify-between gap-4"
                 >
                   <div class="space-y-2 flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
@@ -1477,7 +1487,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
             <!-- Progress Bar -->
             <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-2 overflow-hidden">
               <div
-                class="h-full rounded-full transition-all duration-300"
+                class="h-full rounded-full transition-[width] duration-300"
                 :style="{ width: Math.min(expenseSummary?.spentPercentage || 0, 100) + '%' }"
                 :class="
                   expenseSummary?.status === 'over_budget'
@@ -1623,7 +1633,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                   <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                     <div
                       :class="[
-                        'h-full rounded-full transition-all duration-300',
+                        'h-full rounded-full transition-[width] duration-300',
                         tripTheme.progressFillClass,
                       ]"
                       :style="{
@@ -1664,7 +1674,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 type="button"
                 @click="selectedCategoryFilter = null"
                 :class="[
-                  'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all',
+                  'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-colors',
                   selectedCategoryFilter === null
                     ? 'bg-slate-900 dark:bg-teal-600 text-white shadow-sm'
                     : 'bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300',
@@ -1685,7 +1695,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
                 type="button"
                 @click="selectedCategoryFilter = selectedCategoryFilter === catItem.category ? null : catItem.category"
                 :class="[
-                  'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-bold transition-all',
+                  'inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs sm:text-sm font-bold transition-colors',
                   selectedCategoryFilter === catItem.category
                     ? 'bg-slate-900 dark:bg-teal-600 text-white border-slate-900 dark:border-teal-600 shadow-sm'
                     : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800',
@@ -1748,7 +1758,7 @@ function handleReloadGuideSection(section: GuideReloadableSection) {
               <div
                 v-for="exp in filteredExpenses"
                 :key="exp.id"
-                class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/50 hover:bg-slate-50/60 dark:hover:bg-slate-800 shadow-sm dark:shadow-none transition-all duration-150 gap-4 group"
+                class="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-800/50 hover:bg-slate-50/60 dark:hover:bg-slate-800 shadow-sm dark:shadow-none transition-colors duration-150 gap-4 group"
               >
                 <!-- Left: Category Icon, Title, Date, Description -->
                 <div class="flex items-start sm:items-center gap-4 min-w-0">

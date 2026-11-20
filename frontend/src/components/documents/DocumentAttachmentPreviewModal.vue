@@ -233,6 +233,8 @@ onBeforeUnmount(() => {
               <img
                 :src="objectUrl"
                 :alt="displayFileName"
+                loading="lazy"
+                decoding="async"
                 class="max-w-full max-h-full rounded-xl shadow-md object-contain bg-white dark:bg-slate-900"
               />
             </div>

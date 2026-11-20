@@ -75,7 +75,7 @@ const contextSnapshot = computed(() => packingStore.packingList?.contextSnapshot
     >
       <div
         :class="[
-          'h-full rounded-full transition-all duration-300',
+          'h-full rounded-full transition-[width] duration-300',
           isComplete ? 'bg-emerald-500' : 'bg-teal-600 dark:bg-teal-500',
         ]"
         :style="{ width: barWidthStyle }"

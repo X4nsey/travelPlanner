@@ -11,6 +11,7 @@ import {
 import type { CountryData } from '@/types';
 import { useCountryStore } from '@/stores/country.store';
 import SmartImage from '@/components/ui/SmartImage.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 interface Props {
   modelValue?: string;
@@ -155,15 +156,12 @@ function clearSelection(event: MouseEvent) {
           />
 
           <div class="flex items-center gap-2 min-w-0">
-            <img
-              v-if="selectedCountryObj.flagUrl"
-              :src="selectedCountryObj.flagUrl"
-              :alt="selectedCountryObj.nameRu"
-              loading="lazy"
-              decoding="async"
-              class="w-5 h-3.5 object-cover rounded-sm border border-slate-200 dark:border-slate-700 shrink-0"
+            <CountryFlag
+              :code="selectedCountryObj.isoAlpha2 || selectedCountryObj.flagEmoji"
+              :flagUrl="selectedCountryObj.flagUrl"
+              :name="selectedCountryObj.nameRu"
+              size="sm"
             />
-            <span v-else class="text-base">{{ selectedCountryObj.flagEmoji }}</span>
 
             <div class="truncate">
               <span class="font-semibold text-slate-900 dark:text-slate-100">{{ selectedCountryObj.nameRu }}</span>
@@ -176,7 +174,7 @@ function clearSelection(event: MouseEvent) {
 
         <!-- Custom Country String (if not in catalog) -->
         <div v-else-if="modelValue" class="flex items-center gap-2 min-w-0 flex-1">
-          <span class="text-base">🌍</span>
+          <Globe2 class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
           <span class="font-semibold text-slate-900 dark:text-slate-100 truncate">{{ modelValue }}</span>
         </div>
 
@@ -255,7 +253,12 @@ function clearSelection(event: MouseEvent) {
 
               <div class="min-w-0">
                 <div class="flex items-center gap-1.5">
-                  <span class="text-sm">{{ item.flagEmoji }}</span>
+                  <CountryFlag
+                    :code="item.isoAlpha2 || item.flagEmoji"
+                    :flagUrl="item.flagUrl"
+                    :name="item.nameRu"
+                    size="xs"
+                  />
                   <span class="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                     {{ item.nameRu }}
                   </span>

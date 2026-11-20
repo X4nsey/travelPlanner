@@ -159,7 +159,7 @@ defineExpose({
             type="button"
             @click="category = cat.key"
             :class="[
-              'flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all duration-150 text-left',
+              'flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-colors duration-150 text-left',
               category === cat.key
                 ? 'bg-slate-900 dark:bg-teal-600 text-white border-slate-900 dark:border-teal-600 shadow-sm'
                 : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/80',

@@ -28,8 +28,10 @@ import {
   pluralizeRu,
 } from '@/composables/useFormatters';
 import { resolveTripTheme } from '@/composables/useTripTheme';
+import { lookupIsoAlpha2ByCountryName } from '@/data/world-countries-meta';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 
 const emit = defineEmits<{
   (e: 'open-templates'): void;
@@ -77,6 +79,7 @@ const countryChips = computed(() => {
     const matched = countryStore.findCountryByQuery(item.country);
     return {
       ...item,
+      isoAlpha2: matched?.isoAlpha2 || matched?.flagEmoji || lookupIsoAlpha2ByCountryName(item.country),
       flagUrl: matched?.flagUrl || '',
       slug: matched?.slug || null,
     };
@@ -86,6 +89,15 @@ const countryChips = computed(() => {
 const featuredCountry = computed(() => {
   if (!featuredTrip.value) return undefined;
   return countryStore.findCountryByQuery(featuredTrip.value.country);
+});
+
+const featuredCountryFlagCode = computed(() => {
+  if (!featuredTrip.value) return null;
+  return (
+    featuredCountry.value?.isoAlpha2 ||
+    featuredCountry.value?.flagEmoji ||
+    lookupIsoAlpha2ByCountryName(featuredTrip.value.country)
+  );
 });
 
 const featuredCountdownBadge = computed(() => {
@@ -307,12 +319,12 @@ function retryLoad() {
                   : 'border-slate-200/90 dark:border-slate-700 hover:border-teal-400/60 dark:hover:border-teal-400/60 hover:bg-teal-50/50 dark:hover:bg-slate-800',
               ]"
             >
-              <img
-                v-if="item.flagUrl"
-                :src="item.flagUrl"
-                :alt="item.country"
-                loading="lazy"
-                class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/90 dark:border-slate-600 shrink-0"
+              <CountryFlag
+                v-if="item.isoAlpha2 || item.flagUrl"
+                :code="item.isoAlpha2"
+                :flagUrl="item.flagUrl"
+                :name="item.country"
+                size="sm"
               />
               <Globe2 v-else class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
               <span class="text-sm font-medium text-slate-800 dark:text-slate-100 leading-none">
@@ -342,12 +354,12 @@ function retryLoad() {
                   : 'border-slate-200/90 dark:border-slate-700 hover:border-teal-400/60 dark:hover:border-teal-400/60',
               ]"
             >
-              <img
-                v-if="item.flagUrl"
-                :src="item.flagUrl"
-                :alt="item.country"
-                loading="lazy"
-                class="w-5 h-3.5 object-cover rounded-[3px] border border-slate-200/90 dark:border-slate-600 shrink-0"
+              <CountryFlag
+                v-if="item.isoAlpha2 || item.flagUrl"
+                :code="item.isoAlpha2"
+                :flagUrl="item.flagUrl"
+                :name="item.country"
+                size="sm"
               />
               <Globe2 v-else class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
               <span class="text-sm font-medium text-slate-800 dark:text-slate-100 leading-none">
@@ -380,7 +392,7 @@ function retryLoad() {
       >
         <!-- Atmospheric Top Accent Strip -->
         <div
-          :class="['h-1.5 w-full transition-all duration-300', featuredTripTheme.cardTopBarClass]"
+          :class="['h-1.5 w-full transition-colors duration-300', featuredTripTheme.cardTopBarClass]"
           aria-hidden="true"
         />
 
@@ -437,11 +449,13 @@ function retryLoad() {
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div class="flex items-start gap-3.5 min-w-0">
               <div class="mt-1 shrink-0">
-                <img
-                  v-if="featuredCountry?.flagUrl"
-                  :src="featuredCountry.flagUrl"
-                  :alt="featuredTrip.country"
-                  class="w-10 h-7 object-cover rounded-md shadow-sm border border-slate-200/90 dark:border-slate-700"
+                <CountryFlag
+                  v-if="featuredCountryFlagCode || featuredCountry?.flagUrl"
+                  :code="featuredCountryFlagCode"
+                  :flagUrl="featuredCountry?.flagUrl"
+                  :name="featuredTrip.country"
+                  size="lg"
+                  class="!w-10 !h-7 shadow-sm"
                 />
                 <div
                   v-else
@@ -524,7 +538,7 @@ function retryLoad() {
               <div class="w-full h-2.5 rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden">
                 <div
                   :class="[
-                    'h-full rounded-full transition-all duration-500',
+                    'h-full rounded-full transition-[width] duration-500',
                     featuredTripTheme.progressFillClass,
                   ]"
                   :style="{ width: `${Math.min(100, Math.max(0, featuredTrip.packing.percentage))}%` }"
@@ -561,7 +575,7 @@ function retryLoad() {
               <div class="w-full h-2.5 rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden">
                 <div
                   :class="[
-                    'h-full rounded-full transition-all duration-500',
+                    'h-full rounded-full transition-[width] duration-500',
                     featuredTripTheme.progressSecondaryFillClass,
                   ]"
                   :style="{ width: `${Math.min(100, Math.max(0, featuredTrip.documents.percentage))}%` }"

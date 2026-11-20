@@ -373,12 +373,12 @@ onMounted(() => {
       <section
         class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-700 dark:from-teal-700 dark:via-emerald-800 dark:to-cyan-900 p-6 sm:p-8 text-white shadow-card dark:shadow-black/40"
       >
-        <!-- Decorative Ambient Layers -->
+        <!-- Decorative Ambient Layers (lightweight radial gradients, no GPU blur-3xl) -->
         <div
-          class="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl"
+          class="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.18)_0%,transparent_70%)]"
         />
         <div
-          class="pointer-events-none absolute -bottom-24 left-1/3 w-64 h-64 rounded-full bg-cyan-300/15 blur-3xl"
+          class="pointer-events-none absolute -bottom-24 left-1/3 w-64 h-64 rounded-full bg-[radial-gradient(circle,rgba(103,232,249,0.22)_0%,transparent_70%)]"
         />
         <Compass
           class="pointer-events-none select-none absolute -right-6 -bottom-8 w-44 h-44 text-white/[0.07] rotate-12"
@@ -388,14 +388,14 @@ onMounted(() => {
           <!-- Identity Info -->
           <div class="flex flex-col sm:flex-row sm:items-center gap-5 min-w-0">
             <div
-              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white text-2xl sm:text-3xl font-extrabold flex items-center justify-center shrink-0 shadow-lg"
+              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 border border-white/30 text-white text-2xl sm:text-3xl font-extrabold flex items-center justify-center shrink-0 shadow-lg"
             >
               {{ userInitials }}
             </div>
 
             <div class="min-w-0 space-y-2">
               <div
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-[11px] font-semibold uppercase tracking-wider text-teal-50"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-[11px] font-semibold uppercase tracking-wider text-teal-50"
               >
                 <Compass class="w-3.5 h-3.5" />
                 <span>Паспорт путешественника</span>
@@ -423,7 +423,7 @@ onMounted(() => {
             <div
               v-for="stat in passportStats"
               :key="stat.key"
-              class="rounded-2xl bg-white/15 hover:bg-white/20 backdrop-blur-md border border-white/20 px-3.5 py-3 sm:px-4 sm:py-3.5 min-w-[92px] sm:min-w-[112px] transition-colors"
+              class="rounded-2xl bg-white/15 hover:bg-white/20 border border-white/20 px-3.5 py-3 sm:px-4 sm:py-3.5 min-w-[92px] sm:min-w-[112px] transition-colors"
             >
               <div class="flex items-center gap-1.5 text-teal-100/90 mb-1">
                 <component :is="stat.icon" class="w-3.5 h-3.5 shrink-0" />
@@ -663,7 +663,7 @@ onMounted(() => {
                 :aria-checked="themeMode === option.mode"
                 @click="setTheme(option.mode)"
                 :class="[
-                  'group relative flex flex-col text-left rounded-2xl border p-3 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-teal-500/30',
+                  'group relative flex flex-col text-left rounded-2xl border p-3 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-teal-500/30',
                   themeMode === option.mode
                     ? 'border-teal-500 bg-teal-50/50 ring-2 ring-teal-500/20 dark:border-teal-400 dark:bg-teal-500/10 dark:ring-teal-400/20'
                     : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800/70',

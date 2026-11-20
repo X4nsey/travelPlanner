@@ -24,6 +24,7 @@ import { useTripStore } from '@/stores/trip.store';
 import { GLOBE_COLORS } from '@/constants/globe-colors';
 import SmartImage from '@/components/ui/SmartImage.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
+import CountryFlag from '@/components/ui/CountryFlag.vue';
 import FavoriteButton from './FavoriteButton.vue';
 
 interface Props {
@@ -117,15 +118,13 @@ const countryPlannedTripsCount = computed(() => {
           </div>
 
           <div class="absolute bottom-3.5 left-5 right-5 flex items-center gap-3 text-white">
-            <img
-              v-if="country.flagUrl"
-              :src="country.flagUrl"
-              :alt="country.nameRu"
-              loading="lazy"
-              decoding="async"
-              class="w-10 h-7 object-cover rounded-md shadow border border-white/30 shrink-0"
+            <CountryFlag
+              :code="country.isoAlpha2 || country.flagEmoji"
+              :flagUrl="country.flagUrl"
+              :name="country.nameRu"
+              size="lg"
+              class="!w-10 !h-7 shadow"
             />
-            <span v-else class="text-3xl">{{ country.flagEmoji }}</span>
 
             <div class="min-w-0">
               <h2 class="text-xl sm:text-2xl font-extrabold leading-tight truncate">
