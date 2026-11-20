@@ -291,54 +291,72 @@ const FALLBACK_TEMPLATES: TripTemplate[] = [
 
 const FALLBACK_MEDIA_BY_COUNTRY: Record<
   string,
-  { flagEmoji: string; photoUrl: string; photoAuthor: string }
+  { isoAlpha2: string; flagUrl: string; flagEmoji: string; photoUrl: string; photoAuthor: string }
 > = {
   турция: {
+    isoAlpha2: 'tr',
+    flagUrl: 'https://flagcdn.com/w40/tr.png',
     flagEmoji: '🇹🇷',
     photoUrl:
       'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1000&q=80',
     photoAuthor: 'Anna Berdnik',
   },
   италия: {
+    isoAlpha2: 'it',
+    flagUrl: 'https://flagcdn.com/w40/it.png',
     flagEmoji: '🇮🇹',
     photoUrl:
       'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1000&q=80',
     photoAuthor: 'David Kohler',
   },
   япония: {
+    isoAlpha2: 'jp',
+    flagUrl: 'https://flagcdn.com/w40/jp.png',
     flagEmoji: '🇯🇵',
     photoUrl:
       'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1000&q=80',
     photoAuthor: 'Louie Martinez',
   },
   франция: {
+    isoAlpha2: 'fr',
+    flagUrl: 'https://flagcdn.com/w40/fr.png',
     flagEmoji: '🇫🇷',
     photoUrl:
       'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1000&q=80',
     photoAuthor: 'Chris Karidis',
   },
   россия: {
+    isoAlpha2: 'ru',
+    flagUrl: 'https://flagcdn.com/w40/ru.png',
     flagEmoji: '🇷🇺',
     photoUrl:
       'https://images.unsplash.com/photo-1556610961-2fecc5927173?auto=format&fit=crop&w=1000&q=80',
     photoAuthor: 'Nikolay Vorobyev',
   },
   грузия: {
+    isoAlpha2: 'ge',
+    flagUrl: 'https://flagcdn.com/w40/ge.png',
     flagEmoji: '🇬🇪',
     photoUrl: '',
     photoAuthor: '',
   },
   армения: {
+    isoAlpha2: 'am',
+    flagUrl: 'https://flagcdn.com/w40/am.png',
     flagEmoji: '🇦🇲',
     photoUrl: '',
     photoAuthor: '',
   },
   казахстан: {
+    isoAlpha2: 'kz',
+    flagUrl: 'https://flagcdn.com/w40/kz.png',
     flagEmoji: '🇰🇿',
     photoUrl: '',
     photoAuthor: '',
   },
   азербайджан: {
+    isoAlpha2: 'az',
+    flagUrl: 'https://flagcdn.com/w40/az.png',
     flagEmoji: '🇦🇿',
     photoUrl: '',
     photoAuthor: '',
@@ -381,6 +399,14 @@ function pickKeyEvents(events: TripTemplateEvent[]): TripTemplateEvent[] {
   return picked;
 }
 
+const failedFlagUrls = ref<Record<string, boolean>>({});
+
+function handleFlagError(url: string) {
+  if (url) {
+    failedFlagUrls.value[url] = true;
+  }
+}
+
 const slides = computed(() =>
   templates.value.map((tpl) => {
     const matchedCountry = countryStore.findCountryByQuery(tpl.country);
@@ -388,7 +414,15 @@ const slides = computed(() =>
     const photoUrl = matchedCountry?.coverPhoto?.url || fallbackMedia?.photoUrl || '';
     const thumbUrl = matchedCountry?.coverPhoto?.thumbUrl || '';
     const photoAuthor = matchedCountry?.coverPhoto?.authorName || fallbackMedia?.photoAuthor || '';
-    const flagUrl = matchedCountry?.flagUrl || '';
+    const isoCode = (matchedCountry?.isoAlpha2 || fallbackMedia?.isoAlpha2 || '')
+      .trim()
+      .toLowerCase();
+    const flagUrl = isoCode
+      ? `https://flagcdn.com/w40/${isoCode}.png`
+      : fallbackMedia?.flagUrl || matchedCountry?.flagUrl || '';
+    const flagLargeUrl = isoCode
+      ? `https://flagcdn.com/w160/${isoCode}.png`
+      : matchedCountry?.flagUrl || flagUrl;
     const flagEmoji = matchedCountry?.flagEmoji || fallbackMedia?.flagEmoji || '🌍';
     const countrySlug = matchedCountry?.slug || null;
     const theme = resolveTripTheme(undefined, tpl.tripType);
@@ -400,6 +434,7 @@ const slides = computed(() =>
       thumbUrl,
       photoAuthor,
       flagUrl,
+      flagLargeUrl,
       flagEmoji,
       countrySlug,
       theme,
@@ -533,14 +568,15 @@ onBeforeUnmount(() => {
             'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 shrink-0 whitespace-nowrap',
             idx === activeIndex
               ? ['bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm', slide.theme.ringClass]
-              : 'bg-white/70 dark:bg-slate-900/60 border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:border-slate-300 dark:hover:border-slate-700',
+              : 'bg-white/90 dark:bg-slate-900/80 border-slate-200/80 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:border-slate-300 dark:hover:border-slate-700',
           ]"
         >
           <img
-            v-if="slide.flagUrl"
+            v-if="slide.flagUrl && !failedFlagUrls[slide.flagUrl]"
             :src="slide.flagUrl"
             :alt="slide.template.country"
-            loading="lazy"
+            decoding="async"
+            @error="handleFlagError(slide.flagUrl)"
             class="w-4 h-3 object-cover rounded-[2px] border border-slate-200/80 dark:border-slate-700 shrink-0"
           />
           <span v-else class="text-sm leading-none" aria-hidden="true">{{ slide.flagEmoji }}</span>
@@ -586,7 +622,7 @@ onBeforeUnmount(() => {
     <!-- Main Slide Card -->
     <div
       v-if="activeSlide"
-      class="relative bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-card dark:shadow-none overflow-hidden"
+      class="relative bg-white/95 dark:bg-slate-900/90 rounded-3xl border border-slate-200/85 dark:border-slate-800 shadow-card dark:shadow-none overflow-hidden"
     >
       <!-- Auto-Advance Progress Bar -->
       <div class="h-1 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden" aria-hidden="true">
@@ -641,9 +677,11 @@ onBeforeUnmount(() => {
                 aria-hidden="true"
               />
               <img
-                v-if="activeSlide.flagUrl"
-                :src="activeSlide.flagUrl"
+                v-if="activeSlide.flagLargeUrl && !failedFlagUrls[activeSlide.flagLargeUrl]"
+                :src="activeSlide.flagLargeUrl"
                 :alt="activeSlide.template.country"
+                decoding="async"
+                @error="handleFlagError(activeSlide.flagLargeUrl)"
                 class="w-20 h-14 object-cover rounded-xl shadow-md border border-white/60 dark:border-slate-700 mb-3 relative z-10"
               />
               <span v-else class="text-5xl mb-3 relative z-10" aria-hidden="true">
@@ -669,9 +707,11 @@ onBeforeUnmount(() => {
                 class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 shadow-sm backdrop-blur-md border border-white/40 dark:border-slate-700/80"
               >
                 <img
-                  v-if="activeSlide.flagUrl"
+                  v-if="activeSlide.flagUrl && !failedFlagUrls[activeSlide.flagUrl]"
                   :src="activeSlide.flagUrl"
                   :alt="activeSlide.template.country"
+                  decoding="async"
+                  @error="handleFlagError(activeSlide.flagUrl)"
                   class="w-4 h-3 object-cover rounded-[2px] border border-slate-200/80 dark:border-slate-700 shrink-0"
                 />
                 <span v-else aria-hidden="true">{{ activeSlide.flagEmoji }}</span>
