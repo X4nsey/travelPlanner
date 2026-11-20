@@ -1,620 +1,725 @@
 <script setup lang="ts">
-import { ref, defineAsyncComponent } from 'vue';
+import { computed, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
-  Compass,
-  CalendarRange,
-  Wallet,
-  Clock,
-  ShieldCheck,
-  MapPin,
   ArrowRight,
-  Sparkles,
+  ArrowRightLeft,
+  BarChart3,
+  BookOpen,
+  Briefcase,
   CalendarDays,
-  Info,
+  Check,
+  CloudSun,
+  Compass,
+  Copy,
+  FileDown,
+  FileText,
+  Globe2,
+  HardDrive,
+  Link2,
+  Lock,
+  MapPin,
+  Palette,
+  Share2,
+  ShieldCheck,
+  Sparkles,
+  WifiOff,
 } from 'lucide-vue-next';
 import { useAuthStore } from '@/stores/auth.store';
+import { vReveal } from '@/directives/vReveal';
 import PublicLayout from '@/layouts/PublicLayout.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
-import SmartImage from '@/components/ui/SmartImage.vue';
-import type { InspirationTrip } from '@/components/trips/InspirationTripModal.vue';
-
-const InspirationTripModal = defineAsyncComponent(
-  () => import('@/components/trips/InspirationTripModal.vue')
-);
+import HeroTripPreview from '@/components/home/HeroTripPreview.vue';
+import DestinationsSlider from '@/components/home/DestinationsSlider.vue';
 
 const authStore = useAuthStore();
-const selectedInspirationTrip = ref<InspirationTrip | null>(null);
 
-const features = [
-  {
-    icon: CalendarRange,
-    title: 'Пошаговый план по дням',
-    description:
-      'Система автоматически формирует расписание по календарным дням вашей поездки — добавляйте экскурсии, перелёты и встречи в хронологическом порядке.',
-  },
-  {
-    icon: Wallet,
-    title: 'Контроль бюджета и валют',
-    description:
-      'Фиксируйте общий бюджет путешествия в RUB, USD или EUR и отслеживайте ориентировочную стоимость отдельных мероприятий.',
-  },
-  {
-    icon: Clock,
-    title: 'Все детали в одном месте',
-    description:
-      'Даты, время начала и окончания, адреса, заметки и количество участников всегда под рукой на компьютере, планшете и смартфоне.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Приватность и надёжность',
-    description:
-      'Ваши маршруты и личные планы надёжно защищены и доступны только вам после авторизации.',
-  },
-];
+const bentoPackingItems = ref([
+  { id: 'passport', label: 'Загранпаспорт и страховка', checked: true },
+  { id: 'sunglasses', label: 'Солнцезащитные очки (+24°C)', checked: true },
+  { id: 'adapter', label: 'Пауэрбанк и адаптер Type-C', checked: false },
+]);
 
-const demoDestinations: InspirationTrip[] = [
-  {
-    id: 'spb-karelia',
-    title: 'Санкт-Петербург и Карелия',
-    country: 'Россия',
-    countrySlug: 'russia',
-    flag: '🇷🇺',
-    city: 'Санкт-Петербург',
-    days: '5 дней',
-    durationDays: 5,
-    season: 'Белые ночи и северная природа',
-    bestPeriod: 'Май — Август',
-    photoUrl: 'https://images.unsplash.com/photo-1556610961-2fecc5927173?auto=format&fit=crop&w=1000&q=80',
-    photoAuthor: 'Nikolay Vorobyev',
-    budget: 65000,
-    currency: 'RUB',
-    currencySymbol: '₽',
-    description:
-      'Насыщенный маршрут, объединяющий имперский блеск Санкт-Петербурга, разводные мосты, шедевры Эрмитажа и выезд на ретропоезде в горный парк Рускеала среди карельских скал и озёр.',
-    highlights: [
-      'Государственный Эрмитаж и Дворцовая площадь',
-      'Петергоф с каскадами фонтанов',
-      'Горный парк Рускеала и мраморный каньон',
-      'Ночная прогулка на катере под разводными мостами',
-      'Храм Спаса на Крови и Исаакиевский собор',
-    ],
-    samplePlan: [
-      {
-        day: 1,
-        title: 'Невский проспект и мосты Невы',
-        activities: 'Прибытие, заселение, пешая прогулка по Невскому проспекту и вечерний круиз на теплоходе под разводными мостами.',
-      },
-      {
-        day: 2,
-        title: 'Шедевры искусства и архитектуры',
-        activities: 'Экскурсия в Эрмитаж, подъём на колоннаду Исаакиевского собора и обед на набережной Мойки.',
-      },
-      {
-        day: 3,
-        title: 'Императорский Петергоф',
-        activities: 'Поездка на «Метеоре» в Петергоф, прогулка по Нижнему парку фонтанов и вид на Финский залив.',
-      },
-      {
-        day: 4,
-        title: 'Сказочная Карелия и Рускеала',
-        activities: 'Ретропоезд «Рускеальский экспресс», мраморный каньон, водопады Ахинкоски и традиционные карельские калитки.',
-      },
-      {
-        day: 5,
-        title: 'Музей Фаберже и сувениры',
-        activities: 'Шедевры Фаберже в Шуваловском дворце, покупка кофе и десертов, трансфер на вокзал/аэропорт.',
-      },
-    ],
-  },
-  {
-    id: 'istanbul-bosporus',
-    title: 'Босфор и исторический центр',
-    country: 'Турция',
-    countrySlug: 'turkey',
-    flag: '🇹🇷',
-    city: 'Стамбул',
-    days: '4 дня',
-    durationDays: 4,
-    season: 'Культура, гастрономия и морские прогулки',
-    bestPeriod: 'Апрель — Июнь, Сентябрь — Ноябрь',
-    photoUrl: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1000&q=80',
-    photoAuthor: 'Anna Berdnik',
-    budget: 1200,
-    currency: 'USD',
-    currencySymbol: '$',
-    rubApprox: 110400,
-    description:
-      'Погрузитесь в атмосферу города на стыке двух континентов: тысячелетняя Айя-София, круизы по проливу Босфор на закате, пряные ароматы Египетского базара и колорит богемных улочек Галаты.',
-    highlights: [
-      'Собор Святой Софии (Айя-София)',
-      'Голубая мечеть и Цистерна Базилика',
-      'Паромная переправа на азиатский берег в Кадыкёй',
-      'Галатская башня и исторический трамвай на Истикляль',
-      'Дворец султанов Топкапы',
-    ],
-    samplePlan: [
-      {
-        day: 1,
-        title: 'Сердце Султанахмета',
-        activities: 'Посещение Айя-Софии, Голубой мечети, подземной Цистерны Базилика и турецкий чай в парке Гюльхане.',
-      },
-      {
-        day: 2,
-        title: 'Галата и европейский берег',
-        activities: 'Подъём на смотровую Галатской башни, колоритная пешеходная улица Истикляль и дегустация пахлавы.',
-      },
-      {
-        day: 3,
-        title: 'Круиз по Босфору и Балат',
-        activities: 'Морская прогулка вдоль дворца Долмабахче, разноцветные домики района Балат и рынок специй.',
-      },
-      {
-        day: 4,
-        title: 'Азиатская сторона и Кадыкёй',
-        activities: 'Паромная переправа с чаем и симитами, прогулка по набережной Мода и трансфер в аэропорт.',
-      },
-    ],
-  },
-  {
-    id: 'rome-tuscany',
-    title: 'Вечный город и Тоскана',
-    country: 'Италия',
-    countrySlug: 'italy',
-    flag: '🇮🇹',
-    city: 'Рим и Флоренция',
-    days: '7 дней',
-    durationDays: 7,
-    season: 'Архитектура, музеи и панорамные террасы',
-    bestPeriod: 'Апрель — Июнь, Сентябрь — Октябрь',
-    photoUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1000&q=80',
-    photoAuthor: 'David Kohler',
-    budget: 1850,
-    currency: 'EUR',
-    currencySymbol: '€',
-    rubApprox: 185000,
-    description:
-      'Незабываемое путешествие по сердцу Италии: от античных форумов, Колизея и фонтана Треви в Риме до шедевров эпохи Возрождения во Флоренции и кипарисовых холмов Тосканы.',
-    highlights: [
-      'Колизей и Римский форум',
-      'Музеи Ватикана и собор Святого Петра',
-      'Фонтан Треви и Пантеон',
-      'Галерея Уффици и купол Брунеллески во Флоренции',
-      'Мост Понте-Веккьо и винные холмы Тосканы',
-    ],
-    samplePlan: [
-      {
-        day: 1,
-        title: 'Знакомство с Римом',
-        activities: 'Испанская лестница, Пантеон, пьяцца Навона и традиционный бросок монетки в фонтан Треви.',
-      },
-      {
-        day: 2,
-        title: 'Величие Античности',
-        activities: 'Подробная экскурсия в Колизей, Римский форум и панорама с холма Палатин.',
-      },
-      {
-        day: 3,
-        title: 'Сокровища Ватикана',
-        activities: 'Сикстинская капелла Микеланджело, собор Святого Петра и колоритный район Трастевере.',
-      },
-      {
-        day: 4,
-        title: 'Переезд во Флоренцию',
-        activities: 'Скоростной поезд Frecciarossa, собор Санта-Мария-дель-Фьоре и закат на площади Микеланджело.',
-      },
-      {
-        day: 5,
-        title: 'Ренессанс и мост Понте-Веккьо',
-        activities: 'Шедевры Боттичелли в галерее Уффици, сады Боболи и флорентийский стейк на ужин.',
-      },
-      {
-        day: 6,
-        title: 'Винные холмы Тосканы',
-        activities: 'Однодневная поездка в средневековый город Сиена и винодельни региона Кьянти.',
-      },
-      {
-        day: 7,
-        title: 'Утренний эспрессо и вылет',
-        activities: 'Покупка сувениров из кожи, итальянского сыра и трансфер в аэропорт.',
-      },
-    ],
-  },
-  {
-    id: 'altai-mountains',
-    title: 'Горные озёра и перевалы',
-    country: 'Россия',
-    countrySlug: 'russia',
-    flag: '🇷🇺',
-    city: 'Горный Алтай',
-    days: '6 дней',
-    durationDays: 6,
-    season: 'Автомаршрут по Чуйскому тракту',
-    bestPeriod: 'Июнь — Сентябрь',
-    photoUrl: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Katun_River%2C_Altai%2C_Russia_%2814940666671%29.jpg/1280px-Katun_River%2C_Altai%2C_Russia_%2814940666671%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail',
-    photoAuthor: 'A Vahanvaty (Wikimedia Commons)',
-    budget: 80000,
-    currency: 'RUB',
-    currencySymbol: '₽',
-    description:
-      'Экспедиция по одной из красивейших автомобильных дорог планеты — Чуйскому тракту. Бирюзовые воды реки Катунь, древние перевалы, загадочное Гейзерное озеро и марсианские пейзажи Кызыл-Чина.',
-    highlights: [
-      'Живописный Чуйский тракт',
-      'Слияние рек Чуи и Катуни',
-      'Термальное Гейзерное озеро с узорами на дне',
-      'Марсианские глиняные каньоны Кызыл-Чин',
-      'Катерная прогулка по Телецкому озеру',
-    ],
-    samplePlan: [
-      {
-        day: 1,
-        title: 'Врата Алтая',
-        activities: 'Прилёт в Горно-Алтайск, старт по Чуйскому тракту, берега бирюзовой Катуни и заселение на эко-турбазе.',
-      },
-      {
-        day: 2,
-        title: 'Перевалы и наскальные рисунки',
-        activities: 'Преодоление перевалов Семинский и Чике-Таман, древнее урочище петроглифов Калбак-Таш.',
-      },
-      {
-        day: 3,
-        title: 'Гейзерное озеро и Курайская степь',
-        activities: 'Утренние узоры Гейзерного озера и панорама заснеженного Северо-Чуйского хребта.',
-      },
-      {
-        day: 4,
-        title: 'Алтайский Марс',
-        activities: 'Экскурсия на внедорожниках в цветные каньоны Марс-1 и Марс-2, фотосессия на инопланетных ландшафтах.',
-      },
-      {
-        day: 5,
-        title: 'Легендарное Телецкое озеро',
-        activities: 'Переезд к северной части Телецкого озера, моторная лодка к водопаду Корбу.',
-      },
-      {
-        day: 6,
-        title: 'Возвращение домой',
-        activities: 'Покупка алтайского мёда, кедровых орехов и травяных чаёв, вылет из Горно-Алтайска.',
-      },
-    ],
-  },
-  {
-    id: 'tokyo-kyoto',
-    title: 'Неоновый Токио и Киото',
-    country: 'Япония',
-    countrySlug: 'japan',
-    flag: '🇯🇵',
-    city: 'Токио и Киото',
-    days: '8 дней',
-    durationDays: 8,
-    season: 'Традиции, технологии и вид на Фудзи',
-    bestPeriod: 'Март — Май, Октябрь — Ноябрь',
-    photoUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1000&q=80',
-    photoAuthor: 'Louie Martinez',
-    budget: 2400,
-    currency: 'USD',
-    currencySymbol: '$',
-    rubApprox: 220800,
-    description:
-      'Удивительный контраст футуристического мегаполиса и многовековых синтоистских святилищ: неоновый перекрёсток Сибуя, тысяча алых ворот Фусими Инари, бамбуковый лес и вид на священную гору Фудзи.',
-    highlights: [
-      'Знаменитый перекрёсток Сибуя и Хатико',
-      'Древний храм Сэнсо-дзи в районе Асакуса',
-      'Вид на вулкан Фудзияма с озера Кавагутико',
-      'Тысяча ворот святилища Фусими Инари в Киото',
-      'Золотой павильон Кинкаку-дзи и квартал гейш Гион',
-    ],
-    samplePlan: [
-      {
-        day: 1,
-        title: 'Прибытие в Токио',
-        activities: 'Заселение в Синдзюку, вечерний футуристический город и смотровая площадка на Токийскую башню.',
-      },
-      {
-        day: 2,
-        title: 'Традиции и технологии',
-        activities: 'Старейший храм Сэнсо-дзи, район электроники Акихабара и сад Синдзюку-гёэн.',
-      },
-      {
-        day: 3,
-        title: 'Сибуя и Харадзюку',
-        activities: 'Самый оживлённый перекрёсток в мире Сибуя, памятник верному псу Хатико и святилище Мэйдзи.',
-      },
-      {
-        day: 4,
-        title: 'Однодневная поездка к Фудзи',
-        activities: 'Озеро Кавагутико, открыточный вид на вулкан Фудзияма и канатная дорога Кати-Кати.',
-      },
-      {
-        day: 5,
-        title: 'Синкансэн в древний Киото',
-        activities: 'Скоростной поезд-пуля, исторический квартал Гион и традиционная чайная церемония.',
-      },
-      {
-        day: 6,
-        title: 'Красные ворота Фусими Инари',
-        activities: 'Утренний подъём сквозь коридоры алых ворот тории и посещение Золотого павильона.',
-      },
-      {
-        day: 7,
-        title: 'Бамбуковая роща и парк оленей',
-        activities: 'Бамбуковый лес Арасияма, храм Тэнрю-дзи и выезд в Нару к ручным оленям.',
-      },
-      {
-        day: 8,
-        title: 'Сувениры и вылет',
-        activities: 'Возвращение в Токио, покупка японских сладостей и трансфер в аэропорт Нарита.',
-      },
-    ],
-  },
-  {
-    id: 'paris-france',
-    title: 'Огни Парижа и замки Луары',
-    country: 'Франция',
-    countrySlug: 'france',
-    flag: '🇫🇷',
-    city: 'Париж',
-    days: '6 дней',
-    durationDays: 6,
-    season: 'Искусство, круассаны и романтика Сены',
-    bestPeriod: 'Апрель — Июнь, Сентябрь — Октябрь',
-    photoUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1000&q=80',
-    photoAuthor: 'Chris Karidis',
-    budget: 1650,
-    currency: 'EUR',
-    currencySymbol: '€',
-    rubApprox: 165000,
-    description:
-      'Классическая парижская мечта: сияющая огнями Эйфелева башня, полотна Моне и Леонардо да Винчи в Лувре, богемный Монмартр, свежая выпечка и королевская зеркальная галерея Версаля.',
-    highlights: [
-      'Эйфелева башня и Марсово поле',
-      'Музей Лувр («Мона Лиза» и античные скульптуры)',
-      'Базилика Сакре-Кёр на вершине Монмартра',
-      'Роскошный Версальский дворец и парки',
-      'Прогулочный круиз по реке Сене на закате',
-    ],
-    samplePlan: [
-      {
-        day: 1,
-        title: 'Бонжур, Париж!',
-        activities: 'Елисейские поля, Триумфальная арка и вечерний круиз на кораблике по Сене мимо светящейся башни.',
-      },
-      {
-        day: 2,
-        title: 'Великие музеи',
-        activities: 'Экскурсия в Лувр, сад Тюильри, площадь Согласия и кофе с круассаном в историческом кафе.',
-      },
-      {
-        day: 3,
-        title: 'Богемный Монмартр',
-        activities: 'Холм художников, базилика Сакре-Кёр с панорамой всего Парижа и знаменитая стена «Я люблю тебя».',
-      },
-      {
-        day: 4,
-        title: 'Королевский Версаль',
-        activities: 'Зеркальная галерея, апартаменты королей и грандиозный французский парк Людовика XIV.',
-      },
-      {
-        day: 5,
-        title: 'Латинский квартал и Сен-Жермен',
-        activities: 'Остров Сите, Люксембургский сад, музей Орсе и вечерний пикник с сыром и багетом.',
-      },
-      {
-        day: 6,
-        title: 'Прощание с городом любви',
-        activities: 'Покупка французского парфюма и макарон Ladurée, трансфер в аэропорт Шарль-де-Голль.',
-      },
-    ],
-  },
-];
+const packedDemoCount = computed(
+  () => bentoPackingItems.value.filter((item) => item.checked).length
+);
 
-function openTripDetails(trip: InspirationTrip) {
-  selectedInspirationTrip.value = trip;
+function toggleDemoPackingItem(id: string) {
+  const item = bentoPackingItems.value.find((entry) => entry.id === id);
+  if (item) {
+    item.checked = !item.checked;
+  }
 }
+
+const vaultDemoFiles = [
+  { name: 'Авиабилет SVO → FCO.pdf', meta: '312 КБ · IndexedDB', status: 'Готово' },
+  { name: 'Полис ВЗР · Скан.webp', meta: '184 КБ · IndexedDB', status: 'Готово' },
+  { name: 'Ваучер отеля Trastevere.pdf', meta: '245 КБ · IndexedDB', status: 'Готово' },
+];
+
+const budgetDemoBars = [
+  { day: 'Д1', amount: '14 200 ₽', heightPct: 58, colorClass: 'from-teal-500 to-emerald-500' },
+  { day: 'Д2', amount: '21 800 ₽', heightPct: 92, colorClass: 'from-sky-500 to-teal-500' },
+  { day: 'Д3', amount: '16 500 ₽', heightPct: 68, colorClass: 'from-teal-500 to-cyan-500' },
+  { day: 'Д4', amount: '11 900 ₽', heightPct: 48, colorClass: 'from-emerald-500 to-teal-500' },
+];
+
+const globePins = [
+  { flag: '🇮🇹', name: 'Италия', posClass: 'top-[24%] left-[44%]', delay: '0s' },
+  { flag: '🇯🇵', name: 'Япония', posClass: 'top-[32%] right-[12%]', delay: '0.7s' },
+  { flag: '🇹🇷', name: 'Турция', posClass: 'top-[47%] left-[55%]', delay: '1.3s' },
+  { flag: '🇬🇪', name: 'Грузия', posClass: 'bottom-[24%] left-[20%]', delay: '0.4s' },
+];
 </script>
 
 <template>
   <PublicLayout>
-    <!-- Hero Section -->
-    <section class="relative overflow-hidden py-16 sm:py-24 bg-gradient-to-b from-teal-50/60 via-white to-slate-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="max-w-3xl mx-auto text-center">
-          <div
-            class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 dark:bg-teal-500/15 border border-teal-200/80 dark:border-teal-500/30 text-teal-700 dark:text-teal-300 text-xs font-semibold mb-6"
-          >
-            <Sparkles class="w-3.5 h-3.5" />
-            <span>Удобный органайзер ваших путешествий</span>
-          </div>
+    <!-- 1. TWO-COLUMN HERO SECTION -->
+    <section
+      class="relative overflow-hidden py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-teal-50/70 via-white to-slate-50 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950 transition-colors duration-200"
+    >
+      <!-- Subtle Decorative Ambient Background -->
+      <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div
+          class="absolute -top-32 -left-24 w-[28rem] h-[28rem] rounded-full bg-teal-300/20 dark:bg-teal-500/10 blur-3xl"
+        />
+        <div
+          class="absolute top-1/4 -right-24 w-[30rem] h-[30rem] rounded-full bg-sky-300/20 dark:bg-sky-500/10 blur-3xl"
+        />
+        <div
+          class="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:28px_28px] opacity-35 dark:opacity-45 [mask-image:radial-gradient(ellipse_75%_65%_at_50%_30%,#000_40%,transparent_100%)]"
+        />
+      </div>
 
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-tight mb-6">
-            Планируйте идеальные поездки с
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-sky-600 dark:from-teal-400 dark:to-emerald-400">
-              TravelPlanner
-            </span>
-          </h1>
-
-          <p class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-8 max-w-2xl mx-auto">
-            Создавайте маршруты, распределяйте мероприятия по дням, контролируйте бюджет и храните все заметки о предстоящих путешествиях в едином минималистичном пространстве.
-          </p>
-
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <RouterLink :to="authStore.isAuthenticated ? '/dashboard' : '/register'" class="w-full sm:w-auto">
-              <BaseButton variant="primary" size="lg" fullWidth>
-                <span>Начать планировать</span>
-                <ArrowRight class="w-5 h-5" />
-              </BaseButton>
-            </RouterLink>
-
-            <RouterLink to="/explore" class="w-full sm:w-auto">
-              <BaseButton variant="secondary" size="lg" fullWidth>
-                <Compass class="w-5 h-5 text-teal-600 dark:text-teal-400" />
-                <span>Исследовать 3D-глобус</span>
-              </BaseButton>
-            </RouterLink>
-
-            <RouterLink
-              v-if="!authStore.isAuthenticated"
-              to="/login"
-              class="w-full sm:w-auto"
+      <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          <!-- Left Column: Copy, CTA & Facts -->
+          <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+            <div
+              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-900/90 border border-teal-200/80 dark:border-teal-500/30 text-teal-700 dark:text-teal-300 text-xs font-semibold shadow-sm backdrop-blur-sm"
             >
-              <BaseButton variant="outline" size="lg" fullWidth>
-                Войти в аккаунт
-              </BaseButton>
-            </RouterLink>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Advantages Section -->
-    <section id="features" class="py-16 sm:py-20 bg-white dark:bg-slate-900/70 border-y border-slate-200/70 dark:border-slate-800 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center max-w-2xl mx-auto mb-12">
-          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-            Всё необходимое для продуманного маршрута
-          </h2>
-          <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400">
-            Никаких перегруженных таблиц и разрозненных заметок — только структурированный план вашей поездки.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div
-            v-for="item in features"
-            :key="item.title"
-            class="p-6 rounded-2xl bg-slate-50/70 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-teal-200 dark:hover:border-teal-500/40 hover:bg-white dark:hover:bg-slate-800/80 hover:shadow-soft dark:hover:shadow-none transition-all duration-200"
-          >
-            <div class="w-12 h-12 rounded-2xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-4">
-              <component :is="item.icon" class="w-6 h-6" />
+              <span class="relative flex h-2 w-2 shrink-0">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"
+                />
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500" />
+              </span>
+              <span>Умный планировщик путешествий · Privacy-by-Design</span>
             </div>
-            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 mb-2">
-              {{ item.title }}
-            </h3>
-            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              {{ item.description }}
+
+            <h1
+              class="text-4xl sm:text-5xl xl:text-[3.4rem] font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-[1.1]"
+            >
+              Собирайте идеальные поездки —
+              <span
+                class="block sm:inline text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-sky-600 to-emerald-600 dark:from-teal-400 dark:via-sky-400 dark:to-emerald-400"
+              >
+                от 3D-глобуса до офлайн-гида
+              </span>
+            </h1>
+
+            <p
+              class="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0"
+            >
+              Создавайте расписания по дням, изучайте страны на интерактивном 3D-глобусе,
+              проверяйте прогноз погоды, ведите мультивалютный бюджет, храните билеты в локальном
+              сейфе браузера и выгружайте путеводитель в PDF.
             </p>
+
+            <!-- Primary & Secondary CTA -->
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-1">
+              <RouterLink
+                :to="authStore.isAuthenticated ? '/dashboard' : '/register'"
+                class="w-full sm:w-auto"
+              >
+                <BaseButton variant="primary" size="lg" fullWidth>
+                  <span>Начать планировать</span>
+                  <ArrowRight class="w-5 h-5" />
+                </BaseButton>
+              </RouterLink>
+
+              <RouterLink to="/explore" class="w-full sm:w-auto">
+                <BaseButton variant="secondary" size="lg" fullWidth>
+                  <Globe2 class="w-5 h-5 text-teal-600 dark:text-teal-400" />
+                  <span>Исследовать 3D-глобус</span>
+                </BaseButton>
+              </RouterLink>
+            </div>
+
+            <!-- Compact Key Facts Strip -->
+            <div
+              class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+            >
+              <span class="inline-flex items-center gap-1.5">
+                <Palette class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span>5 атмосферных тем</span>
+              </span>
+              <span class="text-slate-300 dark:text-slate-700" aria-hidden="true">·</span>
+              <span class="inline-flex items-center gap-1.5">
+                <ShieldCheck class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Локальный сейф IndexedDB</span>
+              </span>
+              <span class="text-slate-300 dark:text-slate-700" aria-hidden="true">·</span>
+              <span class="inline-flex items-center gap-1.5">
+                <FileDown class="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                <span>Офлайн HTML/PDF</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Right Column: Live Interactive Floating Trip Preview -->
+          <div class="lg:col-span-6">
+            <HeroTripPreview />
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Popular Destinations Inspiration Section with Real Photos, Ruble Conversion & Click Modal -->
-    <section id="destinations" class="py-16 sm:py-20 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <div class="inline-flex items-center gap-1.5 text-xs font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 px-2.5 py-1 rounded-full border border-teal-200/70 dark:border-teal-500/30 mb-2">
+    <!-- 2. INTERACTIVE DESTINATIONS & CURATED ROUTES SLIDER -->
+    <section
+      id="routes"
+      class="scroll-mt-20 py-16 sm:py-20 bg-slate-50 dark:bg-slate-950 border-t border-slate-200/70 dark:border-slate-800/80 transition-colors duration-200"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8" v-reveal>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div class="max-w-2xl space-y-2">
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/70 dark:border-teal-500/30"
+            >
               <Sparkles class="w-3.5 h-3.5" />
-              <span>Готовые идеи для путешествий</span>
+              <span>Готовые кураторские маршруты</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Вдохновение для следующих поездок
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+              Вдохновение и планы поездок в один клик
             </h2>
-            <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">
-              Нажмите на карточку любого города, чтобы открыть подробный план по дням, достопримечательности и бюджет.
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+              Переключайте направления, изучайте ключевые события по дням и берите любой шаблон за основу своего маршрута.
             </p>
           </div>
 
-          <RouterLink :to="authStore.isAuthenticated ? '/trips/new' : '/register'">
-            <BaseButton variant="secondary" size="md">
-              <Compass class="w-4 h-4 text-teal-600 dark:text-teal-400" />
-              <span>Создать свой маршрут</span>
+          <RouterLink to="/countries" class="shrink-0">
+            <BaseButton variant="outline" size="md">
+              <BookOpen class="w-4 h-4 text-teal-600 dark:text-teal-400" />
+              <span>Весь каталог стран</span>
             </BaseButton>
           </RouterLink>
         </div>
 
-        <!-- 6 Destination Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <article
-            v-for="dest in demoDestinations"
-            :key="dest.id"
-            @click="openTripDetails(dest)"
-            role="button"
-            tabindex="0"
-            @keydown.enter.prevent="openTripDetails(dest)"
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none overflow-hidden flex flex-col justify-between hover:shadow-card dark:hover:border-teal-500/40 hover:-translate-y-1 transition-all duration-200 cursor-pointer group text-left"
+        <DestinationsSlider />
+      </div>
+    </section>
+
+    <!-- 3. MODERN 6-CARD BENTO GRID OF REAL FEATURES -->
+    <section
+      id="features"
+      class="scroll-mt-20 py-16 sm:py-24 bg-white dark:bg-slate-900/60 border-t border-slate-200/70 dark:border-slate-800 transition-colors duration-200"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div class="text-center max-w-2xl mx-auto space-y-3" v-reveal>
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700"
           >
-            <div>
-              <!-- Real Photo Cover with Country & Duration Badges -->
-              <div class="relative overflow-hidden aspect-[16/10]">
-                <SmartImage
-                  :src="dest.photoUrl"
-                  size="md"
-                  :alt="dest.title"
-                  :authorName="dest.photoAuthor"
-                  :fallbackTitle="dest.title"
-                  :fallbackFlag="dest.flag"
-                  aspectClass="w-full h-full"
-                  imgClass="group-hover:scale-105 transition-transform duration-500 ease-out"
-                />
+            <Compass class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+            <span>Реальные инструменты путешественника</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+            Всё для поездки — в одном продуманном пространстве
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+            Никаких разрозненных таблиц и десятка вкладок: каждая функция TravelPlanner дополняет остальные.
+          </p>
+        </div>
 
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-black/25 pointer-events-none" />
+        <!-- Bento Grid: 1 col mobile / 6 cols tablet / 12 cols desktop -->
+        <div class="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-5">
+          <!-- BENTO 1: Interactive 3D Globe & Country Atlas (Dark Graphite Accent Card) -->
+          <article
+            v-reveal="40"
+            class="md:col-span-6 lg:col-span-7 relative overflow-hidden rounded-3xl bg-slate-900 dark:bg-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-card flex flex-col justify-between gap-6 group"
+          >
+            <!-- Ambient Nebula Glow -->
+            <div
+              class="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full bg-teal-500/20 blur-3xl group-hover:bg-teal-400/25 transition-colors duration-500"
+              aria-hidden="true"
+            />
+            <div
+              class="pointer-events-none absolute -bottom-24 -left-20 w-64 h-64 rounded-full bg-sky-500/15 blur-3xl"
+              aria-hidden="true"
+            />
 
-                <!-- Badges on top of photo -->
-                <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
-                  <span
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 shadow-sm backdrop-blur-md border border-white/40 dark:border-slate-700/80"
-                  >
-                    <span>{{ dest.flag }}</span>
-                    <span>{{ dest.country }}</span>
-                  </span>
-
-                  <span class="inline-flex items-center gap-1 text-xs font-semibold text-white bg-slate-900/70 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/20">
-                    <CalendarDays class="w-3.5 h-3.5 text-teal-300" />
-                    {{ dest.days }}
-                  </span>
+            <div class="relative z-10 grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
+              <div class="sm:col-span-7 space-y-3.5">
+                <div
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-500/15 text-teal-300 border border-teal-400/30"
+                >
+                  <Globe2 class="w-3.5 h-3.5" />
+                  <span>WebGL · Three.js + Атлас</span>
                 </div>
+                <h3 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                  Интерактивный 3D-глобус и атлас стран
+                </h3>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                  Вращайте планету, нажимайте на страны, изучайте проверенные фото, визовые правила,
+                  связь, транспорт и сразу запускайте планирование поездки из карточки страны.
+                </p>
 
-                <!-- City Tag on bottom left of photo -->
-                <div class="absolute bottom-3 left-3 z-10 text-white flex items-center gap-1 text-xs font-medium drop-shadow">
-                  <MapPin class="w-3.5 h-3.5 text-teal-300" />
-                  <span>{{ dest.city }}</span>
+                <div class="flex flex-wrap items-center gap-2.5 pt-2">
+                  <RouterLink to="/explore">
+                    <BaseButton variant="primary" size="sm">
+                      <span>Открыть 3D-глобус</span>
+                      <ArrowRight class="w-4 h-4" />
+                    </BaseButton>
+                  </RouterLink>
+                  <RouterLink
+                    to="/countries"
+                    class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-200 bg-white/10 hover:bg-white/15 border border-white/15 transition-colors"
+                  >
+                    <BookOpen class="w-3.5 h-3.5 text-teal-300" />
+                    <span>Атлас стран</span>
+                  </RouterLink>
                 </div>
               </div>
 
-              <!-- Content Body -->
-              <div class="p-5">
-                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors mb-1.5 line-clamp-1">
-                  {{ dest.title }}
-                </h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
-                  {{ dest.description }}
-                </p>
+              <!-- Decorative Orbital Globe Visual -->
+              <div class="sm:col-span-5 relative h-52 sm:h-56 flex items-center justify-center">
+                <svg
+                  viewBox="0 0 220 220"
+                  class="w-48 h-48 sm:w-52 sm:h-52 text-teal-400/35"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <radialGradient id="bentoGlobeFill" cx="40%" cy="35%" r="65%">
+                      <stop offset="0%" stop-color="#14b8a6" stop-opacity="0.38" />
+                      <stop offset="60%" stop-color="#0284c7" stop-opacity="0.16" />
+                      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.05" />
+                    </radialGradient>
+                  </defs>
+                  <circle cx="110" cy="110" r="78" fill="url(#bentoGlobeFill)" stroke="currentColor" stroke-width="1.2" />
+                  <circle cx="110" cy="110" r="98" stroke="currentColor" stroke-width="1" stroke-dasharray="4 6" opacity="0.55" />
+                  <ellipse cx="110" cy="110" rx="78" ry="28" stroke="currentColor" stroke-width="1" opacity="0.65" />
+                  <ellipse cx="110" cy="110" rx="78" ry="54" stroke="currentColor" stroke-width="0.9" opacity="0.35" />
+                  <ellipse cx="110" cy="110" rx="34" ry="78" stroke="currentColor" stroke-width="1" opacity="0.65" />
+                  <ellipse cx="110" cy="110" rx="60" ry="78" stroke="currentColor" stroke-width="0.9" opacity="0.35" />
+                  <line x1="32" y1="110" x2="188" y2="110" stroke="currentColor" stroke-width="0.9" opacity="0.4" />
+                  <line x1="110" y1="32" x2="110" y2="188" stroke="currentColor" stroke-width="0.9" opacity="0.4" />
+                </svg>
+
+                <!-- Floating Country Chips on Orbit -->
+                <div
+                  v-for="pin in globePins"
+                  :key="pin.name"
+                  :class="[
+                    'absolute inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/90 backdrop-blur-md border border-white/15 shadow-lg text-[11px] font-semibold text-white',
+                    pin.posClass,
+                  ]"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" :style="{ animationDelay: pin.delay }" />
+                  <span aria-hidden="true">{{ pin.flag }}</span>
+                  <span>{{ pin.name }}</span>
+                </div>
               </div>
             </div>
+          </article>
 
-            <!-- Footer: Budget Line with Ruble conversion in brackets for foreign currency -->
-            <div class="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-              <span class="text-slate-500 dark:text-slate-400">Ориентир бюджета:</span>
-              <div class="text-right">
-                <span class="font-extrabold text-slate-900 dark:text-slate-100">
-                  {{ dest.budget.toLocaleString('ru-RU') }} {{ dest.currencySymbol }}
-                </span>
-                <!-- In brackets in rubles for foreign currency -->
-                <span
-                  v-if="dest.currency !== 'RUB' && dest.rubApprox"
-                  class="font-semibold text-teal-700 dark:text-teal-400 ml-1"
+          <!-- BENTO 2: Privacy-by-Design Ticket Vault (IndexedDB) -->
+          <article
+            v-reveal="100"
+            class="md:col-span-6 lg:col-span-5 rounded-3xl bg-slate-50/90 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-emerald-300/80 dark:hover:border-emerald-500/40 p-6 sm:p-7 flex flex-col justify-between gap-5 transition-colors duration-200"
+          >
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div
+                  class="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-200/70 dark:border-emerald-500/30 flex items-center justify-center"
                 >
-                  (~{{ dest.rubApprox.toLocaleString('ru-RU') }} ₽)
+                  <ShieldCheck class="w-5 h-5" />
+                </div>
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-500/30"
+                >
+                  <HardDrive class="w-3 h-3" />
+                  <span>IndexedDB · 0 байт на сервер</span>
+                </span>
+              </div>
+
+              <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100">
+                Privacy-by-Design сейф билетов
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Сканы паспортов, PDF-билеты и номера полисов хранятся исключительно в локальной
+                базе вашего браузера и никогда не уходят на удалённый сервер.
+              </p>
+            </div>
+
+            <!-- Mini Vault UI Preview -->
+            <div class="space-y-2">
+              <div
+                v-for="doc in vaultDemoFiles"
+                :key="doc.name"
+                class="flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-2xl bg-white dark:bg-slate-800/75 border border-slate-200/70 dark:border-slate-700/80"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div
+                    class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                  >
+                    <Lock class="w-3.5 h-3.5" />
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                      {{ doc.name }}
+                    </p>
+                    <p class="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                      {{ doc.meta }}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 shrink-0"
+                >
+                  {{ doc.status }}
                 </span>
               </div>
             </div>
           </article>
-        </div>
 
-        <!-- Hint below cards -->
-        <div class="mt-6 text-center text-xs text-slate-400 dark:text-slate-500 flex items-center justify-center gap-1.5">
-          <Info class="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-          <span>Нажмите на любую карточку выше, чтобы посмотреть программу по дням и сразу создать поездку</span>
+          <!-- BENTO 3: Smart Packing List + Weather Forecast -->
+          <article
+            v-reveal="140"
+            class="md:col-span-3 lg:col-span-4 rounded-3xl bg-slate-50/90 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-sky-300/80 dark:hover:border-sky-500/40 p-6 flex flex-col justify-between gap-5 transition-colors duration-200"
+          >
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div
+                  class="w-11 h-11 rounded-2xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-200/70 dark:border-sky-500/30 flex items-center justify-center"
+                >
+                  <Briefcase class="w-5 h-5" />
+                </div>
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-200/80 dark:border-sky-500/30 tabular-nums"
+                >
+                  <CloudSun class="w-3.5 h-3.5" />
+                  <span>+22°…+27°C · Open-Meteo</span>
+                </span>
+              </div>
+
+              <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
+                Умный список вещей + погода
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Чек-лист подстраивается под климат направления, длительность и формат отдыха.
+              </p>
+            </div>
+
+            <!-- Interactive Mini Checklist -->
+            <div class="rounded-2xl bg-white dark:bg-slate-800/75 border border-slate-200/70 dark:border-slate-700/80 p-3.5 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400 pb-1 border-b border-slate-100 dark:border-slate-700/70">
+                <span>Попробуйте отметить:</span>
+                <span class="text-teal-700 dark:text-teal-400 tabular-nums">
+                  {{ packedDemoCount }} / {{ bentoPackingItems.length }}
+                </span>
+              </div>
+
+              <button
+                v-for="item in bentoPackingItems"
+                :key="item.id"
+                type="button"
+                @click="toggleDemoPackingItem(item.id)"
+                class="w-full flex items-center gap-2.5 py-1 text-left group cursor-pointer"
+              >
+                <span
+                  :class="[
+                    'w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-colors',
+                    item.checked
+                      ? 'bg-teal-600 border-teal-600 text-white'
+                      : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 group-hover:border-teal-400',
+                  ]"
+                >
+                  <Check v-if="item.checked" class="w-3 h-3 stroke-[3]" />
+                </span>
+                <span
+                  :class="[
+                    'text-xs font-semibold transition-colors truncate',
+                    item.checked
+                      ? 'line-through text-slate-400 dark:text-slate-500'
+                      : 'text-slate-800 dark:text-slate-100',
+                  ]"
+                >
+                  {{ item.label }}
+                </span>
+              </button>
+            </div>
+          </article>
+
+          <!-- BENTO 4: Multi-Currency Budget & Analytics -->
+          <article
+            v-reveal="180"
+            class="md:col-span-3 lg:col-span-4 rounded-3xl bg-slate-50/90 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-teal-300/80 dark:hover:border-teal-500/40 p-6 flex flex-col justify-between gap-5 transition-colors duration-200"
+          >
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div
+                  class="w-11 h-11 rounded-2xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-200/70 dark:border-teal-500/30 flex items-center justify-center"
+                >
+                  <BarChart3 class="w-5 h-5" />
+                </div>
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 border border-teal-200/80 dark:border-teal-500/30"
+                >
+                  <ArrowRightLeft class="w-3 h-3" />
+                  <span>Курс ЦБ РФ</span>
+                </span>
+              </div>
+
+              <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
+                Мультивалютный бюджет
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Траты в EUR, USD и RUB автоматически приводятся к валюте поездки с динамикой по дням.
+              </p>
+            </div>
+
+            <!-- Mini Budget & Daily Bars Preview -->
+            <div class="rounded-2xl bg-white dark:bg-slate-800/75 border border-slate-200/70 dark:border-slate-700/80 p-3.5 space-y-3">
+              <div class="flex items-center justify-between text-[11px] font-bold">
+                <span class="text-slate-500 dark:text-slate-400">EUR / USD → RUB</span>
+                <span class="text-teal-700 dark:text-teal-300 tabular-nums">64 400 ₽</span>
+              </div>
+
+              <div class="grid grid-cols-4 gap-2.5 items-end h-20 pt-1">
+                <div
+                  v-for="bar in budgetDemoBars"
+                  :key="bar.day"
+                  class="h-full flex flex-col justify-end items-center gap-1"
+                  :title="`${bar.day}: ${bar.amount}`"
+                >
+                  <div class="w-full flex-1 bg-slate-100 dark:bg-slate-700/70 rounded-lg overflow-hidden flex items-end">
+                    <div
+                      :class="['w-full rounded-t-lg bg-gradient-to-t', bar.colorClass]"
+                      :style="{ height: `${bar.heightPct}%` }"
+                    />
+                  </div>
+                  <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                    {{ bar.day }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- BENTO 5: Offline PDF/HTML Guidebook -->
+          <article
+            v-reveal="220"
+            class="md:col-span-6 lg:col-span-4 rounded-3xl bg-slate-50/90 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-amber-300/80 dark:hover:border-amber-500/40 p-6 flex flex-col justify-between gap-5 transition-colors duration-200"
+          >
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between gap-2">
+                <div
+                  class="w-11 h-11 rounded-2xl bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-200/70 dark:border-amber-500/30 flex items-center justify-center"
+                >
+                  <FileDown class="w-5 h-5" />
+                </div>
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-500/30"
+                >
+                  <WifiOff class="w-3 h-3" />
+                  <span>Без интернета</span>
+                </span>
+              </div>
+
+              <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100">
+                Офлайн PDF/HTML-путеводитель
+              </h3>
+              <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Экспортируйте полный лист маршрута с расписанием, памяткой страны и чек-листом — откроется в телефоне даже в роуминге.
+              </p>
+            </div>
+
+            <!-- Mini Offline Sheet Preview -->
+            <div class="rounded-2xl bg-white dark:bg-slate-800/75 border border-slate-200/70 dark:border-slate-700/80 p-3.5 space-y-2.5">
+              <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/70">
+                <div class="flex items-center gap-2 min-w-0">
+                  <FileText class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                    TravelGuide_Rome.html
+                  </span>
+                </div>
+                <div class="flex items-center gap-1 shrink-0">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-rose-50 dark:bg-rose-500/15 text-rose-700 dark:text-rose-300">
+                    PDF
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300">
+                    HTML
+                  </span>
+                </div>
+              </div>
+
+              <div class="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                <div class="flex items-center justify-between">
+                  <span class="inline-flex items-center gap-1.5">
+                    <CalendarDays class="w-3 h-3 text-teal-600 dark:text-teal-400" />
+                    <span>План по дням и адреса</span>
+                  </span>
+                  <span class="font-bold text-slate-800 dark:text-slate-100">6 дней</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="inline-flex items-center gap-1.5">
+                    <MapPin class="w-3 h-3 text-sky-600 dark:text-sky-400" />
+                    <span>Визы, транспорт, экстренные</span>
+                  </span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">Включено</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- BENTO 6: Sharing & Ready Templates (Wide Bottom Card) -->
+          <article
+            v-reveal="260"
+            class="md:col-span-6 lg:col-span-12 rounded-3xl bg-gradient-to-br from-slate-50 via-white to-indigo-50/50 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/35 border border-slate-200/80 dark:border-slate-800 hover:border-indigo-300/80 dark:hover:border-indigo-500/40 p-6 sm:p-8 transition-colors duration-200"
+          >
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-5 space-y-3">
+                <div
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/30"
+                >
+                  <Share2 class="w-3.5 h-3.5" />
+                  <span>Совместный доступ и шаблоны</span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-slate-100">
+                  Делитесь маршрутом с попутчиками и дублируйте поездки
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  Откройте публичную ссылку только для чтения: друзья увидят расписание и смогут
+                  отмечать личный список вещей у себя в браузере, а ваши брони и документы останутся
+                  приватными. Любой маршрут можно клонировать с автоматическим сдвигом дат.
+                </p>
+              </div>
+
+              <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Sub-card A: Public Share Link Preview -->
+                <div
+                  class="rounded-2xl bg-white dark:bg-slate-800/75 border border-slate-200/80 dark:border-slate-700/80 p-4 space-y-3 shadow-soft dark:shadow-none"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <Link2 class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <span>Публичная ссылка</span>
+                    </span>
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 px-2 py-0.5 rounded-full">
+                      Активна
+                    </span>
+                  </div>
+
+                  <div
+                    class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700 text-[11px] font-mono text-slate-600 dark:text-slate-300 truncate"
+                  >
+                    /shared/rome-amalfi-2026
+                  </div>
+
+                  <div class="flex flex-wrap gap-1.5 text-[10px] font-semibold">
+                    <span class="px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300">
+                      План ✓
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300">
+                      Вещи ✓
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                      <Lock class="w-2.5 h-2.5" />
+                      Брони скрыты
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Sub-card B: Duplicate with Date Shift Preview -->
+                <div
+                  class="rounded-2xl bg-white dark:bg-slate-800/75 border border-slate-200/80 dark:border-slate-700/80 p-4 space-y-3 shadow-soft dark:shadow-none"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+                      <Copy class="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                      <span>Дублирование маршрута</span>
+                    </span>
+                    <span class="text-[10px] font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/15 px-2 py-0.5 rounded-full">
+                      1 клик
+                    </span>
+                  </div>
+
+                  <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200/70 dark:border-slate-700 text-xs font-bold">
+                    <span class="text-slate-500 dark:text-slate-400">14 – 19 мая</span>
+                    <ArrowRight class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                    <span class="text-slate-900 dark:text-slate-100">10 – 15 сен</span>
+                  </div>
+
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
+                    Автоматический сдвиг всех дней, событий, списка вещей и шаблона чек-листа.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Interactive Inspiration Trip Modal -->
-    <InspirationTripModal
-      :open="Boolean(selectedInspirationTrip)"
-      :trip="selectedInspirationTrip"
-      @close="selectedInspirationTrip = null"
-    />
+    <!-- 4. FINAL CTA SECTION -->
+    <section class="py-16 sm:py-20 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" v-reveal>
+        <div
+          class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 border border-teal-500/25 px-6 py-12 sm:px-12 sm:py-16 text-center shadow-2xl shadow-slate-900/15 dark:shadow-black/40"
+        >
+          <!-- Ambient Glows -->
+          <div
+            class="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-teal-400/20 blur-3xl"
+            aria-hidden="true"
+          />
+          <div
+            class="pointer-events-none absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-sky-400/20 blur-3xl"
+            aria-hidden="true"
+          />
+
+          <div class="relative z-10 max-w-2xl mx-auto space-y-5">
+            <div
+              class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-teal-200 border border-white/15 backdrop-blur-sm"
+            >
+              <Sparkles class="w-3.5 h-3.5 text-teal-300" />
+              <span>Бесплатно · Без рекламы · Privacy-by-Design</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Готовы собрать своё следующее путешествие?
+            </h2>
+
+            <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+              Выберите страну на 3D-глобусе или запустите готовый маршрут — настройте атмосферу
+              поездки, соберите вещи по погоде и выгрузите удобный путеводитель.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+              <RouterLink
+                :to="authStore.isAuthenticated ? '/dashboard' : '/register'"
+                class="w-full sm:w-auto"
+              >
+                <BaseButton variant="primary" size="lg" fullWidth>
+                  <span>
+                    {{ authStore.isAuthenticated ? 'Перейти в личный кабинет' : 'Начать планировать' }}
+                  </span>
+                  <ArrowRight class="w-5 h-5" />
+                </BaseButton>
+              </RouterLink>
+
+              <RouterLink to="/explore" class="w-full sm:w-auto">
+                <button
+                  type="button"
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-base font-medium text-white bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm transition-all duration-200 active:scale-[0.99]"
+                >
+                  <Globe2 class="w-5 h-5 text-teal-300" />
+                  <span>Открыть 3D-глобус</span>
+                </button>
+              </RouterLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </PublicLayout>
 </template>

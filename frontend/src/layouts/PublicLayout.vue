@@ -36,7 +36,7 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
         </RouterLink>
 
         <!-- Desktop Links -->
-        <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <nav class="hidden md:flex items-center gap-6 lg:gap-7 text-sm font-medium text-slate-600 dark:text-slate-300">
           <RouterLink
             to="/explore"
             class="inline-flex items-center gap-1.5 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
@@ -53,7 +53,18 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
             <BookOpen class="w-4 h-4 text-teal-600 dark:text-teal-400" />
             <span>Страны мира</span>
           </RouterLink>
-          <a href="/#features" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Преимущества</a>
+          <RouterLink
+            :to="{ path: '/', hash: '#routes' }"
+            class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+          >
+            Маршруты
+          </RouterLink>
+          <RouterLink
+            :to="{ path: '/', hash: '#features' }"
+            class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+          >
+            Преимущества
+          </RouterLink>
         </nav>
 
         <!-- Desktop Theme Switcher & Auth Buttons -->
@@ -160,13 +171,20 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
             <BookOpen class="w-4 h-4 text-teal-600 dark:text-teal-400" />
             <span>Страны мира</span>
           </RouterLink>
-          <a
-            href="/#features"
+          <RouterLink
+            :to="{ path: '/', hash: '#routes' }"
+            class="px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
+            @click="mobileMenuOpen = false"
+          >
+            Маршруты
+          </RouterLink>
+          <RouterLink
+            :to="{ path: '/', hash: '#features' }"
             class="px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800"
             @click="mobileMenuOpen = false"
           >
             Преимущества
-          </a>
+          </RouterLink>
         </div>
 
         <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2.5">
@@ -196,17 +214,19 @@ const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> =
     <footer class="bg-white dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-teal-600 text-white flex items-center justify-center">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-sky-600 text-white flex items-center justify-center shadow-sm">
             <Compass class="w-4 h-4" />
           </div>
           <span class="font-bold text-slate-900 dark:text-slate-100">TravelPlanner</span>
-          <span class="text-xs text-slate-400 dark:text-slate-500 ml-1">— сервис планирования путешествий</span>
+          <span class="text-xs text-slate-400 dark:text-slate-500 ml-1 hidden sm:inline">— умный планировщик путешествий</span>
         </div>
 
-        <div class="flex items-center gap-5 text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
+          <RouterLink :to="{ path: '/', hash: '#routes' }" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Маршруты</RouterLink>
+          <RouterLink :to="{ path: '/', hash: '#features' }" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Преимущества</RouterLink>
           <RouterLink to="/explore" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">3D-Глобус</RouterLink>
           <RouterLink to="/countries" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Каталог стран</RouterLink>
-          <span>© {{ new Date().getFullYear() }} TravelPlanner</span>
+          <span class="text-slate-400 dark:text-slate-500">© {{ new Date().getFullYear() }} TravelPlanner</span>
         </div>
       </div>
     </footer>

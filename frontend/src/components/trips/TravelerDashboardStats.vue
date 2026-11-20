@@ -399,7 +399,7 @@ function retryLoad() {
               ]"
             >
               <Compass :class="['w-4 h-4', featuredTripTheme.accentIconClass]" />
-              <span>Ближайшая поездка · Командный центр</span>
+              <span>Ближайшая поездка · Подготовка</span>
             </span>
           </div>
 
