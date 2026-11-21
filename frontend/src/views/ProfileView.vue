@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import type { Component } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { useForm, useField } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import {
@@ -10,20 +10,22 @@ import {
   Calendar,
   Lock,
   ShieldCheck,
-  Compass,
+  Settings,
+  LogOut,
   Map,
   Globe2,
   CalendarDays,
   HardDrive,
   Trash2,
   RefreshCw,
-  Palette,
   Sun,
   Moon,
   Monitor,
   Check,
   ChevronRight,
-  LockKeyhole,
+  FileText,
+  FolderOpen,
+  Database,
 } from 'lucide-vue-next';
 import {
   profileNameValidationSchema,
@@ -31,6 +33,9 @@ import {
 } from '@/schemas/validation';
 import { useAuthStore } from '@/stores/auth.store';
 import { useTripStore } from '@/stores/trip.store';
+import { useCountryStore } from '@/stores/country.store';
+import { usePackingStore } from '@/stores/packing.store';
+import { useWeatherStore } from '@/stores/weather.store';
 import { useDocumentStore } from '@/stores/document.store';
 import { useToastStore } from '@/stores/toast.store';
 import { useTheme, type ThemeMode } from '@/composables/useTheme';
@@ -47,13 +52,63 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseAlert from '@/components/ui/BaseAlert.vue';
 import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
 
+type ProfileTab = 'settings' | 'documents' | 'security';
+
+const router = useRouter();
 const authStore = useAuthStore();
 const tripStore = useTripStore();
+const countryStore = useCountryStore();
+const packingStore = usePackingStore();
+const weatherStore = useWeatherStore();
 const documentStore = useDocumentStore();
 const toastStore = useToastStore();
 const { themeMode, isDark, setTheme } = useTheme();
 
-// Traveler passport info
+const activeTab = ref<ProfileTab>('settings');
+
+const menuTabs = computed<
+  Array<{
+    id: ProfileTab;
+    label: string;
+    mobileLabel: string;
+    title: string;
+    subtitle: string;
+    icon: Component;
+    badge?: number;
+  }>
+>(() => [
+  {
+    id: 'settings',
+    label: 'Настройки',
+    mobileLabel: 'Настройки',
+    title: 'Настройки',
+    subtitle: 'Статистика путешественника, личные данные и тема оформления',
+    icon: Settings,
+  },
+  {
+    id: 'documents',
+    label: 'Документы на устройстве',
+    mobileLabel: 'Документы',
+    title: 'Документы на устройстве',
+    subtitle: 'Локально сохранённые билеты, брони и ваучеры в этом браузере',
+    icon: HardDrive,
+    badge: vaultStats.value.filesCount > 0 ? vaultStats.value.filesCount : undefined,
+  },
+  {
+    id: 'security',
+    label: 'Безопасность',
+    mobileLabel: 'Безопасность',
+    title: 'Безопасность',
+    subtitle: 'Управление паролем и защитой вашего аккаунта',
+    icon: ShieldCheck,
+  },
+]);
+
+const currentTabMeta = computed(
+  () => menuTabs.value.find((tab) => tab.id === activeTab.value) || menuTabs.value[0]
+);
+
+// Traveler identity & stats
 const userInitials = computed(() => {
   const rawName = authStore.user?.name || 'П';
   return rawName
@@ -70,7 +125,7 @@ const formattedCreatedAt = computed(() => {
   return formatRussianDate(iso.slice(0, 10), true);
 });
 
-const passportStats = computed(() => [
+const travelerStats = computed(() => [
   {
     key: 'trips',
     label: 'Поездок',
@@ -121,7 +176,7 @@ const onSaveName = handleNameSubmit(async (values) => {
   nameError.value = null;
   try {
     await authStore.updateProfile({ name: values.name.trim() });
-    toastStore.success('Имя пользователя успешно обновлено');
+    toastStore.success('Изменения профиля сохранены');
   } catch (err: any) {
     nameError.value = err?.message || 'Не удалось обновить имя';
   } finally {
@@ -129,7 +184,23 @@ const onSaveName = handleNameSubmit(async (values) => {
   }
 });
 
-// Local document vault (IndexedDB Privacy-by-Design)
+// Theme appearance switcher
+const themeOptions: Array<{ mode: ThemeMode; label: string; icon: Component }> = [
+  { mode: 'light', label: 'Светлая', icon: Sun },
+  { mode: 'dark', label: 'Тёмная', icon: Moon },
+  { mode: 'system', label: 'Системная', icon: Monitor },
+];
+
+const activeThemeCaption = computed(() => {
+  if (themeMode.value === 'system') {
+    return `Подстраивается под систему — сейчас активна ${isDark.value ? 'тёмная' : 'светлая'} тема`;
+  }
+  return themeMode.value === 'dark'
+    ? 'Активна тёмная тема на этом устройстве'
+    : 'Активна светлая тема на этом устройстве';
+});
+
+// Local document storage on device
 const vaultStats = ref<LocalVaultStats>({
   supported: true,
   filesCount: 0,
@@ -165,7 +236,7 @@ async function handleConfirmClearVault() {
     clearVaultDialogOpen.value = false;
     toastStore.success('Локальные файлы документов удалены с этого устройства');
   } catch (err: any) {
-    vaultError.value = err?.message || 'Не удалось очистить локальный сейф документов';
+    vaultError.value = err?.message || 'Не удалось очистить локальные файлы';
     toastStore.error('Ошибка очистки локального хранилища');
   } finally {
     isClearingVault.value = false;
@@ -176,55 +247,15 @@ const vaultFilesLabel = computed(() =>
   pluralizeRu(vaultStats.value.filesCount, ['файл', 'файла', 'файлов'])
 );
 
-const vaultTripsSubtext = computed(() => {
-  if (!vaultStats.value.supported) return 'IndexedDB недоступна';
-  if (vaultStats.value.filesCount === 0) return 'На этом устройстве файлов нет';
-  const tripsCount = vaultStats.value.tripsCount;
-  if (tripsCount <= 0) return 'Хранятся локально в браузере';
-  return `В ${tripsCount} ${pluralizeRu(tripsCount, ['поездке', 'поездках', 'поездках'])}`;
-});
+const vaultTripsLabel = computed(() =>
+  pluralizeRu(vaultStats.value.tripsCount, ['поездка', 'поездки', 'поездок'])
+);
 
 const formattedVaultSize = computed(() =>
   formatAttachmentFileSize(vaultStats.value.totalBytes)
 );
 
-// Theme appearance options
-const themeCards: Array<{
-  mode: ThemeMode;
-  title: string;
-  description: string;
-  icon: Component;
-}> = [
-  {
-    mode: 'light',
-    title: 'Светлая',
-    description: 'Чистый дневной интерфейс',
-    icon: Sun,
-  },
-  {
-    mode: 'dark',
-    title: 'Тёмная',
-    description: 'Комфорт для глаз вечером',
-    icon: Moon,
-  },
-  {
-    mode: 'system',
-    title: 'Системная',
-    description: 'Как в настройках ОС',
-    icon: Monitor,
-  },
-];
-
-const activeThemeCaption = computed(() => {
-  if (themeMode.value === 'system') {
-    return `Автоматическая синхронизация с ОС — сейчас активна ${isDark.value ? 'тёмная' : 'светлая'} тема`;
-  }
-  return themeMode.value === 'dark'
-    ? 'Включена тёмная тема оформления на этом устройстве'
-    : 'Включена светлая тема оформления на этом устройстве';
-});
-
-// Password update form
+// Password change form
 const isUpdatingPassword = ref(false);
 const passwordError = ref<string | null>(null);
 
@@ -358,6 +389,26 @@ const onSavePassword = handlePasswordSubmit(async (values) => {
   }
 });
 
+// Logout handler
+const isLoggingOut = ref(false);
+
+async function handleLogout() {
+  if (isLoggingOut.value) return;
+  isLoggingOut.value = true;
+  try {
+    await authStore.logout();
+    tripStore.clearState();
+    countryStore.clearFavoritesState();
+    packingStore.clearState();
+    weatherStore.clearState();
+    documentStore.clearState();
+    toastStore.info('Вы вышли из аккаунта');
+    router.push('/login');
+  } finally {
+    isLoggingOut.value = false;
+  }
+}
+
 onMounted(() => {
   tripStore.fetchStats().catch(() => {
     // Non-blocking fallback to zeros
@@ -368,466 +419,455 @@ onMounted(() => {
 
 <template>
   <DashboardLayout>
-    <div class="max-w-6xl mx-auto space-y-6 animate-fade-in">
-      <!-- Full-Width Traveler Passport Hero Banner -->
-      <section
-        class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-700 dark:from-teal-700 dark:via-emerald-800 dark:to-cyan-900 p-6 sm:p-8 text-white shadow-card dark:shadow-black/40"
-      >
-        <!-- Decorative Ambient Layers (lightweight radial gradients, no GPU blur-3xl) -->
-        <div
-          class="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.18)_0%,transparent_70%)]"
-        />
-        <div
-          class="pointer-events-none absolute -bottom-24 left-1/3 w-64 h-64 rounded-full bg-[radial-gradient(circle,rgba(103,232,249,0.22)_0%,transparent_70%)]"
-        />
-        <Compass
-          class="pointer-events-none select-none absolute -right-6 -bottom-8 w-44 h-44 text-white/[0.07] rotate-12"
-        />
-
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <!-- Identity Info -->
-          <div class="flex flex-col sm:flex-row sm:items-center gap-5 min-w-0">
-            <div
-              class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 border border-white/30 text-white text-2xl sm:text-3xl font-extrabold flex items-center justify-center shrink-0 shadow-lg"
-            >
-              {{ userInitials }}
-            </div>
-
-            <div class="min-w-0 space-y-2">
-              <div
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-[11px] font-semibold uppercase tracking-wider text-teal-50"
-              >
-                <Compass class="w-3.5 h-3.5" />
-                <span>Паспорт путешественника</span>
-              </div>
-
-              <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white truncate">
-                {{ authStore.user?.name || 'Путешественник' }}
-              </h1>
-
-              <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs sm:text-sm text-teal-50/90">
-                <span class="inline-flex items-center gap-1.5 min-w-0">
-                  <Mail class="w-4 h-4 shrink-0 text-teal-200" />
-                  <span class="truncate">{{ authStore.user?.email }}</span>
-                </span>
-                <span class="inline-flex items-center gap-1.5 shrink-0">
-                  <Calendar class="w-4 h-4 shrink-0 text-teal-200" />
-                  <span>В TravelPlanner с {{ formattedCreatedAt }}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3 Compact Live Stats Badges -->
-          <div class="grid grid-cols-3 gap-2.5 sm:gap-3 shrink-0">
-            <div
-              v-for="stat in passportStats"
-              :key="stat.key"
-              class="rounded-2xl bg-white/15 hover:bg-white/20 border border-white/20 px-3.5 py-3 sm:px-4 sm:py-3.5 min-w-[92px] sm:min-w-[112px] transition-colors"
-            >
-              <div class="flex items-center gap-1.5 text-teal-100/90 mb-1">
-                <component :is="stat.icon" class="w-3.5 h-3.5 shrink-0" />
-                <span class="text-[11px] font-medium truncate">{{ stat.label }}</span>
-              </div>
-
-              <div
-                v-if="tripStore.isLoadingStats && !tripStore.stats"
-                class="h-7 w-12 rounded-lg bg-white/20 animate-pulse"
-              />
-              <p v-else class="text-xl sm:text-2xl font-extrabold text-white leading-tight tabular-nums">
-                {{ stat.value }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 2-Column Bento Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <!-- LEFT COLUMN -->
-        <div class="space-y-6">
-          <!-- Card 1: Personal Info -->
-          <section
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-7 transition-colors"
+    <div class="max-w-5xl mx-auto animate-fade-in">
+      <div class="flex flex-col lg:flex-row items-start gap-6 lg:gap-7">
+        <!-- Left Column: Compact Sticky Sidebar Menu Card -->
+        <aside class="w-full lg:w-64 shrink-0">
+          <div
+            class="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-2.5 lg:sticky lg:top-24"
           >
-            <div class="flex items-start gap-3.5 mb-6">
-              <div
-                class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
-              >
-                <User class="w-5 h-5" />
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  Личные данные
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                  Обновите отображаемое имя в вашем профиле и на маршрутах
-                </p>
-              </div>
-            </div>
-
-            <form @submit.prevent="onSaveName" class="space-y-4" novalidate>
-              <BaseAlert v-if="nameError" type="error" :message="nameError" />
-
-              <BaseInput
-                v-model="name"
-                name="name"
-                label="Отображаемое имя"
-                placeholder="Введите ваше имя"
-                :error="nameErrors.name"
-                required
-                :disabled="isUpdatingName"
-              >
-                <template #icon>
-                  <User class="w-4 h-4" />
-                </template>
-              </BaseInput>
-
-              <BaseInput
-                :modelValue="authStore.user?.email || ''"
-                name="email_readonly"
-                label="Электронная почта"
-                disabled
-                hint="Почта закреплена за аккаунтом и используется для входа — изменить её нельзя"
-              >
-                <template #icon>
-                  <Mail class="w-4 h-4" />
-                </template>
-              </BaseInput>
-
-              <div class="pt-2 flex justify-end sm:justify-start">
-                <BaseButton type="submit" variant="primary" :loading="isUpdatingName">
-                  Сохранить имя
-                </BaseButton>
-              </div>
-            </form>
-          </section>
-
-          <!-- Card 2: Local Document Vault (Privacy-by-Design) -->
-          <section
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-7 transition-colors"
-          >
-            <div class="flex items-start justify-between gap-3 mb-4">
-              <div class="flex items-start gap-3.5 min-w-0">
+            <!-- Mini User Plate -->
+            <div
+              class="flex items-center justify-between gap-2.5 px-2.5 py-2.5 mb-2 border-b border-slate-100 dark:border-slate-800/80"
+            >
+              <div class="flex items-center gap-3 min-w-0">
                 <div
-                  class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                  class="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 text-white text-sm font-bold flex items-center justify-center shrink-0 shadow-sm"
                 >
-                  <HardDrive class="w-5 h-5" />
+                  {{ userInitials }}
                 </div>
                 <div class="min-w-0">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-                      Локальный сейф документов
-                    </h2>
-                    <span
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30"
-                    >
-                      <LockKeyhole class="w-3 h-3" />
-                      Privacy-by-Design
-                    </span>
-                  </div>
-                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                    Файлы билетов, броней и ваучеров хранятся исключительно в
-                    <code class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-medium">IndexedDB</code>
-                    этого браузера и никогда не отправляются на сервер.
+                  <p class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate leading-tight">
+                    {{ authStore.user?.name || 'Путешественник' }}
+                  </p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    {{ authStore.user?.email }}
                   </p>
                 </div>
               </div>
 
+              <!-- Mobile Quick Logout Button -->
               <button
                 type="button"
-                @click="loadVaultStats"
-                :disabled="isLoadingVault"
-                title="Обновить статистику хранилища"
-                aria-label="Обновить статистику хранилища"
-                class="p-2 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-teal-400 dark:hover:bg-slate-800 transition-colors shrink-0 disabled:opacity-50"
+                @click="handleLogout"
+                :disabled="isLoggingOut"
+                aria-label="Выйти из аккаунта"
+                class="lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-500/15 dark:hover:bg-rose-500/25 transition-colors shrink-0 disabled:opacity-50"
               >
-                <RefreshCw :class="['w-4 h-4', isLoadingVault ? 'animate-spin' : '']" />
+                <LogOut class="w-3.5 h-3.5" />
+                <span>Выйти</span>
               </button>
             </div>
 
-            <BaseAlert v-if="vaultError" type="error" :message="vaultError" class="mb-4" />
-
-            <!-- Storage Metrics -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-              <div
-                class="rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 p-4"
-              >
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  Сохранено локально
-                </p>
-                <div
-                  v-if="isLoadingVault"
-                  class="h-7 w-24 mt-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse"
-                />
-                <p
-                  v-else
-                  class="text-xl font-extrabold text-slate-900 dark:text-slate-100 mt-1 tabular-nums"
-                >
-                  {{ vaultStats.filesCount }}
-                  <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
-                    {{ vaultFilesLabel }}
-                  </span>
-                </p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  {{ vaultTripsSubtext }}
-                </p>
-              </div>
-
-              <div
-                class="rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 p-4"
-              >
-                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  Занято на устройстве
-                </p>
-                <div
-                  v-if="isLoadingVault"
-                  class="h-7 w-20 mt-1.5 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse"
-                />
-                <p
-                  v-else
-                  class="text-xl font-extrabold text-slate-900 dark:text-slate-100 mt-1 tabular-nums"
-                >
-                  {{ formattedVaultSize }}
-                </p>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  PDF, JPEG, PNG, WEBP до 10 МБ
-                </p>
-              </div>
-            </div>
-
-            <!-- Clear Local Files Action -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <button
-                type="button"
-                @click="clearVaultDialogOpen = true"
-                :disabled="isLoadingVault || isClearingVault || !vaultStats.supported || vaultStats.filesCount === 0"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border border-rose-200 bg-rose-50/70 text-rose-700 hover:bg-rose-100/80 hover:border-rose-300 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 dark:hover:border-rose-500/40 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
-              >
-                <Trash2 class="w-4 h-4 shrink-0" />
-                <span>Очистить локальные файлы на этом устройстве</span>
-              </button>
-            </div>
-
-            <!-- Compact Diagnostics Footer Link -->
-            <div
-              class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3"
-            >
-              <span class="text-xs text-slate-400 dark:text-slate-500">
-                Служебный инструмент каталога стран
-              </span>
-              <RouterLink
-                to="/diagnostics/photos"
-                class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400 transition-colors"
-              >
-                <span>Диагностика флагов и фото</span>
-                <ChevronRight class="w-3.5 h-3.5" />
-              </RouterLink>
-            </div>
-          </section>
-        </div>
-
-        <!-- RIGHT COLUMN -->
-        <div class="space-y-6">
-          <!-- Card 3: Interface Appearance / Theme Picker -->
-          <section
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-7 transition-colors"
-          >
-            <div class="flex items-start gap-3.5 mb-5">
-              <div
-                class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"
-              >
-                <Palette class="w-5 h-5" />
-              </div>
-              <div>
-                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  Оформление интерфейса
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                  Выберите предпочитаемую тему — настройка сохраняется мгновенно
-                </p>
-              </div>
-            </div>
-
-            <!-- 3 Visual Preview Mini-Cards -->
-            <div
-              class="grid grid-cols-1 sm:grid-cols-3 gap-3"
-              role="radiogroup"
-              aria-label="Выбор темы оформления"
+            <!-- Menu Tabs (Horizontal strip on mobile, Vertical stack on desktop) -->
+            <nav
+              class="flex lg:flex-col gap-1 overflow-x-auto"
+              role="tablist"
+              aria-label="Разделы профиля"
             >
               <button
-                v-for="option in themeCards"
-                :key="option.mode"
+                v-for="tab in menuTabs"
+                :key="tab.id"
                 type="button"
-                role="radio"
-                :aria-checked="themeMode === option.mode"
-                @click="setTheme(option.mode)"
+                role="tab"
+                :aria-selected="activeTab === tab.id"
+                @click="activeTab = tab.id"
                 :class="[
-                  'group relative flex flex-col text-left rounded-2xl border p-3 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-teal-500/30',
-                  themeMode === option.mode
-                    ? 'border-teal-500 bg-teal-50/50 ring-2 ring-teal-500/20 dark:border-teal-400 dark:bg-teal-500/10 dark:ring-teal-400/20'
-                    : 'border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:border-slate-700 dark:hover:bg-slate-800/70',
+                  'group flex-1 lg:flex-none flex items-center justify-center lg:justify-between gap-2 px-3 py-2 lg:py-2.5 rounded-xl text-sm whitespace-nowrap transition-colors duration-150',
+                  activeTab === tab.id
+                    ? 'bg-teal-50 text-teal-700 font-semibold dark:bg-teal-500/15 dark:text-teal-300 dark:ring-1 dark:ring-inset dark:ring-teal-500/25'
+                    : 'text-slate-600 font-medium hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/70 dark:hover:text-slate-100',
                 ]"
               >
-                <!-- Mini UI Preview Window -->
-                <div
-                  class="relative w-full h-20 rounded-xl overflow-hidden border mb-3 select-none"
-                  :class="
-                    option.mode === 'dark'
-                      ? 'border-slate-700/80 bg-slate-950'
-                      : option.mode === 'light'
-                        ? 'border-slate-200 bg-slate-100'
-                        : 'border-slate-300 dark:border-slate-700 bg-slate-100'
-                  "
-                >
-                  <!-- Light Theme Preview -->
-                  <div v-if="option.mode === 'light'" class="h-full flex">
-                    <div class="w-1/3 bg-white border-r border-slate-200/90 p-1.5 flex flex-col gap-1">
-                      <div class="h-2 w-8 rounded bg-teal-500/80" />
-                      <div class="h-1.5 w-full rounded bg-slate-200 mt-1" />
-                      <div class="h-1.5 w-4/5 rounded bg-teal-100" />
-                      <div class="h-1.5 w-3/4 rounded bg-slate-200" />
-                    </div>
-                    <div class="flex-1 p-1.5 flex flex-col gap-1.5 bg-slate-50">
-                      <div class="h-3.5 rounded-md bg-gradient-to-r from-teal-500 to-emerald-500" />
-                      <div class="flex-1 rounded-md bg-white border border-slate-200/80 p-1.5 space-y-1">
-                        <div class="h-1.5 w-3/4 rounded bg-slate-300" />
-                        <div class="h-1.5 w-1/2 rounded bg-slate-200" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Dark Theme Preview -->
-                  <div v-else-if="option.mode === 'dark'" class="h-full flex">
-                    <div class="w-1/3 bg-slate-900 border-r border-slate-800 p-1.5 flex flex-col gap-1">
-                      <div class="h-2 w-8 rounded bg-teal-400/90" />
-                      <div class="h-1.5 w-full rounded bg-slate-700 mt-1" />
-                      <div class="h-1.5 w-4/5 rounded bg-teal-500/30" />
-                      <div class="h-1.5 w-3/4 rounded bg-slate-700" />
-                    </div>
-                    <div class="flex-1 p-1.5 flex flex-col gap-1.5 bg-slate-950">
-                      <div class="h-3.5 rounded-md bg-gradient-to-r from-teal-600 to-emerald-600" />
-                      <div class="flex-1 rounded-md bg-slate-900 border border-slate-800 p-1.5 space-y-1">
-                        <div class="h-1.5 w-3/4 rounded bg-slate-600" />
-                        <div class="h-1.5 w-1/2 rounded bg-slate-700" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- System Theme Split Preview -->
-                  <div v-else class="h-full grid grid-cols-2">
-                    <!-- Left Half Light -->
-                    <div class="bg-slate-50 p-1.5 flex flex-col gap-1.5 border-r border-slate-300/80">
-                      <div class="h-3 rounded bg-teal-500" />
-                      <div class="flex-1 rounded bg-white border border-slate-200 p-1 space-y-1">
-                        <div class="h-1.5 w-4/5 rounded bg-slate-300" />
-                        <div class="h-1.5 w-3/5 rounded bg-slate-200" />
-                      </div>
-                    </div>
-                    <!-- Right Half Dark -->
-                    <div class="bg-slate-950 p-1.5 flex flex-col gap-1.5">
-                      <div class="h-3 rounded bg-teal-400/80" />
-                      <div class="flex-1 rounded bg-slate-900 border border-slate-800 p-1 space-y-1">
-                        <div class="h-1.5 w-4/5 rounded bg-slate-600" />
-                        <div class="h-1.5 w-3/5 rounded bg-slate-700" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Active Check Pill -->
-                  <span
-                    v-if="themeMode === option.mode"
-                    class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-teal-600 dark:bg-teal-400 text-white dark:text-slate-950 flex items-center justify-center shadow"
-                  >
-                    <Check class="w-3 h-3 stroke-[3]" />
-                  </span>
-                </div>
-
-                <!-- Card Title & Subtitle -->
-                <div class="flex items-center gap-1.5">
+                <span class="flex items-center gap-2.5 min-w-0">
                   <component
-                    :is="option.icon"
+                    :is="tab.icon"
                     :class="[
-                      'w-4 h-4 shrink-0',
-                      themeMode === option.mode
+                      'w-4 h-4 shrink-0 transition-colors',
+                      activeTab === tab.id
                         ? 'text-teal-600 dark:text-teal-400'
-                        : 'text-slate-400 dark:text-slate-500',
+                        : 'text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300',
                     ]"
                   />
-                  <span
-                    :class="[
-                      'text-sm font-semibold',
-                      themeMode === option.mode
-                        ? 'text-teal-700 dark:text-teal-300'
-                        : 'text-slate-800 dark:text-slate-200',
-                    ]"
-                  >
-                    {{ option.title }}
-                  </span>
-                </div>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                  {{ option.description }}
-                </p>
+                  <span class="sm:hidden">{{ tab.mobileLabel }}</span>
+                  <span class="hidden sm:inline truncate">{{ tab.label }}</span>
+                </span>
+
+                <span
+                  v-if="tab.badge"
+                  :class="[
+                    'hidden lg:inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full text-[11px] font-bold tabular-nums',
+                    activeTab === tab.id
+                      ? 'bg-teal-100 text-teal-700 dark:bg-teal-500/25 dark:text-teal-300'
+                      : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+                  ]"
+                >
+                  {{ tab.badge }}
+                </span>
+              </button>
+            </nav>
+
+            <!-- Desktop Divider & Logout Button -->
+            <div class="hidden lg:block mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                @click="handleLogout"
+                :disabled="isLoggingOut"
+                class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:text-rose-600 hover:bg-rose-50/80 dark:text-slate-400 dark:hover:text-rose-400 dark:hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+              >
+                <LogOut class="w-4 h-4 shrink-0" />
+                <span>Выйти из аккаунта</span>
               </button>
             </div>
+          </div>
+        </aside>
 
-            <p class="mt-4 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-              <span
-                class="w-2 h-2 rounded-full shrink-0"
-                :class="isDark ? 'bg-teal-400' : 'bg-emerald-500'"
-              />
-              <span>{{ activeThemeCaption }}</span>
+        <!-- Right Column: Active Section Content -->
+        <div class="flex-1 min-w-0 w-full space-y-5">
+          <!-- Section Heading -->
+          <header class="space-y-1">
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+              {{ currentTabMeta.title }}
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              {{ currentTabMeta.subtitle }}
             </p>
-          </section>
+          </header>
 
-          <!-- Card 4: Security & Password -->
-          <section
-            class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-6 sm:p-7 transition-colors"
-          >
-            <div class="flex items-start gap-3.5 mb-6">
-              <div
-                class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
-              >
-                <ShieldCheck class="w-5 h-5" />
+          <!-- TAB 1: SETTINGS -->
+          <div v-if="activeTab === 'settings'" role="tabpanel" class="space-y-5 animate-fade-in">
+            <!-- Compact Traveler Stats Row Card -->
+            <section
+              class="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5"
+            >
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="grid grid-cols-3 gap-3 sm:gap-5 flex-1">
+                  <div
+                    v-for="stat in travelerStats"
+                    :key="stat.key"
+                    class="flex items-center gap-2.5 min-w-0"
+                  >
+                    <div
+                      class="w-9 h-9 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
+                    >
+                      <component :is="stat.icon" class="w-4 h-4" />
+                    </div>
+                    <div class="min-w-0">
+                      <div
+                        v-if="tripStore.isLoadingStats && !tripStore.stats"
+                        class="h-6 w-10 rounded-md bg-slate-200 dark:bg-slate-800 animate-pulse"
+                      />
+                      <p
+                        v-else
+                        class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight tabular-nums"
+                      >
+                        {{ stat.value }}
+                      </p>
+                      <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">
+                        {{ stat.label }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  class="flex items-center gap-2 pt-3 sm:pt-0 sm:pl-5 border-t sm:border-t-0 sm:border-l border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 shrink-0"
+                >
+                  <Calendar class="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                  <div>
+                    <p class="text-[11px] text-slate-400 dark:text-slate-500 leading-none">
+                      Дата регистрации
+                    </p>
+                    <p class="font-semibold text-slate-700 dark:text-slate-200 mt-0.5">
+                      {{ formattedCreatedAt }}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  Безопасность и пароль
+            </section>
+
+            <!-- Personal Info Card -->
+            <section
+              class="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6"
+            >
+              <div class="mb-5">
+                <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                  Личные данные
                 </h2>
                 <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                  Подтвердите текущий пароль, чтобы установить новый
+                  Отображаемое имя используется в личном кабинете и на ваших маршрутах
                 </p>
               </div>
-            </div>
 
-            <form @submit.prevent="onSavePassword" class="space-y-4" novalidate>
-              <BaseAlert v-if="passwordError" type="error" :message="passwordError" />
+              <form @submit.prevent="onSaveName" class="space-y-4" novalidate>
+                <BaseAlert v-if="nameError" type="error" :message="nameError" />
 
-              <BaseInput
-                v-model="currentPassword"
-                name="currentPassword"
-                type="password"
-                label="Текущий пароль"
-                placeholder="Введите текущий пароль"
-                autocomplete="current-password"
-                :error="passwordErrors.currentPassword"
-                required
-                :disabled="isUpdatingPassword"
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                  <BaseInput
+                    v-model="name"
+                    name="name"
+                    label="Отображаемое имя"
+                    placeholder="Введите ваше имя"
+                    :error="nameErrors.name"
+                    required
+                    :disabled="isUpdatingName"
+                  >
+                    <template #icon>
+                      <User class="w-4 h-4" />
+                    </template>
+                  </BaseInput>
+
+                  <BaseInput
+                    :modelValue="authStore.user?.email || ''"
+                    name="email_readonly"
+                    label="Электронная почта"
+                    disabled
+                    hint="Почта закреплена за аккаунтом для входа — изменить её нельзя"
+                  >
+                    <template #icon>
+                      <Mail class="w-4 h-4" />
+                    </template>
+                  </BaseInput>
+                </div>
+
+                <div class="pt-1 flex justify-end sm:justify-start">
+                  <BaseButton type="submit" variant="primary" :loading="isUpdatingName">
+                    Сохранить изменения
+                  </BaseButton>
+                </div>
+              </form>
+            </section>
+
+            <!-- Theme Appearance Compact Bar Card -->
+            <section
+              class="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6"
+            >
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="min-w-0">
+                  <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                    Тема оформления
+                  </h2>
+                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    {{ activeThemeCaption }}
+                  </p>
+                </div>
+
+                <div
+                  class="inline-flex items-center gap-1 p-1 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 w-full sm:w-auto shrink-0"
+                  role="radiogroup"
+                  aria-label="Выбор темы оформления"
+                >
+                  <button
+                    v-for="opt in themeOptions"
+                    :key="`profile-theme-${opt.mode}`"
+                    type="button"
+                    role="radio"
+                    :aria-checked="themeMode === opt.mode"
+                    @click="setTheme(opt.mode)"
+                    :class="[
+                      'flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm whitespace-nowrap transition-colors duration-150',
+                      themeMode === opt.mode
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-semibold shadow-sm ring-1 ring-slate-200/70 dark:ring-slate-700'
+                        : 'text-slate-600 hover:text-slate-900 font-medium dark:text-slate-400 dark:hover:text-slate-100',
+                    ]"
+                  >
+                    <component
+                      :is="opt.icon"
+                      :class="[
+                        'w-4 h-4 shrink-0',
+                        themeMode === opt.mode
+                          ? 'text-teal-600 dark:text-teal-400'
+                          : 'text-slate-400 dark:text-slate-500',
+                      ]"
+                    />
+                    <span>{{ opt.label }}</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- TAB 2: LOCAL DOCUMENTS ON DEVICE -->
+          <div v-else-if="activeTab === 'documents'" role="tabpanel" class="space-y-5 animate-fade-in">
+            <section
+              class="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6"
+            >
+              <div class="flex items-start justify-between gap-3 mb-5">
+                <div class="flex items-start gap-3.5 min-w-0">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                  >
+                    <HardDrive class="w-5 h-5" />
+                  </div>
+                  <div class="min-w-0">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                      Локальное хранилище билетов и броней
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      Ваши билеты, сканы и ваучеры хранятся только в этом браузере и никогда не отправляются на сервер.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  @click="loadVaultStats"
+                  :disabled="isLoadingVault"
+                  title="Обновить статистику хранилища"
+                  aria-label="Обновить статистику хранилища"
+                  class="p-2 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-teal-400 dark:hover:bg-slate-800 transition-colors shrink-0 disabled:opacity-50"
+                >
+                  <RefreshCw :class="['w-4 h-4', isLoadingVault ? 'animate-spin' : '']" />
+                </button>
+              </div>
+
+              <BaseAlert v-if="vaultError" type="error" :message="vaultError" class="mb-4" />
+
+              <BaseAlert
+                v-if="!isLoadingVault && !vaultStats.supported"
+                type="info"
+                message="Локальное хранилище файлов недоступно в текущем режиме браузера."
+                class="mb-4"
+              />
+
+              <!-- 3 Storage Metrics -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <div
+                  class="rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 p-4"
+                >
+                  <div class="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <FileText class="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                    <span>Сохранено файлов</span>
+                  </div>
+                  <div
+                    v-if="isLoadingVault"
+                    class="h-7 w-20 mt-2 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse"
+                  />
+                  <p
+                    v-else
+                    class="text-xl font-extrabold text-slate-900 dark:text-slate-100 mt-1.5 tabular-nums"
+                  >
+                    {{ vaultStats.filesCount }}
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      {{ vaultFilesLabel }}
+                    </span>
+                  </p>
+                </div>
+
+                <div
+                  class="rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 p-4"
+                >
+                  <div class="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <FolderOpen class="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                    <span>Связанных поездок</span>
+                  </div>
+                  <div
+                    v-if="isLoadingVault"
+                    class="h-7 w-20 mt-2 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse"
+                  />
+                  <p
+                    v-else
+                    class="text-xl font-extrabold text-slate-900 dark:text-slate-100 mt-1.5 tabular-nums"
+                  >
+                    {{ vaultStats.tripsCount }}
+                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      {{ vaultTripsLabel }}
+                    </span>
+                  </p>
+                </div>
+
+                <div
+                  class="rounded-xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-800 p-4"
+                >
+                  <div class="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <Database class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    <span>Занятый объём</span>
+                  </div>
+                  <div
+                    v-if="isLoadingVault"
+                    class="h-7 w-20 mt-2 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse"
+                  />
+                  <p
+                    v-else
+                    class="text-xl font-extrabold text-slate-900 dark:text-slate-100 mt-1.5 tabular-nums"
+                  >
+                    {{ formattedVaultSize }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Clear Local Files Action -->
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <button
+                  type="button"
+                  @click="clearVaultDialogOpen = true"
+                  :disabled="
+                    isLoadingVault ||
+                    isClearingVault ||
+                    !vaultStats.supported ||
+                    vaultStats.filesCount === 0
+                  "
+                  class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border border-rose-200 bg-rose-50/70 text-rose-700 hover:bg-rose-100/80 hover:border-rose-300 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 dark:hover:border-rose-500/40 transition-colors disabled:opacity-45 disabled:cursor-not-allowed"
+                >
+                  <Trash2 class="w-4 h-4 shrink-0" />
+                  <span>Очистить локальные файлы на этом устройстве</span>
+                </button>
+
+                <span class="text-xs text-slate-400 dark:text-slate-500">
+                  PDF, JPEG, PNG, WEBP до 10 МБ
+                </span>
+              </div>
+
+              <!-- Utility Diagnostics Link -->
+              <div
+                class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3"
               >
-                <template #icon>
-                  <Lock class="w-4 h-4" />
-                </template>
-              </BaseInput>
+                <span class="text-xs text-slate-400 dark:text-slate-500">
+                  Служебный инструмент каталога стран
+                </span>
+                <RouterLink
+                  to="/diagnostics/photos"
+                  class="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-teal-600 dark:text-slate-400 dark:hover:text-teal-400 transition-colors"
+                >
+                  <span>Диагностика фото каталога</span>
+                  <ChevronRight class="w-3.5 h-3.5" />
+                </RouterLink>
+              </div>
+            </section>
+          </div>
 
-              <div class="space-y-2.5">
+          <!-- TAB 3: SECURITY -->
+          <div v-else role="tabpanel" class="space-y-5 animate-fade-in">
+            <section
+              class="rounded-2xl bg-white/95 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-soft dark:shadow-none p-5 sm:p-6"
+            >
+              <div class="flex items-start gap-3.5 mb-5">
+                <div
+                  class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0"
+                >
+                  <ShieldCheck class="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
+                    Смена пароля
+                  </h2>
+                  <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                    Подтвердите текущий пароль, чтобы установить новый
+                  </p>
+                </div>
+              </div>
+
+              <form @submit.prevent="onSavePassword" class="space-y-4 max-w-xl" novalidate>
+                <BaseAlert v-if="passwordError" type="error" :message="passwordError" />
+
                 <BaseInput
-                  v-model="newPassword"
-                  name="newPassword"
+                  v-model="currentPassword"
+                  name="currentPassword"
                   type="password"
-                  label="Новый пароль"
-                  placeholder="Минимум 6 символов"
-                  autocomplete="new-password"
-                  :error="passwordErrors.newPassword"
+                  label="Текущий пароль"
+                  placeholder="Введите текущий пароль"
+                  autocomplete="current-password"
+                  :error="passwordErrors.currentPassword"
                   required
                   :disabled="isUpdatingPassword"
                 >
@@ -836,90 +876,106 @@ onMounted(() => {
                   </template>
                 </BaseInput>
 
-                <!-- Password Strength Indicator -->
-                <div
-                  class="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 p-3 space-y-2"
-                >
-                  <div class="flex items-center justify-between text-xs">
-                    <span class="text-slate-500 dark:text-slate-400 font-medium">
-                      Надёжность нового пароля
-                    </span>
-                    <span
-                      v-if="passwordStrength.score > 0"
-                      :class="['font-semibold', passwordStrength.textClass]"
-                    >
-                      {{ passwordStrength.label }}
-                    </span>
-                    <span v-else class="text-slate-400 dark:text-slate-500">
-                      Введите пароль
-                    </span>
-                  </div>
+                <div class="space-y-2.5">
+                  <BaseInput
+                    v-model="newPassword"
+                    name="newPassword"
+                    type="password"
+                    label="Новый пароль"
+                    placeholder="Минимум 6 символов"
+                    autocomplete="new-password"
+                    :error="passwordErrors.newPassword"
+                    required
+                    :disabled="isUpdatingPassword"
+                  >
+                    <template #icon>
+                      <Lock class="w-4 h-4" />
+                    </template>
+                  </BaseInput>
 
-                  <!-- 4 Strength Bars -->
-                  <div class="grid grid-cols-4 gap-1.5">
-                    <div
-                      v-for="segment in 4"
-                      :key="segment"
-                      :class="[
-                        'h-1.5 rounded-full transition-colors duration-200',
-                        segment <= passwordStrength.score
-                          ? passwordStrength.barClass
-                          : 'bg-slate-200 dark:bg-slate-700/80',
-                      ]"
-                    />
-                  </div>
+                  <!-- Password Strength Indicator -->
+                  <div
+                    class="rounded-xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800 p-3 space-y-2"
+                  >
+                    <div class="flex items-center justify-between text-xs">
+                      <span class="text-slate-500 dark:text-slate-400 font-medium">
+                        Надёжность нового пароля
+                      </span>
+                      <span
+                        v-if="passwordStrength.score > 0"
+                        :class="['font-semibold', passwordStrength.textClass]"
+                      >
+                        {{ passwordStrength.label }}
+                      </span>
+                      <span v-else class="text-slate-400 dark:text-slate-500">
+                        Введите пароль
+                      </span>
+                    </div>
 
-                  <!-- Requirement Chips -->
-                  <div class="flex flex-wrap gap-1.5 pt-0.5">
-                    <span
-                      v-for="rule in passwordRuleHints"
-                      :key="rule.label"
-                      :class="[
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors',
-                        rule.met
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
-                          : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
-                      ]"
-                    >
-                      <Check v-if="rule.met" class="w-3 h-3 stroke-[2.5]" />
-                      <span>{{ rule.label }}</span>
-                    </span>
+                    <div class="grid grid-cols-4 gap-1.5">
+                      <div
+                        v-for="segment in 4"
+                        :key="segment"
+                        :class="[
+                          'h-1.5 rounded-full transition-colors duration-200',
+                          segment <= passwordStrength.score
+                            ? passwordStrength.barClass
+                            : 'bg-slate-200 dark:bg-slate-700/80',
+                        ]"
+                      />
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5 pt-0.5">
+                      <span
+                        v-for="rule in passwordRuleHints"
+                        :key="rule.label"
+                        :class="[
+                          'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors',
+                          rule.met
+                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
+                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400',
+                        ]"
+                      >
+                        <Check v-if="rule.met" class="w-3 h-3 stroke-[2.5]" />
+                        <span>{{ rule.label }}</span>
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <BaseInput
-                v-model="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                label="Подтверждение нового пароля"
-                placeholder="Повторите новый пароль"
-                autocomplete="new-password"
-                :error="passwordErrors.confirmPassword"
-                required
-                :disabled="isUpdatingPassword"
-              >
-                <template #icon>
-                  <Lock class="w-4 h-4" />
-                </template>
-              </BaseInput>
+                <BaseInput
+                  v-model="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  label="Подтверждение нового пароля"
+                  placeholder="Повторите новый пароль"
+                  autocomplete="new-password"
+                  :error="passwordErrors.confirmPassword"
+                  required
+                  :disabled="isUpdatingPassword"
+                >
+                  <template #icon>
+                    <Lock class="w-4 h-4" />
+                  </template>
+                </BaseInput>
 
-              <div class="pt-2 flex justify-end sm:justify-start">
-                <BaseButton type="submit" variant="primary" :loading="isUpdatingPassword">
-                  Обновить пароль
-                </BaseButton>
-              </div>
-            </form>
-          </section>
+                <div class="pt-1 flex justify-end sm:justify-start">
+                  <BaseButton type="submit" variant="primary" :loading="isUpdatingPassword">
+                    Обновить пароль
+                  </BaseButton>
+                </div>
+              </form>
+            </section>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Clear Local Vault Confirmation Modal -->
+    <!-- Clear Local Documents Confirmation Modal -->
     <ConfirmDialog
       :open="clearVaultDialogOpen"
-      title="Очистить локальный сейф?"
-      :message="`Будут безвозвратно удалены все ${vaultStats.filesCount} ${vaultFilesLabel} (${formattedVaultSize}) из локального хранилища IndexedDB этого браузера. Сами карточки документов в поездках останутся на месте.`"
+      title="Очистить локальные файлы?"
+      :message="`Будут безвозвратно удалены все ${vaultStats.filesCount} ${vaultFilesLabel} (${formattedVaultSize}) из памяти этого браузера. Сами карточки документов в поездках останутся на месте.`"
       confirmText="Очистить файлы"
       cancelText="Отмена"
       :loading="isClearingVault"

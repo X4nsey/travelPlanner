@@ -78,8 +78,8 @@ const featureCards: FeatureCard[] = [
 
 <template>
   <PublicLayout>
-    <!-- Unified Full-Page Atmospheric Surface -->
-    <div class="home-page-surface relative overflow-hidden flex-1 transition-colors duration-200">
+    <!-- HomeView Content Layer (inherits unified .app-page-surface from PublicLayout) -->
+    <div class="relative overflow-hidden flex-1">
       <!-- Lightweight Static Vector Travel Map (Meridians, Flight Arcs & City Nodes) -->
       <div
         class="pointer-events-none select-none absolute inset-0 overflow-hidden"
